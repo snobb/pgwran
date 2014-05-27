@@ -1,0 +1,84 @@
+<table class="table" id="connection"> 
+    <tr>
+        <td>
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="input-group">
+                        <div class="input-group-btn">
+                            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" id="conn_dropdown">Name<span class="caret"></span></button>
+                            <!-- Button and dropdown menu -->
+                            <ul class="dropdown-menu" id="conn_dropdown_mark"></ul>
+                        </div>
+                        <input type="text" class="form-control" id="name" name="name" readonly="readonly">
+                        <input type="hidden" id="conn_id" name="conn_id">
+                    </div>
+                </div>
+            </div>
+        </td>
+        <td colspan="2">
+            <textarea type="area" class="form-control" id="description" name="description" readonly="readonly"></textarea>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div class="panel panel-default">
+                <div class="panel-heading">Speed in kbps</div>
+                <div class="panel-body">
+                    <div class="input-group">
+                        <span class="input-group-addon input-group-sm">Downstream</span>
+                        <input class="form-control" id="speed_down" name="speed_down" readonly="readonly">
+                    </div>
+                    <div class="input-group">
+                        <span class="input-group-addon input-group-sm">Upstream</span>
+                        <input class="form-control" id="speed_up" name="speed_up" readonly="readonly">
+                    </div>
+                    <div class="input-group">
+                        <span class="input-group-addon input-group-sm">Variance</span>
+                        <input class="form-control" id="speed_var" name="speed_var" readonly="readonly">
+                    </div>
+                </div>
+            </div>
+        </td>
+        <td>
+            <div class="panel panel-default">
+                <div class="panel-heading">Latency in ms</div>
+                <div class="panel-body">
+                    <div class="input-group">
+                        <span class="input-group-addon input-group-sm">Downstream</span>
+                        <input class="form-control" id="latency_down" name="latency_down" readonly="readonly">
+                    </div>
+                    <div class="input-group">
+                        <span class="input-group-addon input-group-sm">Upstream</span>
+                        <input class="form-control" id="latency_up" name="latency_up" readonly="readonly">
+                    </div>
+                    <div class="input-group">
+                        <span class="input-group-addon input-group-sm">Jitter</span>
+                        <input class="form-control" id="latency_jitter" name="latency_jitter" readonly="readonly">
+                    </div>
+
+                </div>
+            </div>
+        </td>
+        <td>
+            <div class="panel panel-default">
+                <div class="panel-heading">Loss in %</div>
+                <div class="panel-body">
+                    <div class="input-group">
+                        <span class="input-group-addon input-group-sm">Downstream</span>
+                        <input class="form-control" id="loss_down" name="loss_down" readonly="readonly">
+                    </div>
+                    <div class="input-group">
+                        <span class="input-group-addon input-group-sm">Upstream</span>
+                        <input class="form-control" id="loss_up" name="loss_up" readonly="readonly">
+                    </div>
+                    <div class="input-group">
+                        <span class="input-group-addon input-group-sm">Jitter</span>
+                        <input class="form-control" id="loss_jitter" name="loss_jitter" readonly="readonly">
+                    </div>
+                </div>
+            </div>
+        </td>
+    </tr>
+</table>
+
+

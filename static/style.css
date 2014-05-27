@@ -1,0 +1,43 @@
+img.png {
+    float: left;
+    margin: 10px 10px 5px 10px;
+}
+.footer {
+    border-top: 1px solid #eee;
+    margin-top: 20px;
+    padding-top: 20px;
+    padding-bottom: 20px;
+}
+
+.nav-tabs li a {
+    margin: 0px;
+    font-size: 14px;
+    padding: 5px 10px 5px 10px;
+}
+
+/* Main marketing message and sign up button */
+.body {
+    padding: 5px;
+    background-color: transparent;
+}
+
+.table#address_table {
+    margin: 10px;
+    width: 50%;
+}
+
+.table#connection td {
+    border: none
+}
+
+.table#subscriber td {
+    border: none
+}
+
+.table#client td {
+    border: none
+}
+
+.table#settings td {
+    border: none
+}
