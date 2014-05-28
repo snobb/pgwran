@@ -6,6 +6,7 @@
 
 import db
 import bottle
+from json import JSONEncoder, dumps as jsonify
 
 # Configuration
 config = {
@@ -53,19 +54,21 @@ def get_data():
             "connection" : connection }
 
 
-@app.get("/data/connection")
+@app.get("/data/connection/")
 def get_data_connection():
     """get all the db data in one json blob"""
     error = []
+    conn_json = None
 
-    conn_success, conn_error = db.get_all_connections()
-    if not conn_success:
-        error.append(conn_error)
+    connection = db.get_all_connections()
+    if not connection:
+        error.append("Could not load the connections from the db")
+    else:
+        conn_json = [ conn.__dict__ for conn in connection ]
 
-    return {"success" : conn_success,
+    return {"success" : len(error) == 0,
             "error" : error,
-            "connection" : connection }
-
+            "connection" : conn_json }
 
 
 if __name__ == "__main__":

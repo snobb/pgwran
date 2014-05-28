@@ -76,15 +76,14 @@ class Subscriber(object):
         self.imsi = imsi
         self.imei = imei
         self.loc_info = loc_info
-        self.conn_id = conn_id
         self.enabled = enabled
 
 
     def __str__(self):
         return ("name: {}  ipaddr: {} calling_id: {}  called_id: {}  imsi: {}"
-                "imei: {} loc_info: {} conn_id: {} enabled: {}").format(self.name,
-                        self.ipaddr, self.calling_id, self.called_id, self.imsi,
-                        self.imei, self.loc_info, self.conn_id, self.enabled)
+                "imei: {} loc_info: {}").format(self.name, self.ipaddr,
+                        self.calling_id, self.called_id, self.imsi, self.imei,
+                        self.loc_info))
 
 
 
@@ -99,10 +98,9 @@ class Settings(object):
         self.rad_secret = rad_secret
 
     def __str__(self):
-        return ("{}\nrad_ip: {}\nrad_port: {}\nrad_user: "
-                "{}\nrad_pass, rad_secret: {}").format(self.rad_ip,
-                        self.rad_port, self.rad_user, self.rad_pass,
-                        self.rad_secret)
+        return ("rad_ip: {} rad_port: {} rad_user: rad_pass {}, "
+                "rad_secret: {}").format(self.rad_ip, self.rad_port,
+                        self.rad_user, self.rad_pass, self.rad_secret)
 
 
 
@@ -120,8 +118,8 @@ class Client(object):
 
 
 
-class DBConnectorSQLite(DBConnector):
-    """SQLite connector"""
+        class DBConnectorSQLite(DBConnector):
+            """SQLite connector"""
     def __init__(self, dbname):
         self.dbname = dbname
         self.db = None
@@ -215,8 +213,8 @@ class DB(object):
                     connection.loss_up, connection.loss_jitter])
 
 
-    def get_connection_by_name(self, name):
-        """get a connection by name"""
+                def get_connection_by_name(self, name):
+                    """get a connection by name"""
         res = self.connector.query_db("""SELECT name, description, speed_down,
                 speed_up, speed_var, latency_up, latency_down, latency_jitter,
                 loss_down, loss_up, loss_jitter, conn_id FROM connection WHERE
@@ -250,32 +248,32 @@ class DB(object):
                 conn_id=?""", [conn_id])
 
 
-    def update_connection(self, connection):
-        """update the connection in the database"""
+        def update_connection(self, connection):
+            """update the connection in the database"""
         return self.connector.execute_db("""UPDATE connection SET name = ?,
                 description = ?, speed_down = ?, speed_up = ?, speed_var = ?,
                 latency_up = ?, latency_down = ?, latency_jitter = ?, loss_down
                 = ?, loss_up = ?, loss_jitter = ? WHERE conn_id = ?""",
                 [connection.name, connection.description, connection.speed_down,
-                connection.speed_up, connection.speed_var,
-                connection.latency_up, connection.latency_down,
-                connection.latency_jitter, connection.loss_down,
-                connection.loss_up, connection.loss_jitter,
-                connection.conn_id])
+                    connection.speed_up, connection.speed_var,
+                    connection.latency_up, connection.latency_down,
+                    connection.latency_jitter, connection.loss_down,
+                    connection.loss_up, connection.loss_jitter,
+                    connection.conn_id])
 
 
-    def set_subscriber(self, subscriber):
-        """add a subscriber to a DB"""
+                def set_subscriber(self, subscriber):
+                    """add a subscriber to a DB"""
         return self.connector.execute_db("""INSERT INTO subscriber(name, ipaddr,
                 calling_id, called_id, imsi, imei, loc_info, conn_id, enabled)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""", [subscriber.name,
-                subscriber.ipaddr, subscriber.calling_id, subscriber.called_id,
-                subscriber.imsi, subscriber.imei, subscriber.loc_info,
-                subscriber.conn_id, subscriber.enabled])
+                    subscriber.ipaddr, subscriber.calling_id, subscriber.called_id,
+                    subscriber.imsi, subscriber.imei, subscriber.loc_info,
+                    subscriber.conn_id, subscriber.enabled])
 
 
-    def get_subscriber_by_name(self, name):
-        """get a subscriber by name"""
+                def get_subscriber_by_name(self, name):
+                    """get a subscriber by name"""
         res = self.connector.query_db("""SELECT name, ipaddr, calling_id,
                 called_id, imsi, imei, loc_info, subs_id, conn_id, enabled FROM
                 subscriber WHERE name = ?""", [name], True)
@@ -301,8 +299,8 @@ class DB(object):
                     subscriber.subs_id])
 
 
-    def get_all_subscribers(self):
-        """get list of all subscribers"""
+                def get_all_subscribers(self):
+                    """get list of all subscribers"""
         res_all = self.connector.query_db("""SELECT name, ipaddr, calling_id,
                 called_id, imsi, imei, loc_info, subs_id, conn_id, enabled FROM
                 subscriber""", [], False)
@@ -317,8 +315,8 @@ class DB(object):
                 = ?""", [subs_id])
 
 
-    def get_settings(self):
-        """populate the settings object from the DB"""
+        def get_settings(self):
+            """populate the settings object from the DB"""
         res = self.connector.query_db("""SELECT rad_ip, rad_port, rad_user,
                 rad_pass, rad_secret FROM settings""", [], True)
         return Settings(*res) if res else None
@@ -332,4 +330,4 @@ class DB(object):
                     settings.rad_pass, settings.rad_secret])
 
 
-# vim: set ts=4 sts=4 sw=4 tw=80 ai smarttab et list
+                # vim: set ts=4 sts=4 sw=4 tw=80 ai smarttab et list
