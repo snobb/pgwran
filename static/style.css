@@ -26,18 +26,18 @@ img.png {
     width: 50%;
 }
 
-.table#connection td {
+.table#connection_screen td {
     border: none
 }
 
-.table#subscriber td {
+.table#subscriber_screen td {
     border: none
 }
 
-.table#client td {
+.table#client_screen td {
     border: none
 }
 
-.table#settings td {
+.table#settings_screen td {
     border: none
 }

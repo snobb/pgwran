@@ -4,7 +4,7 @@
 # Author: Alex Kozadaev (2014)
 #
 
-import db
+import dao
 import bottle
 from json import JSONEncoder, dumps as jsonify
 
@@ -19,7 +19,7 @@ config = {
 
 # Globals
 app = bottle.Bottle()
-db = db.DB(db.DBConnectorSQLite(config["DATABASE"]))
+db = dao.Dao(dao.DaoConnectorSQLite(config["DATABASE"]))
 
 
 # dispatch handlers
@@ -54,21 +54,52 @@ def get_data():
             "connection" : connection }
 
 
-@app.get("/data/connection/")
-def get_data_connection():
-    """get all the db data in one json blob"""
+@app.get("/data/subs_profile/")
+def get_data_subs_profile():
+    """get subscriber profile data in one json blob"""
     error = []
-    conn_json = None
+    subs_json = None
 
-    connection = db.get_all_connections()
-    if not connection:
-        error.append("Could not load the connections from the db")
+    subs_profiles = db.get_all_subs_profiles()
+    if not subs_profiles:
+        error.append("Could not load the subcriber profiles from the db")
     else:
-        conn_json = [ conn.__dict__ for conn in connection ]
+        subs_json = [subs.get_dict() for subs in subs_profiles]
 
     return {"success" : len(error) == 0,
             "error" : error,
-            "connection" : conn_json }
+            "subs_profiles" : subs_json }
+
+
+@app.get("/data/conn_profile/")
+def get_data_conn_profile():
+    """get connection profile data in one json blob"""
+    error = []
+    conn_json = None
+
+    conn_profiles = db.get_all_conn_profiles()
+    if not conn_profiles:
+        error.append("Could not load the connection profiles from the db")
+    else:
+        conn_json = [conn.get_dict() for conn in conn_profiles]
+
+    return {"success" : len(error) == 0,
+            "error" : error,
+            "conn_profiles" : conn_json }
+
+
+@app.get("/data/settings/")
+def get_data_settings():
+    """get settings data in one json blob"""
+    error = []
+
+    settings = db.get_settings()
+    if not settings:
+        error.append("Could not load settings from the db")
+
+    return {"success" : len(error) == 0,
+            "error" : error,
+            "settings" : settings.get_dict()}
 
 
 if __name__ == "__main__":

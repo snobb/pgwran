@@ -4,19 +4,29 @@
 # Author: Alex Kozadaev (2014)
 #
 
+import sqlite3
 
 class GenericDaoObject(object):
-
     def get_dict(self):
         return self.__dict__
+
+    def set_dict(self, values):
+        self.__dict__ = values
 
     def get_fields(self):
         return self.get_dict().keys()
 
+    def get_values(self):
+        return self.get_dict().values()
+
+    def __str__(self):
+        template = ": {}  ".join(self.get_fields())
+        return template.format(self.get_dict.values())
+
 
 class Connection(GenericDaoObject):
     """Connection storage object"""
-    def __init__(self, name, description="", speed_down=2000, speed_up=2000,
+    def __init__(self, name="New", description="", speed_down=2000, speed_up=2000,
                 speed_var=100, latency_up=200, latency_down=200,
                 latency_jitter=100, loss_down=0.01, loss_up=0.01,
                 loss_jitter=0.005, conn_id=-1):
@@ -34,18 +44,9 @@ class Connection(GenericDaoObject):
         self.loss_jitter = loss_jitter
 
 
-    def __str__(self):
-        return ("name: {}  speed_down: {}  speed_up: {}  speed_var: {} "
-                "latency_up: {} latency_down: {}  latency_jitter: {} "
-                "loss_down: {} loss_up: {}  loss_jitter: {} ").format(
-                self.name, self.speed_down, self.speed_up, self.speed_var,
-                self.latency_up, self.latency_down, self.latency_jitter,
-                self.loss_down, self.loss_up, self.loss_jitter)
-
-
 class Subscriber(GenericDaoObject):
     """Subscriber storage object"""
-    def __init__(self, name, ipaddr="", calling_id = "000000000000000",
+    def __init__(self, name="new", ipaddr="", calling_id = "000000000000000",
             called_id = "web.apn", imsi = "90000000000000",
             imei = "012345678901234", loc_info = "f5f5", subs_id=-1, conn_id=0,
             enabled=False):
@@ -57,20 +58,19 @@ class Subscriber(GenericDaoObject):
         self.imsi = imsi
         self.imei = imei
         self.loc_info = loc_info
-        self.enabled = enabled
 
 
     def __str__(self):
         return ("name: {}  ipaddr: {} calling_id: {}  called_id: {}  imsi: {}"
                 "imei: {} loc_info: {}").format(self.name, self.ipaddr,
                         self.calling_id, self.called_id, self.imsi, self.imei,
-                        self.loc_info))
+                        self.loc_info)
 
 
 class Settings(GenericDaoObject):
     """Settings storage object"""
-    def __init__(self, rad_ip, rad_port, rad_user, rad_pass,
-            rad_secret):
+    def __init__(self, rad_ip="", rad_port=1813, rad_user="", rad_pass="",
+            rad_secret=""):
         self.rad_ip = rad_ip
         self.rad_port = rad_port
         self.rad_user = rad_user
@@ -93,11 +93,11 @@ class Client(GenericDaoObject):
 
 
     def __str__(self):
-        return ("subscriber: {}\nconnection: {}").format(
-                self.subscriber, self.connection)
+        return ("subscriber: {} connection: {} enabled: {}").format(
+                self.subscriber, self.connection, self.enabled)
 
 
-class DBConnectorSQLite(DBConnector):
+class DaoConnectorSQLite(object):
     """SQLite connector"""
     def __init__(self, dbname):
         self.dbname = dbname
@@ -180,6 +180,23 @@ class DBConnectorSQLite(DBConnector):
         return (rv[0] if rv else None) if one else rv
 
 
+    def query_object(self, obj_class, table, filters=None):
+        fields = obj_class().get_fields()
+        query = "select {} from {}".format(", ".join(fields), table)
+        if filters:
+            query += "where {}".filters
+
+        values = []
+        res_all = self.query_db(query, [], False)
+        if len(res_all):
+            for res in res_all:
+                obj_instance = obj_class()
+                obj_instance.set_dict(dict(zip(fields, res)))
+                values.append(obj_instance)
+            return values
+        return None
+
+
 class Dao(object):
     def __init__(self, connector):
         self.connector = connector
@@ -189,5 +206,19 @@ class Dao(object):
         """load the database schema"""
         self.connector.init_db(fname)
 
+
+    def get_all_conn_profiles(self):
+        return self.connector.query_object(Connection, "conn_profile")
+
+
+    def get_all_subs_profiles(self):
+        return self.connector.query_object(Subscriber, "subs_profile")
+
+
+    def get_settings(self):
+        settings = self.connector.query_object(Settings, "settings");
+        if settings and len(settings) > 0:
+            return settings[0]
+        return None
 
 # vim: ts=4 sts=4 sw=4 tw=80 ai smarttab et fo=rtcq list

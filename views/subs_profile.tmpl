@@ -1,1 +1,74 @@
-subscriber profile
+<table class="table" id="subscriber_screen"> 
+    <tr>
+        <td>
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="input-group">
+                        <div class="input-group-btn">
+                            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" id="subs_dropdown">Name <span class="caret"></span></button>
+                            <!-- Button and dropdown menu -->
+                            <ul class="dropdown-menu" id="subs_dropdown_mark">
+                                <li class="divider"></li>
+                                <li><a href="#" id="subsNew">Create New</a></li>
+                            </ul>
+                        </div>
+                        <input type="text" class="form-control" id="subs_name" name="subs_name">
+                        <input type="hidden" class="form-control" id="subs_id" name="subs_id">
+                    </div>
+                </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-heading">Network</div>
+                <div class="panel-body">
+                    <div class="input-group">
+                        <span class="input-group-addon input-group-sm">IP address</span>
+                        <input type="text" class="form-control" id="subs_ipaddr" name="subs_ipaddr">
+                    </div>
+                </div>
+            </div>
+        </td>
+        <td>
+            <div class="panel panel-default">
+                <div class="panel-heading">Attributes</div>
+                <div class="panel-body">
+                    <div class="input-group">
+                        <span class="input-group-addon input-group-sm">IMSI</span>
+                        <input type="number" class="form-control" id="subs_imsi" name="subs_imsi">
+                    </div>
+                    <div class="input-group">
+                        <span class="input-group-addon input-group-sm">IMEI</span>
+                        <input type="number" class="form-control" id="subs_imei" name="subs_imei">
+                    </div>
+                    <div class="input-group">
+                        <span class="input-group-addon input-group-sm">Calling Station ID</span>
+                        <input type="number" min="0" max="999999999999999" class="form-control" id="subs_calling_id" name="subs_calling_id">
+                    </div>
+                    <div class="input-group">
+                        <span class="input-group-addon input-group-sm">Called Station ID</span>
+                        <input type="text" class="form-control" id="subs_called_id" name="subs_called_id">
+                    </div>
+                    <div class="input-group">
+                        <span class="input-group-addon input-group-sm">Location info</span>
+                        <input type="text" class="form-control" id="subs_loc_info" name="subs_loc_info">
+                    </div>
+                </div>
+            </div>
+        </td>
+    </tr>
+</table>
+<button type="submit" class="btn btn-primary">Save</button>
+<button type="button" class="btn btn-default" id="submitDelete">Delete</button>
+
+<div class="modal fade" id="modalSubscriber">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body"><h4>Are you sure you want to delete the record?</h4></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="submitOk">OK</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+
