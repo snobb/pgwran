@@ -49,5 +49,14 @@ class DaoTest(unittest.TestCase):
         self.assertEquals(1813, settings.rad_port)
 
 
+    def test_update_settings(self):
+        self.dao.update_settings(
+                Settings(rad_secret="qwerty", rad_ip="1.1.1.1"))
+
+        settings = self.dao.get_settings()
+        self.assertEquals(settings.rad_secret, "qwerty");
+        self.assertEquals(settings.rad_ip, "1.1.1.1");
+
+
 
 # vim: ts=4 sts=4 sw=4 tw=80 ai smarttab et fo=rtcq list

@@ -182,9 +182,9 @@ class DaoConnectorSQLite(object):
 
     def query_object(self, obj_class, table, filters=None):
         fields = obj_class().get_fields()
-        query = "select {} from {}".format(", ".join(fields), table)
+        query = "SELECT {} FROM {}".format(",".join(fields), table)
         if filters:
-            query += "where {}".filters
+            query += "WHERE {}".format(filters)
 
         values = []
         res_all = self.query_db(query, [], False)
@@ -195,6 +195,14 @@ class DaoConnectorSQLite(object):
                 values.append(obj_instance)
             return values
         return None
+
+
+    def update_object(self, obj, table, filters=None):
+        fields = obj.get_fields()
+        query = "UPDATE {} SET {}=?".format(table, "=?,".join(fields))
+        if filters:
+            query += "WHERE {}".format(filters)
+        return self.execute_db(query, obj.get_values())
 
 
 class Dao(object):
@@ -220,5 +228,11 @@ class Dao(object):
         if settings and len(settings) > 0:
             return settings[0]
         return None
+
+
+    def update_settings(self, settings):
+        return self.connector.update_object(settings, "settings")
+
+
 
 # vim: ts=4 sts=4 sw=4 tw=80 ai smarttab et fo=rtcq list

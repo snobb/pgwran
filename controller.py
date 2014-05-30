@@ -35,27 +35,27 @@ def home_get():
     return bottle.template("base.tmpl")
 
 
-@app.get("/data")
-def get_data():
-    """get all the db data in one json blob"""
-    error = []
+# @app.get("/json")
+# def get_json():
+#     """get all the db data in one json blob"""
+#     error = []
+#
+#     subs_success, subs_error = db.get_all_subscribers()
+#     if not subs_success:
+#         error.append(subs_error)
+#
+#     conn_success, conn_error = db.get_all_connections()
+#     if not conn_success:
+#         error.append(conn_error)
+#
+#     return {"success" : subs_success and conn_success,
+#             "error" : error,
+#             "subscriber" : subscriber,
+#             "connection" : connection }
 
-    subs_success, subs_error = db.get_all_subscribers()
-    if not subs_success:
-        error.append(subs_error)
 
-    conn_success, conn_error = db.get_all_connections()
-    if not conn_success:
-        error.append(conn_error)
-
-    return {"success" : subs_success and conn_success,
-            "error" : error,
-            "subscriber" : subscriber,
-            "connection" : connection }
-
-
-@app.get("/data/subs_profile/")
-def get_data_subs_profile():
+@app.get("/json/get/subs_profile/")
+def get_json_subs_profile():
     """get subscriber profile data in one json blob"""
     error = []
     subs_json = None
@@ -71,8 +71,8 @@ def get_data_subs_profile():
             "subs_profiles" : subs_json }
 
 
-@app.get("/data/conn_profile/")
-def get_data_conn_profile():
+@app.get("/json/get/conn_profile/")
+def get_json_conn_profile():
     """get connection profile data in one json blob"""
     error = []
     conn_json = None
@@ -88,8 +88,8 @@ def get_data_conn_profile():
             "conn_profiles" : conn_json }
 
 
-@app.get("/data/settings/")
-def get_data_settings():
+@app.get("/json/get/settings/")
+def get_json_settings():
     """get settings data in one json blob"""
     error = []
 
@@ -101,6 +101,31 @@ def get_data_settings():
             "error" : error,
             "settings" : settings.get_dict()}
 
+
+@app.post("/json/update/settings/")
+def update_json_settings():
+    """update settings in the database"""
+    settings = db.get_settings()
+    form = bottle.request.forms
+    settings.rad_ip = form.get("settings_rad_ip")
+    settings.rad_port = form.get("settings_rad_port")
+    settings.rad_user = form.get("settings_rad_user")
+    settings.rad_pass = form.get("settings_rad_pass")
+    settings.rad_secret = form.get("settings_rad_secret")
+    success, msg = db.update_settings(settings)
+    if not success:
+        status = "Could not update the settings: {}".format(msg)
+    else:
+        status = "The settings were updated successfully"
+
+
+    return {"success" : success,
+            "status" : status}
+
+
+        # add_error("ERROR: could not update the settings")
+    # else:
+        # add_flash("Settings were successfully updated")
 
 if __name__ == "__main__":
     db.init_schema(config["DB_SCHEMA"])
