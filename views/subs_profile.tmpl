@@ -1,63 +1,62 @@
-<table class="table" id="subscriber_screen"> 
-    <tr>
-        <td>
-            <div class="panel panel-default">
-                <div class="panel-body">
-                    <div class="input-group">
-                        <div class="input-group-btn">
-                            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" id="subs_dropdown">Name <span class="caret"></span></button>
-                            <!-- Button and dropdown menu -->
-                            <ul class="dropdown-menu" id="subs_dropdown_mark">
-                                <li class="divider"></li>
-                                <li><a href="#" id="subs_new">Create New</a></li>
-                            </ul>
+<form class="form" role="form" id="sprof_subs_form">
+    <table class="table" id="subscriber_screen"> 
+        <tr>
+            <td>
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div class="input-group">
+                            <div class="input-group-btn">
+                                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" id="subs_dropdown">Name <span class="caret"></span></button>
+                                <!-- Button and dropdown menu -->
+                                <ul class="dropdown-menu" id="subs_dropdown_mark"></ul>
+                            </div>
+                            <input type="text" class="form-control" id="sprof_subs_name" name="sprof_subs_name">
+                            <input type="hidden" class="form-control" id="sprof_subs_id" name="sprof_subs_id">
                         </div>
-                        <input type="text" class="form-control" id="subs_name" name="subs_name">
-                        <input type="hidden" class="form-control" id="subs_id" name="subs_id">
                     </div>
                 </div>
-            </div>
-            <div class="panel panel-default">
-                <div class="panel-heading">Network</div>
-                <div class="panel-body">
-                    <div class="input-group">
-                        <span class="input-group-addon input-group-sm">IP address</span>
-                        <input type="text" class="form-control" id="subs_ipaddr" name="subs_ipaddr">
+                <div class="panel panel-default">
+                    <div class="panel-heading">Network</div>
+                    <div class="panel-body">
+                        <div class="input-group">
+                            <span class="input-group-addon input-group-sm">IP address</span>
+                            <input type="text" class="form-control" id="sprof_subs_ipaddr" name="sprof_subs_ipaddr">
+                        </div>
                     </div>
                 </div>
-            </div>
-        </td>
-        <td>
-            <div class="panel panel-default">
-                <div class="panel-heading">Attributes</div>
-                <div class="panel-body">
-                    <div class="input-group">
-                        <span class="input-group-addon input-group-sm">IMSI</span>
-                        <input type="number" class="form-control" id="subs_imsi" name="subs_imsi">
-                    </div>
-                    <div class="input-group">
-                        <span class="input-group-addon input-group-sm">IMEI</span>
-                        <input type="number" class="form-control" id="subs_imei" name="subs_imei">
-                    </div>
-                    <div class="input-group">
-                        <span class="input-group-addon input-group-sm">Calling Station ID</span>
-                        <input type="number" min="0" max="999999999999999" class="form-control" id="subs_calling_id" name="subs_calling_id">
-                    </div>
-                    <div class="input-group">
-                        <span class="input-group-addon input-group-sm">Called Station ID</span>
-                        <input type="text" class="form-control" id="subs_called_id" name="subs_called_id">
-                    </div>
-                    <div class="input-group">
-                        <span class="input-group-addon input-group-sm">Location info</span>
-                        <input type="text" class="form-control" id="subs_loc_info" name="subs_loc_info">
+            </td>
+            <td>
+                <div class="panel panel-default">
+                    <div class="panel-heading">Attributes</div>
+                    <div class="panel-body">
+                        <div class="input-group">
+                            <span class="input-group-addon input-group-sm">IMSI</span>
+                            <input type="number" class="form-control" id="sprof_subs_imsi" name="sprof_subs_imsi">
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-addon input-group-sm">IMEI</span>
+                            <input type="number" class="form-control" id="sprof_subs_imei" name="sprof_subs_imei">
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-addon input-group-sm">Calling Station ID</span>
+                            <input type="number" min="0" max="999999999999999" class="form-control" id="sprof_subs_calling_id" name="sprof_subs_calling_id">
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-addon input-group-sm">Called Station ID</span>
+                            <input type="text" class="form-control" id="sprof_subs_called_id" name="sprof_subs_called_id">
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-addon input-group-sm">Location info</span>
+                            <input type="text" class="form-control" id="sprof_subs_loc_info" name="sprof_subs_loc_info">
+                        </div>
                     </div>
                 </div>
-            </div>
-        </td>
-    </tr>
-</table>
-<button type="submit" class="btn btn-primary">Save</button>
-<button type="button" class="btn btn-default" id="submitDelete">Delete</button>
+            </td>
+        </tr>
+    </table>
+    <button type="button" class="btn btn-primary" id="button_subs_save">Save</button>
+    <button type="button" class="btn btn-default" id="button_subs_delete">Delete</button>
+</form>
 
 <div class="modal fade" id="modalSubscriber">
     <div class="modal-dialog">

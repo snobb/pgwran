@@ -145,64 +145,142 @@ class DaoConnectorSQLite(object):
 
 
     def init_db(self, fname="schema.sql"):
-        """Creates the database tables."""
+        """Creates the database tables.
+        return a dictionary like:
+        {
+            "success": True/False,
+            "statusText": << status message if any >>
+            "data": result data
+        }
+        """
         db = self.get_db()
         with open(fname, "r") as f:
             db.cursor().executescript(f.read())
 
 
     def execute_db(self, query, args):
-        """Insert into the table"""
+        """Insert into the table
+        return a dictionary like:
+        {
+            "success": True/False,
+            "statusText": << status message if any >>
+            "data": result data
+        }
+        """
+        success, statusText, data = True, None, None
         try:
             db = self.get_db()
             db.execute(query, args)
         except sqlite3.Error as e:
-            return False, e
-        return True, None
-
-    def execute_db_list(self, queries, args):
-        try:
-            db = self.get_db()
-            db.execute("BEGIN TRANSACTION")
-            for query in queries:
-                db.execute(query, args)
-            db.commit()
-        except sqlite3.Error as e:
-            db.rollback()
-            return False, e
-        return True, None
+            success, statusText = False, e.message
+        return { "success": success, "statusText": statusText, "data": None }
 
 
     def query_db(self, query, args=(), one=False):
-        """Queries the database and returns a list of dictionaries."""
-        cur = self.get_db().execute(query, args)
-        rv = cur.fetchall()
-        return (rv[0] if rv else None) if one else rv
+        """Queries the database and returns a list of dictionaries.
+        return a dictionary like:
+        {
+            "success": True/False,
+            "statusText": << status message if any >>
+            "data": result data
+        }
+
+        """
+        statusText = ""
+        try:
+            cur = self.get_db().execute(query, args)
+            rv = cur.fetchall()
+            data = (rv[0] if rv else None) if one else rv
+        except sqlite3.Error as e:
+            statusText, data = e.message, None
+
+        return {
+                "success": data != None,
+                "statusText": statusText,
+                "data": data
+        }
 
 
     def query_object(self, obj_class, table, filters=None):
+        """Query an object of class <obj_class> in table <table> with filters
+        <filters>
+        return a dictionary like:
+        {
+            "success": True/False,
+            "statusText": << status message if any >>
+            "data": result data
+        }
+        """
         fields = obj_class().get_fields()
+        data = None
         query = "SELECT {} FROM {}".format(",".join(fields), table)
         if filters:
             query += "WHERE {}".format(filters)
 
         values = []
-        res_all = self.query_db(query, [], False)
-        if len(res_all):
-            for res in res_all:
+        res = self.query_db(query, [], False)
+        if res["success"]:
+            data = res["data"]
+            for row in data:
                 obj_instance = obj_class()
-                obj_instance.set_dict(dict(zip(fields, res)))
+                obj_instance.set_dict(dict(zip(fields, row)))
                 values.append(obj_instance)
-            return values
-        return None
+            res["data"] = values
+        return res
 
 
     def update_object(self, obj, table, filters=None):
+        """Update an object <obj> in table <table> with filters <filters
+        return a dictionary like:
+        {
+            "success": True/False,
+            "statusText": << status message if any >>
+            "data": None
+        }
+        """
         fields = obj.get_fields()
         query = "UPDATE {} SET {}=?".format(table, "=?,".join(fields))
         if filters:
             query += "WHERE {}".format(filters)
         return self.execute_db(query, obj.get_values())
+
+
+    def insert_object(self, obj, table, id_field):
+        """Insert object into <table>. id_field - name of the id field in the
+        object - required to prevent inserting it.
+        return a dictionary like:
+        {
+            "success": True/False,
+            "statusText": << status message if any >>
+            "data": the db id of the inserted object
+        }
+        """
+        try:
+            self.begin_transaction()
+            obj_dict = obj.get_dict()
+            obj_dict.pop(id_field) # prevent id field in the statement
+            obj_len = len(obj_dict)
+            query = "INSERT INTO {}({}) VALUES ({})".format(
+                    table,
+                    ",".join(obj_dict.keys()),
+                    ",".join(["?"] * obj_len)
+                    )
+            res = self.execute_db(query, obj_dict.values())
+            conn_id_res = self.get_last_insert_id()
+            self.commit()
+
+            if res["success"] and conn_id_res["success"]:
+                res["data"] = conn_id_res["data"]
+
+            return res
+        except sqlite3.Error as e:
+            self.rollback()
+            return { "success": False, "statusText": e.message, "data": None }
+
+    def get_last_insert_id(self):
+            res = self.query_db("SELECT last_insert_rowid()", one=True)
+            res["data"] = res["data"][0]
+            return res
 
 
 class Dao(object):
@@ -215,19 +293,42 @@ class Dao(object):
         self.connector.init_db(fname)
 
 
-    def get_all_conn_profiles(self):
-        return self.connector.query_object(Connection, "conn_profile")
-
-
     def get_all_subs_profiles(self):
         return self.connector.query_object(Subscriber, "subs_profile")
 
 
+    def update_subs_profile(self, subs_profile):
+        subs_filter = "subs_id={}".format(subs_profile.subs_id)
+        return self.connector.update_object(subs_profile, "subs_profile",
+                subs_filter)
+
+
+    def insert_subs_profile(self, subs_profile):
+            return self.connector.insert_object(subs_profile,
+                    "subs_profile", "subs_id")
+
+
+    def get_all_conn_profiles(self):
+        return self.connector.query_object(Connection, "conn_profile")
+
+
+    def update_conn_profile(self, conn_profile):
+        conn_filter = "conn_id={}".format(conn_profile.conn_id)
+        return self.connector.update_object(conn_profile, "conn_profile",
+                conn_filter)
+
+    def insert_conn_profile(self, conn_profile):
+            return self.connector.insert_object(conn_profile,
+                    "conn_profile", "conn_id")
+
+
     def get_settings(self):
-        settings = self.connector.query_object(Settings, "settings");
-        if settings and len(settings) > 0:
-            return settings[0]
-        return None
+        settings_res = self.connector.query_object(Settings, "settings");
+        if settings_res["success"]:
+            settings = settings_res["data"]
+            if settings and len(settings) > 0:
+                settings_res["data"] = settings[0]
+        return settings_res
 
 
     def update_settings(self, settings):
