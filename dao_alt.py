@@ -4,6 +4,52 @@
 # Author: Alex Kozadaev (2014)
 #
 
+import sqlite3
+import sqlite_connector as connector
+
+class ConnectDB(object):
+    def __init__(self):
+        pass
+
+    def __call__(self, func):
+        def wrapped(*args, **kwargs):
+            try:
+                self.db.execute("PRAGMA foreign_keys=ON");
+                self.db.execute("BEGIN TRANSACTION")
+                kwargs["db"] = self
+                func(*args, **kwargs)
+                self.db.commit()
+            except sqlite3.Error as e:
+                self.db.rollback()
+                raise Exception(e.message)
+            finally:
+                if self.db:
+                    self.db.close()
+        return wrapped
+
+
+    @property
+    def db(self):
+        db = connector.get_db()
+        if not db:
+            raise ValueError("ERROR: db was not initialized")
+        return db
+
+
+    def execute_db(self, query, args):
+        """Insert into the table"""
+        self.db.execute(query, args)
+
+
+    def query_db(self, query, args=(), one=False):
+        """Queries the database and returns a list of rows"""
+        print "loading here"
+        cur = self.db.execute(query, args)
+        rv = cur.fetchall()
+        return (rv[0] if rv else None) if one else rv
+
+
+
 class GenericDaoObject(object):
     def get_keys(self):
         return ([name for name in self.__dict__.keys() if
@@ -14,6 +60,10 @@ class GenericDaoObject(object):
                 not name.startswith("__")])
 
     def __str__(self):
+        str_list = []
+        for k, v in zip(self.get_keys(), self.get_values()):
+            str_list.append("{}: {}".format(k, v))
+        return ", ".join(str_list)
 
 
 class ConnectionProfile(GenericDaoObject):
@@ -38,8 +88,50 @@ class ConnectionProfile(GenericDaoObject):
         self.__table__ = "conn_profile"
 
 
-class ConnectionProfileDAO(object):
-    pass
+class GenericDaoInterface():
+    def get_all():
+        raise NotImplementedError()
+    def get(obj_id):
+        raise NotImplementedError()
+    def save(obj):
+        raise NotImplementedError()
+    def delete(obj):
+        raise NotImplementedError()
+
+
+class ConnectionProfileDAO(GenericDaoInterface):
+    def get_all():
+        pass
+    def get(obj_id):
+        pass
+    def save(obj):
+        pass
+    def delete(obj):
+        pass
+
+
+class ConnectionProfileDAO(GenericDaoInterface):
+    def get_all():
+        pass
+    def get(obj_id):
+        pass
+    def save(obj):
+        pass
+    def delete(obj):
+        pass
+
+
+if __name__ == "__main__":
+    connector.initialize("test.db", "schema.sql")
+
+    @ConnectDB()
+    def test_db(*args, **kwargs):
+        db = kwargs["db"]
+        values = db.query_db("select * from conn_profile")
+        for val in values:
+            print val
+
+    test_db()
 
 
 # vim: ts=4 sts=4 sw=4 tw=80 ai smarttab et fo=rtcq list
