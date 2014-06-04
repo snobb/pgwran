@@ -6,6 +6,7 @@
 
 import dao
 import bottle
+from logger import Logger
 from json import JSONEncoder, dumps as jsonify
 
 # Configuration
@@ -28,7 +29,7 @@ def server_static(filepath):
     """serving static files located at the static"""
     return bottle.static_file(filepath, root="static/")
 
-
+@Logger
 @app.get("/")
 def home_get():
     """GET handler for home"""
@@ -54,6 +55,7 @@ def home_get():
 #             "connection" : connection }
 
 
+@Logger
 @app.get("/json/get/subs_profile/")
 def get_json_subs_profile():
     """get subscriber profile data in one json blob"""
@@ -75,6 +77,7 @@ def get_json_subs_profile():
             }
 
 
+@Logger
 @app.post("/json/save/subs_profile/")
 def save_json_subs_profile():
     """save subscriber profile data in one json blob"""
@@ -125,6 +128,7 @@ def save_json_subs_profile():
             }
 
 
+@Logger
 @app.get("/json/get/conn_profile/")
 def get_json_conn_profile():
     """get connection profile data in one json blob"""
@@ -146,6 +150,7 @@ def get_json_conn_profile():
             }
 
 
+@Logger
 @app.post("/json/save/conn_profile/")
 def save_json_conn_profile():
     """save connection profile data in one json blob"""
@@ -197,6 +202,7 @@ def save_json_conn_profile():
             }
 
 
+@Logger
 @app.get("/json/get/settings/")
 def get_json_settings():
     """get settings data in one json blob"""
@@ -215,6 +221,7 @@ def get_json_settings():
             }
 
 
+@Logger
 @app.post("/json/save/settings/")
 def save_json_settings():
     """save settings in the database"""
