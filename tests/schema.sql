@@ -34,12 +34,13 @@ CREATE TABLE settings (
     rad_pass VARCHAR NOT NULL,
     rad_secret VARCHAR NOT NULL
 );
-DROP TABLE IF EXISTS subscribers;
-CREATE TABLE subscribers (
-    client_id INTEGER PRIMARY KEY AUTOINCREMENT,
+DROP TABLE IF EXISTS subscriber;
+CREATE TABLE subscriber (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     conn_id INTEGER DEFAULT 1,
     subs_id INTEGER,
-    FOREIGN KEY(subs_id) REFERENCES subscriber(subs_id) ON DELETE CASCADE ON UPDATE CASCADE
+    enabled INTEGER DEFAULT 0,
+    FOREIGN KEY(subs_id) REFERENCES subs_profile(subs_id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 INSERT INTO settings(rad_ip, rad_port, rad_user, rad_pass, rad_secret) VALUES ("10.0.16.1", 1813, "admin", "password", "secret");
 
@@ -65,4 +66,9 @@ INSERT INTO subs_profile(name, ipaddr, calling_id, called_id, imsi, imei, loc_in
     "004916636129410", "internet.apn", "90156451177704", "66657422830175", "stockholm");
 INSERT INTO subs_profile(name, ipaddr, calling_id, called_id, imsi, imei, loc_info) VALUES ("Alex", "10.0.0.40",
     "004412345678901", "telepathy.apn", "90156451177999", "66657422830999", "bishkek");
+
+INSERT INTO subscriber(id, subs_id, conn_id, enabled) VALUES(1, 1, 1, 1);
+INSERT INTO subscriber(id, subs_id, conn_id, enabled) VALUES(2, 2, 2, 1);
+INSERT INTO subscriber(id, subs_id, conn_id, enabled) VALUES(3, 3, 3, 1);
+INSERT INTO subscriber(id, subs_id, conn_id, enabled) VALUES(4, 3, 3, 1);
 COMMIT;

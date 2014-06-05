@@ -44,5 +44,42 @@ def get_db():
     return __db__
 
 
+def begin_transaction():
+    """begin transaction"""
+    get_db().execute("BEGIN TRANSACTION")
+
+
+def commit():
+    """commit transaction"""
+    get_db().commit()
+
+
+def rollback():
+    """rollback transaction"""
+    get_db().rollback()
+
+
+def execute_db(query, args):
+    """execute queries without expecting a result"""
+    db = get_db()
+    return db.execute(query, args).lastrowid
+
+
+def query_db(query, args=(), one=False):
+    """Queries the database and returns a list of dictionaries."""
+    cur = get_db().execute(query, args)
+    if one:
+        rv = cur.fetchone()
+    else:
+        rv = cur.fetchall()
+    return rv
+
+
+def close():
+    """close the current db connection"""
+    global __db__
+    __db__.close()
+    __db__ = None
+
 
 # vim: ts=4 sts=4 sw=4 tw=80 ai smarttab et fo=rtcq list
