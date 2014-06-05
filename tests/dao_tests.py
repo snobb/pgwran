@@ -11,6 +11,14 @@ import dao
 
 dao.initialize(":memory:", "tests/schema.sql")
 
+class SubscriberDaoTest(unittest.TestCase):
+    def setUp(self):
+        dao.connector.get_db()
+        self.dao = dao.ConnectionProfileDao()
+
+    def tearDown(self):
+        dao.connector.close()
+
 class ConnDaoTest(unittest.TestCase):
     def setUp(self):
         dao.connector.get_db()
@@ -21,7 +29,7 @@ class ConnDaoTest(unittest.TestCase):
         dao.connector.close()
 
 
-    def test_get_all_conn_profiles(self):
+    def test_get_all(self):
         success, status, conns = self.dao.get_all()
         self.assertTrue(success)
         self.assertNotEquals(0, len(conns))
@@ -33,7 +41,7 @@ class ConnDaoTest(unittest.TestCase):
         self.assertEquals(conns[2].speed_up, 59.3)
 
 
-    def test_update_connection(self):
+    def test_save_update(self):
         success, status, data = self.dao.get_all()
         self.assertTrue(success)
         conn = data[0]
@@ -53,7 +61,7 @@ class ConnDaoTest(unittest.TestCase):
         self.assertEquals(202, conn.loss_down);
 
 
-    def test_insert_connection(self):
+    def test_save_insert(self):
         conn = dao.ConnectionProfile()
         conn.name = "test"
         conn.speed_up = 101
@@ -79,7 +87,7 @@ class ConnDaoTest(unittest.TestCase):
         conn_id = obj.conn_id
         conn_len = len(data)
 
-        success, _, data = self.dao.delete(obj)
+        success, _, data = self.dao.delete(conn_id)
         self.assertTrue(success)
 
         success, _, data = self.dao.get_all()
@@ -162,7 +170,7 @@ class SubscriberDaoTest(unittest.TestCase):
         subs_id = obj.subs_id
         subs_len = len(data)
 
-        success, _, data = self.dao.delete(obj)
+        success, _, data = self.dao.delete(subs_id)
         self.assertTrue(success)
 
         success, _, data = self.dao.get_all()

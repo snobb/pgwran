@@ -24,13 +24,14 @@ class Transaction(object):
         """wrap the function and do the transaction handling"""
         def wrapped(*args, **kwargs):
             success, status, data = True, "", None
-            ret = None
             try:
                 connector.begin_transaction()
                 data = func(*args, **kwargs)
                 connector.commit()
             except Exception as e:
                 success = False
+                print e
+                status = e.message
                 connector.rollback()
             return (success, status, data)
         return wrapped
@@ -77,9 +78,9 @@ class GenericDaoImpl(object):
 
 
     @Transaction()
-    def delete(self, obj):
+    def delete(self, obj_id):
         """delete the object"""
-        obj_id = getattr(obj, obj.get_id_name())
+        obj = self.__obj_class__()
         connector.execute_db(
                 obj.get_delete_query(),
                 [obj_id])
@@ -88,6 +89,12 @@ class GenericDaoImpl(object):
 class GenericDaoObject(object):
     __table__   = "GenericTable"
     __id_name__ = None
+
+
+    def get_dict(self):
+        fields = self.__dict__
+        return {k:v for k, v in fields.items() if
+                not k.startswith("__")}
 
 
     def get_keys(self, has_filter=True):
@@ -164,12 +171,12 @@ class GenericDaoObject(object):
 class Subscriber(GenericDaoObject):
     """Subscriber storage object"""
     __table__   = "subscriber"
-    __id_name__ = "id"
+    __id_name__ = "sid"
 
-    def __init__(self, subscriber=-1, connection=-1, enabled=False, id = -1):
-        self.id = id
-        self.subscriber = subscriber
-        self.connection = connection
+    def __init__(self, subs_id=-1, conn_id=0, enabled=0, sid = -1):
+        self.sid = sid
+        self.subs_id = subs_id
+        self.conn_id = conn_id
         self.enabled = enabled
 
 
@@ -234,7 +241,6 @@ class Settings(GenericDaoObject):
                 "=?,".join(self.get_keys()))
 
 
-
 class SubscriberDao(GenericDaoImpl):
     __obj_class__ = Subscriber
 
@@ -245,6 +251,24 @@ class ConnectionProfileDao(GenericDaoImpl):
 
 class SubscriberProfileDao(GenericDaoImpl):
     __obj_class__ = SubscriberProfile
+
+    @Transaction()
+    def save(self, obj):
+        obj_id = getattr(obj, obj.get_id_name())
+        if obj_id == -1:    # Insert
+            new_obj_id = connector.execute_db(
+                    obj.get_insert_query(),
+                    obj.get_values())
+
+            # adding subscriber as well
+            subscriber = Subscriber(subs_id=new_obj_id)
+            res = SubscriberDao().save(subscriber)
+            return new_obj_id
+        else:               # Update
+            new_obj_id = connector.execute_db(
+                    obj.get_update_query(),
+                    obj.get_values() + [obj_id])
+        return new_obj_id
 
 
 class SettingsDao(GenericDaoImpl):

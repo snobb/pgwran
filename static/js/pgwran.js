@@ -27,10 +27,27 @@ $('document').ready(function() {
 
 /********* Subscriber profile code **********/
 function handleSubsProfile() {
+    $('#button_subs_delete').on('click', function(data) {
+        $('#modal_subscriber').modal('show');
+        $('#button_subs_ok').on('click', function(data) {
+            $('#modal_subscriber').modal('hide');
+            form = $('#subsForm');
+            $.getJSON('/json/subs_profile/delete/' +
+                      $('#sprof_subs_id').val(), {}, function(data) {
+                // output success
+                showSuccess("The value has been deleted successfully");
+                updateSubscriberProfileData(0);
+            }).fail(function(data) {
+                showError("ERROR: " + data.statusText);
+            });
+        });
+    });
+
+
     $('#button_subs_save').on('click', function(data) {
         $.ajax({
             type: 'POST',
-            url: '/json/save/subs_profile/',
+            url: '/json/subs_profile/save/',
             data: $("#sprof_subs_form").serialize(),
             success: function(response) {
                 if (response.success) {
@@ -48,12 +65,12 @@ function handleSubsProfile() {
         });
     });
 
-    updateSubscriberProfileData();
+    updateSubscriberProfileData(0);
     return false;
 }
 
 function updateSubscriberProfileData(current) {
-    $.getJSON('/json/get/subs_profile/', {}, function(data) {
+    $.getJSON('/json/subs_profile/get/', {}, function(data) {
         if (data.success) {
             message = '';
             obj = data.data.subs_profiles;
@@ -110,11 +127,13 @@ function handleConnProfile() {
         $('#button_conn_ok').on('click', function(data) {
             $('#modal_connection').modal('hide');
             form = $('#connForm');
-            $.getJSON('/json/delete/conn_profile/' +
-                      $('#conn_id').val(), {}, function(data) {
+            $.getJSON('/json/conn_profile/delete/' +
+                      $('#cprof_conn_id').val(), {}, function(data) {
                 // output success
+                showSuccess("The value has been deleted successfully");
+                updateConnectionProfileData(0);
             }).fail(function(data) {
-                showError("ERROR: " + data.statusText)
+                showError("ERROR: " + data.statusText);
             });
         });
     });
@@ -122,7 +141,7 @@ function handleConnProfile() {
     $('#button_conn_save').on('click', function(data) {
         $.ajax({
             type: 'POST',
-            url: '/json/save/conn_profile/',
+            url: '/json/conn_profile/save/',
             data: $("#cprof_conn_form").serialize(),
             success: function(response) {
                 if (response.success) {
@@ -145,7 +164,7 @@ function handleConnProfile() {
 }
 
 function updateConnectionProfileData(current) {
-    $.getJSON('/json/get/conn_profile/', {}, function(data) {
+    $.getJSON('/json/conn_profile/get/', {}, function(data) {
         if (data.success) {
             message = '';
             obj = data.data.conn_profiles
@@ -210,7 +229,7 @@ function handleSettings() {
         console.out("settings here");
         $.ajax({
             type: 'POST',
-            url: '/json/save/settings/',
+            url: '/json/settings/save/',
             data: $("#settings_form").serialize(),
             success: function(response) {
                 if (response.success) {
@@ -224,7 +243,7 @@ function handleSettings() {
         });
     });
 
-    $.getJSON('/json/get/settings/', {}, function(data) {
+    $.getJSON('/json/settings/get/', {}, function(data) {
         if (data.success) {
             message = '';
             obj = data.data.settings

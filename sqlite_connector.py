@@ -18,6 +18,7 @@ def initialize(db_fname, db_schema=None):
     config["db_fname"] = db_fname
     config["db_schema"] = db_schema
     __db__ = None
+    get_db()
 
 
 def __init_db():

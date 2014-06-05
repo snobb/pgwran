@@ -6,7 +6,6 @@
 
 import dao
 import bottle
-from logger import Logger
 from json import JSONEncoder, dumps as jsonify
 
 # Configuration
@@ -20,8 +19,11 @@ config = {
 
 # Globals
 app = bottle.Bottle()
-db = dao.Dao(dao.DaoConnectorSQLite(config["DATABASE"]))
 
+subs_dao = dao.SubscriberDao()
+conn_prof_dao = dao.ConnectionProfileDao()
+subs_prof_dao = dao.SubscriberProfileDao()
+settings_dao = dao.SettingsDao()
 
 # dispatch handlers
 @app.get("/static/<filepath:path>")
@@ -29,45 +31,22 @@ def server_static(filepath):
     """serving static files located at the static"""
     return bottle.static_file(filepath, root="static/")
 
-@Logger
 @app.get("/")
 def home_get():
     """GET handler for home"""
     return bottle.template("base.tmpl")
 
 
-# @app.get("/json")
-# def get_json():
-#     """get all the db data in one json blob"""
-#     error = []
-#
-#     subs_success, subs_error = db.get_all_subscribers()
-#     if not subs_success:
-#         error.append(subs_error)
-#
-#     conn_success, conn_error = db.get_all_connections()
-#     if not conn_success:
-#         error.append(conn_error)
-#
-#     return {"success" : subs_success and conn_success,
-#             "error" : error,
-#             "subscriber" : subscriber,
-#             "connection" : connection }
-
-
-@Logger
-@app.get("/json/get/subs_profile/")
+@app.get("/json/subs_profile/get/")
 def get_json_subs_profile():
     """get subscriber profile data in one json blob"""
-    error = []
     subs_json = None
 
-    get_res = db.get_all_subs_profiles()
-    success, status_text = get_res["success"], ""
+    success, status_text, data = subs_prof_dao.get_all()
     if not success:
-        status_text = "ERROR: {}".format(get_res["statusText"])
+        status_text = "ERROR: {}".format(status_text)
     else:
-        subs_json = [subs.get_dict() for subs in get_res["data"]]
+        subs_json = [subs.get_dict() for subs in data]
 
     return {"success" : success,
             "statusText" : status_text,
@@ -77,18 +56,16 @@ def get_json_subs_profile():
             }
 
 
-@Logger
-@app.post("/json/save/subs_profile/")
+@app.post("/json/subs_profile/save/")
 def save_json_subs_profile():
     """save subscriber profile data in one json blob"""
-    error = []
     subs_json = None
 
     form = bottle.request.forms
 
     print form.get("sprof_subs_id")
 
-    subs_profile = dao.Subscriber(
+    subs_profile = dao.SubscriberProfile(
             subs_id = int(form.get("sprof_subs_id")),
             name = form.get("sprof_subs_name"),
             ipaddr = form.get("sprof_subs_ipaddr"),
@@ -100,22 +77,20 @@ def save_json_subs_profile():
             );
 
     if subs_profile.subs_id == -1:
-        insert_res = db.insert_subs_profile(subs_profile)
-        success = insert_res["success"]
-        subs_profile.subs_id = insert_res["data"]
+        success, status_text, data = subs_prof_dao.save(subs_profile)
+        subs_profile.subs_id = data
         action = "insert"
         if not success:
             status_text = ("ERROR: Could not create a subscriber "
-                        "profile: {}").format(insert_res["statusText"])
+                        "profile: {}").format(status_text)
         else:
             status_text = "The subscriber profile was created successfully"
     else:
-        update_res = db.update_subs_profile(subs_profile)
-        success = update_res["success"]
+        success, status_text, data = subs_prof_dao.save(subs_profile)
         action = "update"
         if not success:
             status_text = ("ERROR: Could not update the subscriber "
-                        "profile: {}").format(update_res["statusText"])
+                        "profile: {}").format(status_text)
         else:
             status_text = "The subscriber profile was updated successfully"
 
@@ -128,37 +103,41 @@ def save_json_subs_profile():
             }
 
 
-@Logger
-@app.get("/json/get/conn_profile/")
+@app.get("/json/subs_profile/delete/<subs_id>")
+def delete_json_subs_profile(subs_id):
+    success, status_text, data = subs_prof_dao.delete(subs_id)
+    return {"success" : success,
+            "statusText" : status_text,
+            "data": data }
+
+
+
+@app.get("/json/conn_profile/get/")
 def get_json_conn_profile():
     """get connection profile data in one json blob"""
-    error = []
     conn_json = None
 
-    conn_result = db.get_all_conn_profiles()
-    success, status_text = conn_result["success"], ""
-    if not conn_result["success"]:
-        status_text = "ERROR: {}".format(conn_result["statusText"])
+    success, status_text, data = conn_prof_dao.get_all()
+    if not success:
+        status_text = "ERROR: {}".format(status_text)
     else:
-        conn_json = [conn.get_dict() for conn in conn_result["data"]]
+        conn_json = [conn.get_dict() for conn in data]
 
-    return {"success" : len(error) == 0,
-            "statusText" : "\n".join(error),
+    return {"success" : success,
+            "statusText" : status_text,
             "data" : {
                 "conn_profiles" : conn_json
                 }
             }
 
 
-@Logger
-@app.post("/json/save/conn_profile/")
+@app.post("/json/conn_profile/save/")
 def save_json_conn_profile():
     """save connection profile data in one json blob"""
-    error = []
     conn_json = None
 
     form = bottle.request.forms
-    conn_profile = dao.Connection(
+    conn_profile = dao.ConnectionProfile(
             name = form.get("cprof_name"),
             description = form.get("cprof_description"),
             speed_down = form.get("cprof_speed_down"),
@@ -174,22 +153,20 @@ def save_json_conn_profile():
             );
 
     if conn_profile.conn_id == -1:
-        insert_res = db.insert_conn_profile(conn_profile)
-        success = insert_res["success"]
-        conn_profile.conn_id = insert_res["data"]
+        success, status_text, data = conn_prof_dao.save(conn_profile)
+        conn_profile.conn_id = data
         action = "insert"
         if not success:
             status_text = ("ERROR: Could not create a connection "
-                        "profile: {}").format(insert_res["statusText"])
+                        "profile: {}").format(status_text)
         else:
             status_text = "The connection profile was created successfully"
     else:
-        update_res = db.update_conn_profile(conn_profile)
-        success = update_res["success"]
+        success, status_text, data = conn_prof_dao.save(conn_profile)
         action = "update"
         if not success:
             status_text = ("ERROR: Could not update the connection "
-                        "profile: {}").format(update_res["statusText"])
+                        "profile: {}").format(status_text)
         else:
             status_text = "The connection profile was updated successfully"
 
@@ -202,44 +179,44 @@ def save_json_conn_profile():
             }
 
 
-@Logger
-@app.get("/json/get/settings/")
+@app.get("/json/conn_profile/delete/<conn_id>")
+def delete_json_conn_profile(conn_id):
+    success, status_text, data = conn_prof_dao.delete(conn_id)
+    return {"success" : success,
+            "statusText" : status_text,
+            "data": data }
+
+
+@app.get("/json/settings/get/")
 def get_json_settings():
     """get settings data in one json blob"""
-    error = []
-
-    settings_res = db.get_settings()
-    success, status_text = settings_res["success"], ""
+    success, status_text, data = settings_dao.get()
     if not success:
-        status_text = "ERROR: {}".format(settings_res["statusText"])
+        status_text = "ERROR: {}".format(status_text)
 
     return {"success" : success,
             "statusText" : status_text,
             "data": {
-                "settings" : settings_res["data"].get_dict()
+                "settings" : data.get_dict()
                 }
             }
 
 
-@Logger
-@app.post("/json/save/settings/")
+@app.post("/json/settings/save/")
 def save_json_settings():
     """save settings in the database"""
-    get_res = db.get_settings()
-    success, status_text = get_res["success"], get_res["statusText"]
-    if get_res["success"]:
-        settings = get_res["data"]
+    success, status_text, settings = settings_dao.get()
+    if success:
         form = bottle.request.forms
         settings.rad_ip = form.get("settings_rad_ip")
         settings.rad_port = form.get("settings_rad_port")
         settings.rad_user = form.get("settings_rad_user")
         settings.rad_pass = form.get("settings_rad_pass")
         settings.rad_secret = form.get("settings_rad_secret")
-        update_res = db.update_settings(settings)
-        success = update_res["success"]
+        success, status_text, data = settings_dao.save(settings)
         if not success:
             status_text = ("Could not update the settings: "
-               " {}").format(update_res["statusText"])
+               " {}").format(status_text)
         else:
             status_text = "The settings were updated successfully"
 
@@ -249,7 +226,7 @@ def save_json_settings():
 
 
 if __name__ == "__main__":
-    db.init_schema(config["DB_SCHEMA"])
+    dao.initialize("database.db", "schema.sql")
     app.run(host="localhost", port=8080, debug=True, reloader=True)
 
 # vim: ts=4 sts=4 sw=4 tw=80 ai smarttab et fo=rtcq list
