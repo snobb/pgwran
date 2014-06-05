@@ -5,27 +5,197 @@
 #
 
 import sqlite3
+import sqlite_connector as connector
+
+
+def initialize(db_name, db_schema):
+    """initialize connector wrapper"""
+    connector.initialize(db_name, db_schema)
+
+
+class Transaction(object):
+    """Transaction Decorator class"""
+    def __init__(self):
+        """constructor for the transaction"""
+        pass
+
+
+    def __call__(self, func):
+        """wrap the function and do the transaction handling"""
+        def wrapped(*args, **kwargs):
+            success, status, data = True, "", None
+            ret = None
+            try:
+                connector.begin_transaction()
+                data = func(*args, **kwargs)
+                connector.commit()
+            except Exception as e:
+                success = False
+                connector.rollback()
+            return (success, status, data)
+        return wrapped
+
+
+class GenericDaoImpl(object):
+    @Transaction()
+    def get_all(self):
+        """get all objects"""
+        cls = self.__obj_class__
+        child = cls()
+        obj_list = connector.query_db(
+                child.get_select_query(), [])
+        if len(obj_list):
+            return [cls(**(dict(zip(child.get_keys(), obj)))) for obj in obj_list]
+        return None
+
+
+    @Transaction()
+    def get(self, obj_id):
+        """get the objects with id - obj_id"""
+        cls = self.__obj_class__
+        child = cls()
+        obj = connector.query_db(
+                child.get_select_query(True), [obj_id], True)
+        if obj:
+            return cls(**(dict(zip(child.get_keys(), obj))))
+        return None
+
+
+    @Transaction()
+    def save(self, obj):
+        """save the object. If the object's ID -1 insert else update."""
+        obj_id = getattr(obj, obj.get_id_name())
+        if obj_id == -1:    # Insert
+            new_obj_id = connector.execute_db(
+                    obj.get_insert_query(),
+                    obj.get_values())
+        else:               # Update
+            new_obj_id = connector.execute_db(
+                    obj.get_update_query(),
+                    obj.get_values() + [obj_id])
+        return new_obj_id
+
+
+    @Transaction()
+    def delete(self, obj):
+        """delete the object"""
+        obj_id = getattr(obj, obj.get_id_name())
+        connector.execute_db(
+                obj.get_delete_query(),
+                [obj_id])
+
 
 class GenericDaoObject(object):
-    def get_dict(self):
-        return self.__dict__
+    __table__   = "GenericTable"
+    __id_name__ = None
 
-    def set_dict(self, values):
-        self.__dict__ = values
 
-    def get_fields(self):
-        return self.get_dict().keys()
+    def get_keys(self, has_filter=True):
+        """get list of field names of the object"""
+        fields = self.__dict__
+        if not has_filter:
+            fields.pop(self.get_id_name())
+        return ([name for name in fields.keys() if
+                not name.startswith("__")])
 
-    def get_values(self):
-        return self.get_dict().values()
+
+    def get_values(self, has_filter=True):
+        """get the values of the object fields in the same order as in
+        get_keys()"""
+        fields = self.__dict__
+        if not has_filter:
+            fields.pop(self.get_id_name())
+        return ([getattr(self, name) for name in fields.keys() if
+                not name.startswith("__")])
+
+
+    def get_insert_query(self):
+        """get the object related INSERT query"""
+        keys = self.get_keys(has_filter=False)
+        return "INSERT INTO {}({}) VALUES ({})".format(
+                self.__table__,
+                ",".join(keys),
+                ",".join(["?"] * len(keys))
+                )
+
+
+    def get_update_query(self):
+        """get the object related UPDATE query"""
+        return "UPDATE {} SET {}=? WHERE {}=?".format(
+                self.__table__,
+                "=?,".join(self.get_keys()),
+                self.get_id_name())
+
+
+    def get_select_query(self, filtered=False):
+        """get the object related SELECT query"""
+        query_filter = ""
+        if filtered:
+            query_filter = "WHERE {}=?".format(self.get_id_name())
+        return "SELECT {} FROM {} {}".format(
+                ",".join(self.get_keys()), self.get_table_name(), query_filter)
+
+
+    def get_delete_query(self):
+        """get the object related DELETE query"""
+        return "DELETE FROM {} WHERE {}=?".format(
+                self.get_table_name(),
+                self.get_id_name())
+
+
+    def get_table_name(self):
+        """get table name"""
+        return self.__class__.__table__
+
+
+    def get_id_name(self):
+        """get id name"""
+        return self.__class__.__id_name__
+
 
     def __str__(self):
-        template = ": {}  ".join(self.get_fields())
-        return template.format(self.get_dict.values())
+        """string representation of the class"""
+        str_list = []
+        for k, v in zip(self.get_keys(), self.get_values()):
+            str_list.append("{}: {}".format(k, v))
+        return ", ".join(str_list)
 
 
-class Connection(GenericDaoObject):
-    """Connection storage object"""
+class Subscriber(GenericDaoObject):
+    """Subscriber storage object"""
+    __table__   = "subscriber"
+    __id_name__ = "id"
+
+    def __init__(self, subscriber=-1, connection=-1, enabled=False, id = -1):
+        self.id = id
+        self.subscriber = subscriber
+        self.connection = connection
+        self.enabled = enabled
+
+
+class SubscriberProfile(GenericDaoObject):
+    """Subscriber profile storage object"""
+    __table__   = "subs_profile"
+    __id_name__ = "subs_id"
+
+    def __init__(self, name="New", ipaddr="", calling_id = "000000000000000",
+            called_id = "web.apn", imsi = "90000000000000",
+            imei = "012345678901234", loc_info = "f5f5", subs_id=-1):
+        self.subs_id = subs_id
+        self.name = name
+        self.ipaddr = ipaddr
+        self.calling_id = calling_id
+        self.called_id = called_id
+        self.imsi = imsi
+        self.imei = imei
+        self.loc_info = loc_info
+
+
+class ConnectionProfile(GenericDaoObject):
+    """Connection Profile storage object"""
+    __table__   = "conn_profile"
+    __id_name__ = "conn_id"
+
     def __init__(self, name="New", description="", speed_down=2000, speed_up=2000,
                 speed_var=100, latency_up=200, latency_down=200,
                 latency_jitter=100, loss_down=0.01, loss_up=0.01,
@@ -44,31 +214,11 @@ class Connection(GenericDaoObject):
         self.loss_jitter = loss_jitter
 
 
-class Subscriber(GenericDaoObject):
-    """Subscriber storage object"""
-    def __init__(self, name="new", ipaddr="", calling_id = "000000000000000",
-            called_id = "web.apn", imsi = "90000000000000",
-            imei = "012345678901234", loc_info = "f5f5", subs_id=-1, conn_id=0,
-            enabled=False):
-        self.subs_id = subs_id
-        self.name = name
-        self.ipaddr = ipaddr
-        self.calling_id = calling_id
-        self.called_id = called_id
-        self.imsi = imsi
-        self.imei = imei
-        self.loc_info = loc_info
-
-
-    def __str__(self):
-        return ("name: {}  ipaddr: {} calling_id: {}  called_id: {}  imsi: {}"
-                "imei: {} loc_info: {}").format(self.name, self.ipaddr,
-                        self.calling_id, self.called_id, self.imsi, self.imei,
-                        self.loc_info)
-
-
 class Settings(GenericDaoObject):
     """Settings storage object"""
+    __table__   = "settings"
+    __id_name__ = None
+
     def __init__(self, rad_ip="", rad_port=1813, rad_user="", rad_pass="",
             rad_secret=""):
         self.rad_ip = rad_ip
@@ -77,263 +227,53 @@ class Settings(GenericDaoObject):
         self.rad_pass = rad_pass
         self.rad_secret = rad_secret
 
-    def __str__(self):
-        return ("rad_ip: {} rad_port: {} rad_user: rad_pass {}, "
-                "rad_secret: {}").format(self.rad_ip, self.rad_port,
-                        self.rad_user, self.rad_pass, self.rad_secret)
+    def get_update_query(self):
+        """get the object related UPDATE query"""
+        return "UPDATE {} SET {}=?".format(
+                self.__table__,
+                "=?,".join(self.get_keys()))
 
 
-class Client(GenericDaoObject):
-    """Client storage object"""
-    def __init__(self, subscriber, connection, enabled=True, client_id = -1):
-        self.client_id = client_id
-        self.subscriber = subscriber
-        self.connection = connection
-        self.enabled = enabled
+
+class SubscriberDao(GenericDaoImpl):
+    __obj_class__ = Subscriber
 
 
-    def __str__(self):
-        return ("subscriber: {} connection: {} enabled: {}").format(
-                self.subscriber, self.connection, self.enabled)
+class ConnectionProfileDao(GenericDaoImpl):
+    __obj_class__ = ConnectionProfile
 
 
-class DaoConnectorSQLite(object):
-    """SQLite connector"""
-    def __init__(self, dbname):
-        self.dbname = dbname
-        self.db = None
+class SubscriberProfileDao(GenericDaoImpl):
+    __obj_class__ = SubscriberProfile
 
 
-    def connect_db(self):
-        """Connects to the specific database."""
-        rv = sqlite3.connect(self.dbname, check_same_thread = False)
-        rv.row_factory = sqlite3.Row
-        return rv
+class SettingsDao(GenericDaoImpl):
+    __obj_class__ = Settings
+
+    @Transaction()
+    def get_all(self):
+        """get_all: return the only available row"""
+        cls = self.__obj_class__
+        child = cls()
+        obj = connector.query_db(
+                child.get_select_query(), [], True)
+        if obj:
+            return cls(**(dict(zip(child.get_keys(), obj))))
 
 
-    def get_db(self):
-        """Opens a new database connection if there is none yet for the
-        current application context."""
-        if not self.db:
-            self.db = self.connect_db()
-            self.db.execute("PRAGMA foreign_keys=ON");
-        return self.db
+    def get(self, obj_id=None):
+        """get: this action does not make sense for this object"""
+        return self.get_all()
 
 
-    def begin_transaction(self):
-        """begin a transaction"""
-        db = self.get_db()
-        db.execute("BEGIN TRANSACTION")
+    @Transaction()
+    def save(self, obj):
+        """save the object"""
+        connector.execute_db(obj.get_update_query(), obj.get_values())
 
 
-    def commit(self):
-        """commit transaction"""
-        db = self.get_db()
-        db.commit()
-
-
-    def rollback(self):
-        """rollback current transaction"""
-        db = self.get_db()
-        db.rollback()
-
-
-    def close_db(self):
-        """Closes the database again at the end of the request."""
-        if self.db:
-            self.db.close()
-
-
-    def init_db(self, fname="schema.sql"):
-        """Creates the database tables.
-        return a dictionary like:
-        {
-            "success": True/False,
-            "statusText": << status message if any >>
-            "data": result data
-        }
-        """
-        db = self.get_db()
-        with open(fname, "r") as f:
-            db.cursor().executescript(f.read())
-
-
-    def execute_db(self, query, args):
-        """Insert into the table
-        return a dictionary like:
-        {
-            "success": True/False,
-            "statusText": << status message if any >>
-            "data": result data
-        }
-        """
-        success, statusText, data = True, None, None
-        try:
-            db = self.get_db()
-            db.execute(query, args)
-        except sqlite3.Error as e:
-            success, statusText = False, e.message
-        return { "success": success, "statusText": statusText, "data": None }
-
-
-    def query_db(self, query, args=(), one=False):
-        """Queries the database and returns a list of dictionaries.
-        return a dictionary like:
-        {
-            "success": True/False,
-            "statusText": << status message if any >>
-            "data": result data
-        }
-
-        """
-        statusText = ""
-        try:
-            cur = self.get_db().execute(query, args)
-            rv = cur.fetchall()
-            data = (rv[0] if rv else None) if one else rv
-        except sqlite3.Error as e:
-            statusText, data = e.message, None
-
-        return {
-                "success": data != None,
-                "statusText": statusText,
-                "data": data
-        }
-
-
-    def query_object(self, obj_class, table, filters=None):
-        """Query an object of class <obj_class> in table <table> with filters
-        <filters>
-        return a dictionary like:
-        {
-            "success": True/False,
-            "statusText": << status message if any >>
-            "data": result data
-        }
-        """
-        fields = obj_class().get_fields()
-        data = None
-        query = "SELECT {} FROM {}".format(",".join(fields), table)
-        if filters:
-            query += "WHERE {}".format(filters)
-
-        values = []
-        res = self.query_db(query, [], False)
-        if res["success"]:
-            data = res["data"]
-            for row in data:
-                obj_instance = obj_class()
-                obj_instance.set_dict(dict(zip(fields, row)))
-                values.append(obj_instance)
-            res["data"] = values
-        return res
-
-
-    def update_object(self, obj, table, filters=None):
-        """Update an object <obj> in table <table> with filters <filters
-        return a dictionary like:
-        {
-            "success": True/False,
-            "statusText": << status message if any >>
-            "data": None
-        }
-        """
-        fields = obj.get_fields()
-        query = "UPDATE {} SET {}=?".format(table, "=?,".join(fields))
-        if filters:
-            query += "WHERE {}".format(filters)
-        return self.execute_db(query, obj.get_values())
-
-
-    def insert_object(self, obj, table, id_field):
-        """Insert object into <table>. id_field - name of the id field in the
-        object - required to prevent inserting it.
-        return a dictionary like:
-        {
-            "success": True/False,
-            "statusText": << status message if any >>
-            "data": the db id of the inserted object
-        }
-        """
-        try:
-            self.begin_transaction()
-            obj_dict = obj.get_dict()
-            obj_dict.pop(id_field) # prevent id field in the statement
-            obj_len = len(obj_dict)
-            query = "INSERT INTO {}({}) VALUES ({})".format(
-                    table,
-                    ",".join(obj_dict.keys()),
-                    ",".join(["?"] * obj_len)
-                    )
-            res = self.execute_db(query, obj_dict.values())
-            conn_id_res = self.get_last_insert_id()
-            self.commit()
-
-            if res["success"] and conn_id_res["success"]:
-                res["data"] = conn_id_res["data"]
-
-            return res
-        except sqlite3.Error as e:
-            self.rollback()
-            return { "success": False, "statusText": e.message, "data": None }
-
-    def get_last_insert_id(self):
-            res = self.query_db("SELECT last_insert_rowid()", one=True)
-            res["data"] = res["data"][0]
-            return res
-
-
-class Dao(object):
-    def __init__(self, connector):
-        self.connector = connector
-
-
-    def init_schema(self, fname="schema.sql"):
-        """load the database schema"""
-        self.connector.init_db(fname)
-
-
-    def get_all_subs_profiles(self):
-        return self.connector.query_object(Subscriber, "subs_profile")
-
-
-    def update_subs_profile(self, subs_profile):
-        subs_filter = "subs_id={}".format(subs_profile.subs_id)
-        return self.connector.update_object(subs_profile, "subs_profile",
-                subs_filter)
-
-
-    def insert_subs_profile(self, subs_profile):
-            return self.connector.insert_object(subs_profile,
-                    "subs_profile", "subs_id")
-
-
-    def get_all_conn_profiles(self):
-        return self.connector.query_object(Connection, "conn_profile")
-
-
-    def update_conn_profile(self, conn_profile):
-        conn_filter = "conn_id={}".format(conn_profile.conn_id)
-        return self.connector.update_object(conn_profile, "conn_profile",
-                conn_filter)
-
-    def insert_conn_profile(self, conn_profile):
-            return self.connector.insert_object(conn_profile,
-                    "conn_profile", "conn_id")
-
-
-    def get_settings(self):
-        settings_res = self.connector.query_object(Settings, "settings");
-        if settings_res["success"]:
-            settings = settings_res["data"]
-            if settings and len(settings) > 0:
-                settings_res["data"] = settings[0]
-        return settings_res
-
-
-    def update_settings(self, settings):
-        return self.connector.update_object(settings, "settings")
-
-
+    def delete(self, obj):
+        """delete: this action does not make sense for this object"""
+        raise NotImplementedError("not applicable for this object")
 
 # vim: ts=4 sts=4 sw=4 tw=80 ai smarttab et fo=rtcq list
