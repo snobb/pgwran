@@ -13,17 +13,70 @@ $('document').ready(function() {
 
         active_id = $('#menuTab .active')[0].id;
 
-        if (active_id === 'subs') {
+        if (active_id === 'menu_subs') {
             console.log('subscribers');
-        } else if (active_id === 'subs_profile') {
+            //handleSubscribers();
+        } else if (active_id === 'menu_subs_profile') {
             handleSubsProfile();
-        } else if (active_id === 'conn_profile') {
+        } else if (active_id === 'menu_conn_profile') {
             handleConnProfile();
-        } else if (active_id === 'settings') {
+        } else if (active_id === 'menu_settings') {
             handleSettings();
         }
     });
 });
+
+/********* Subscribers code **********/
+function handleSubscribers() {
+    updateSubscribersData();
+};
+
+function updateSubscribersData(t) {
+    $('.subscribers_body').html("");
+    template = t.html();
+    $.getJSON('/json/subscribers/get/', {}, function(data) {
+        console.log(data);
+        if (data.success) {
+            var subs_body = "";
+            for (var i = 0; i < data.subscribers.length; i++) {
+                subs_body += getTemplate(data.subscribers[i].subs_id);
+            }
+            $('.subs_body').html(html);
+        } else {
+            showError("ERROR: " + data.statusText);
+        }
+    }).fail(function(e) {
+        showError("ERROR: " + e.statusText);
+    });
+}
+
+function getTemplate(id) {
+    return
+        '<div class="panel panel-default" id="' + id + '>  ' +
+        '    <div class="panel-body"> ' +
+        '        <input type="hidden" name="subs_id" id="subs_id" value="' + id + '"> ' +
+        '        <div class="row"> ' +
+        '            <div class="col-md-5"> ' +
+        '                <div class="input-group"> ' +
+        '                    <span class="input-group-addon">Subscriber</span> ' +
+        '                    <input type="text" class="form-control input-sm" id="name" name="name" readonly="true"> ' +
+        '                </div> ' +
+        '            </div> ' +
+        '            <div class="col-md-5"> ' +
+        '                <div class="input-group"> ' +
+        '                    <!-- Button and dropdown menu --> ' +
+        '                    <span class="input-group-addon">Connection</span> ' +
+        '                    <select name="conn_id" class="form-control input-sm"> ' +
+        '                    </select> ' +
+        '                </div> ' +
+        '            </div> ' +
+        '            <div class="col-md-1"> ' +
+        '                <input type="checkbox" class="cbox"> ON ' +
+        '            </div> ' +
+        '        </div> ' +
+        '    </div> ' +
+        '</div>';
+}
 
 /********* Subscriber profile code **********/
 function handleSubsProfile() {
@@ -70,7 +123,7 @@ function handleSubsProfile() {
     });
 
     updateSubscriberProfileData(0);
-    return true;
+    return false;
 }
 
 function updateSubscriberProfileData(current) {
