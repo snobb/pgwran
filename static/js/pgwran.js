@@ -45,15 +45,19 @@ function handleSubsProfile() {
 
 
     $('#button_subs_save').on('click', function(data) {
+        if ($('#sprof_subs_ipaddr').val() == "") {
+            showError('ERROR: IP address field is required');
+            return false;
+        }
         $.ajax({
             type: 'POST',
             url: '/json/subs_profile/save/',
-            data: $("#sprof_subs_form").serialize(),
+            data: $('#sprof_subs_form').serialize(),
             success: function(response) {
                 if (response.success) {
                     showSuccess(response.statusText);
-                    if (response.data.action == "insert") {
-                        $("#sprof_subs_id").val(response.data.subs_id);
+                    if (response.data.action == 'insert') {
+                        $('#sprof_subs_id').val(response.data.subs_id);
                         updateSubscriberProfileData(response.data.subs_id)
                     }
                 } else {
@@ -61,12 +65,12 @@ function handleSubsProfile() {
                 }
             }
         }).fail(function(e) {
-            showError("ERROR: " + e.statusText);
+            showError('ERROR: ' + e.statusText);
         });
     });
 
     updateSubscriberProfileData(0);
-    return false;
+    return true;
 }
 
 function updateSubscriberProfileData(current) {

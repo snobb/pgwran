@@ -36,6 +36,36 @@ def home_get():
     """GET handler for home"""
     return bottle.template("base.tmpl")
 
+@app.get("/json/subscribers/get/")
+def get_json_subscribers():
+    errors = []
+    subs_json, subsp_json, connp_json = None, None, None
+    success, status_text, data = subs_prof_dao.get_all()
+    if not success:
+        errors.append("ERROR: {}".format(status_text))
+    else:
+        subsp_json = [subs.get_dict() for subs in data]
+        success, status_text, data = conn_prof_dao.get_all()
+        if not success:
+            errors.append("ERROR: {}".format(status_text))
+        else:
+            connp_json = [conn.get_dict() for conn in data]
+            success, status_text, data = subs_dao.get_all()
+            if not success:
+                errors.append("ERROR: {}".format(status_text))
+            else:
+                subs_json = [subs.get_dict() for subs in data]
+
+    return {"success" : success,
+            "statusText" : "\n".join(errors),
+            "data" : {
+                "subs_profiles" : subsp_json,
+                "conn_profiles" : connp_json,
+                "subscribers" : subs_json
+                }
+            }
+
+
 
 @app.get("/json/subs_profile/get/")
 def get_json_subs_profile():
