@@ -30,7 +30,6 @@ class Transaction(object):
                 connector.commit()
             except Exception as e:
                 success = False
-                print e
                 status = e.message
                 connector.rollback()
             return (success, status, data)
@@ -171,13 +170,37 @@ class GenericDaoObject(object):
 class Subscriber(GenericDaoObject):
     """Subscriber storage object"""
     __table__   = "subscriber"
-    __id_name__ = "sid"
+    __id_name__ = "subs_id"
 
-    def __init__(self, subs_id=-1, conn_id=0, enabled=0, sid = -1):
-        self.sid = sid
+    def __init__(self, subs_id=-1, conn_id=0, enabled=0, name=None):
         self.subs_id = subs_id
         self.conn_id = conn_id
         self.enabled = enabled
+        self.name = name 
+
+    def get_select_query(self, filtered=False):
+        query_filter = ""
+        sprofile_obj = SubscriberProfile()
+        fields = [ # the order here should be the same as in constructor
+                "{}.subs_id".format(self.get_table_name()),
+                "{}.conn_id".format(self.get_table_name()),
+                "{}.enabled".format(self.get_table_name()),
+                "{}.name".format(sprofile_obj.get_table_name())
+                ]
+        if filtered:
+            query_filter = "AND {}=?".format(self.get_id_name())
+        return ("SELECT {fields} FROM {table},{subsp_table} "
+                    "WHERE {subsp_id} == {table}.{id} {qfilter} ORDER BY "
+                    "{table}.{id}").format(
+                fields=",".join(fields),
+                table=self.get_table_name(),
+                subsp_table=sprofile_obj.get_table_name(),
+                subsp_id="{}.{}".format(
+                    sprofile_obj.get_table_name(),
+                    sprofile_obj.get_id_name()),
+                id=self.get_id_name(),
+                qfilter=query_filter)
+
 
 
 class SubscriberProfile(GenericDaoObject):

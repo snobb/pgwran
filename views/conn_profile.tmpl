@@ -1,97 +1,98 @@
-<form class="form" role="form" id="cprof_conn_form">
-    <table class="table" id="connection_screen"> 
-        <tr>
-            <td>
-                <div class="panel panel-default">
-                    <div class="panel-body">
-                        <div class="input-group">
-                            <div class="input-group-btn">
-                                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" id="conn_dropdown">Name<span class="caret"></span></button>
-                                <!-- Button and dropdown menu -->
-                                <ul class="dropdown-menu" id="conn_dropdown_mark"></ul>
+<div id="conn_screen">
+    <form class="form" role="form">
+        <table class="table">
+            <tr>
+                <td>
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <div class="input-group">
+                                <div class="input-group-btn">
+                                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" id="dropdown">Name<span class="caret"></span></button>
+                                    <!-- Button and dropdown menu -->
+                                    <ul class="dropdown-menu" id="dropdown_mark"></ul>
+                                </div>
+                                <input type="text" class="form-control" id="name" name="name">
+                                <input type="hidden" id="conn_id" name="conn_id">
                             </div>
-                            <input type="text" class="form-control" id="cprof_name" name="cprof_name">
-                            <input type="hidden" id="cprof_conn_id" name="cprof_conn_id">
                         </div>
                     </div>
-                </div>
-            </td>
-            <td colspan="2">
-                <textarea type="area" class="form-control" id="cprof_description" name="cprof_description"></textarea>
-            </td>
-        </tr>
-        <tr>
-            <td>
-                <div class="panel panel-default">
-                    <div class="panel-heading">Speed in kbps</div>
-                    <div class="panel-body">
-                        <div class="input-group">
-                            <span class="input-group-addon input-group-sm">Downstream</span>
-                            <input class="form-control" id="cprof_speed_down" name="cprof_speed_down">
-                        </div>
-                        <div class="input-group">
-                            <span class="input-group-addon input-group-sm">Upstream</span>
-                            <input class="form-control" id="cprof_speed_up" name="cprof_speed_up">
-                        </div>
-                        <div class="input-group">
-                            <span class="input-group-addon input-group-sm">Variance</span>
-                            <input class="form-control" id="cprof_speed_var" name="cprof_speed_var">
-                        </div>
-                    </div>
-                </div>
-            </td>
-            <td>
-                <div class="panel panel-default">
-                    <div class="panel-heading">Latency in ms</div>
-                    <div class="panel-body">
-                        <div class="input-group">
-                            <span class="input-group-addon input-group-sm">Downstream</span>
-                            <input class="form-control" id="cprof_latency_down" name="cprof_latency_down">
-                        </div>
-                        <div class="input-group">
-                            <span class="input-group-addon input-group-sm">Upstream</span>
-                            <input class="form-control" id="cprof_latency_up" name="cprof_latency_up">
-                        </div>
-                        <div class="input-group">
-                            <span class="input-group-addon input-group-sm">Jitter</span>
-                            <input class="form-control" id="cprof_latency_jitter" name="cprof_latency_jitter">
+                </td>
+                <td colspan="2">
+                    <textarea type="area" class="form-control" id="description" name="description"></textarea>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div class="panel panel-default">
+                        <div class="panel-heading">Speed in kbps</div>
+                        <div class="panel-body">
+                            <div class="input-group">
+                                <span class="input-group-addon input-group-sm">Downstream</span>
+                                <input class="form-control" id="speed_down" name="speed_down">
+                            </div>
+                            <div class="input-group">
+                                <span class="input-group-addon input-group-sm">Upstream</span>
+                                <input class="form-control" id="speed_up" name="speed_up">
+                            </div>
+                            <div class="input-group">
+                                <span class="input-group-addon input-group-sm">Variance</span>
+                                <input class="form-control" id="speed_var" name="speed_var">
+                            </div>
                         </div>
                     </div>
-                </div>
-            </td>
-            <td>
-                <div class="panel panel-default">
-                    <div class="panel-heading">Loss in %</div>
-                    <div class="panel-body">
-                        <div class="input-group">
-                            <span class="input-group-addon input-group-sm">Downstream</span>
-                            <input class="form-control" id="cprof_loss_down" name="cprof_loss_down">
-                        </div>
-                        <div class="input-group">
-                            <span class="input-group-addon input-group-sm">Upstream</span>
-                            <input class="form-control" id="cprof_loss_up" name="cprof_loss_up">
-                        </div>
-                        <div class="input-group">
-                            <span class="input-group-addon input-group-sm">Jitter</span>
-                            <input class="form-control" id="cprof_loss_jitter" name="cprof_loss_jitter">
+                </td>
+                <td>
+                    <div class="panel panel-default">
+                        <div class="panel-heading">Latency in ms</div>
+                        <div class="panel-body">
+                            <div class="input-group">
+                                <span class="input-group-addon input-group-sm">Downstream</span>
+                                <input class="form-control" id="latency_down" name="latency_down">
+                            </div>
+                            <div class="input-group">
+                                <span class="input-group-addon input-group-sm">Upstream</span>
+                                <input class="form-control" id="latency_up" name="latency_up">
+                            </div>
+                            <div class="input-group">
+                                <span class="input-group-addon input-group-sm">Jitter</span>
+                                <input class="form-control" id="latency_jitter" name="latency_jitter">
+                            </div>
                         </div>
                     </div>
+                </td>
+                <td>
+                    <div class="panel panel-default">
+                        <div class="panel-heading">Loss in %</div>
+                        <div class="panel-body">
+                            <div class="input-group">
+                                <span class="input-group-addon input-group-sm">Downstream</span>
+                                <input class="form-control" id="loss_down" name="loss_down">
+                            </div>
+                            <div class="input-group">
+                                <span class="input-group-addon input-group-sm">Upstream</span>
+                                <input class="form-control" id="loss_up" name="loss_up">
+                            </div>
+                            <div class="input-group">
+                                <span class="input-group-addon input-group-sm">Jitter</span>
+                                <input class="form-control" id="loss_jitter" name="loss_jitter">
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        </table>
+        <button type="button" class="btn btn-primary" id="button_save">Save</button>
+        <button type="button" class="btn btn-default" id="button_delete">Delete</button>
+    </form>
+    <div class="modal fade" id="modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-body"><h4>Are you sure you want to delete the record?</h4></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="button_ok">OK</button>
                 </div>
-            </td>
-        </tr>
-    </table>
-    <button type="button" class="btn btn-primary" id="button_conn_save">Save</button>
-    <button type="button" class="btn btn-default" id="button_conn_delete">Delete</button>
-</form>
-<div class="modal fade" id="modal_connection">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-body"><h4>Are you sure you want to delete the record?</h4></div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" id="button_conn_ok">OK</button>
-            </div>
-        </div><!-- /.modal-content -->
-    </div><!-- /.modal-dialog -->
-</div><!-- /.modal -->
-
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+</div>

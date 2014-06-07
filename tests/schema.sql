@@ -36,9 +36,8 @@ CREATE TABLE settings (
 );
 DROP TABLE IF EXISTS subscriber;
 CREATE TABLE subscriber (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    subs_id INTEGER PRIMARY KEY,
     conn_id INTEGER DEFAULT 1,
-    subs_id INTEGER,
     enabled INTEGER DEFAULT 0,
     FOREIGN KEY(subs_id) REFERENCES subs_profile(subs_id) ON DELETE CASCADE ON UPDATE CASCADE
 );
@@ -67,8 +66,8 @@ INSERT INTO subs_profile(name, ipaddr, calling_id, called_id, imsi, imei, loc_in
 INSERT INTO subs_profile(name, ipaddr, calling_id, called_id, imsi, imei, loc_info) VALUES ("Alex", "10.0.0.40",
     "004412345678901", "telepathy.apn", "90156451177999", "66657422830999", "bishkek");
 
-INSERT INTO subscriber(id, subs_id, conn_id, enabled) VALUES(1, 1, 1, 1);
-INSERT INTO subscriber(id, subs_id, conn_id, enabled) VALUES(2, 2, 2, 1);
-INSERT INTO subscriber(id, subs_id, conn_id, enabled) VALUES(3, 3, 3, 1);
-INSERT INTO subscriber(id, subs_id, conn_id, enabled) VALUES(4, 3, 3, 1);
+INSERT INTO subscriber(subs_id, conn_id, enabled) VALUES(1, 4, 1);
+INSERT INTO subscriber(subs_id, conn_id, enabled) VALUES(2, 3, 1);
+INSERT INTO subscriber(subs_id, conn_id, enabled) VALUES(3, 2, 1);
+INSERT INTO subscriber(subs_id, conn_id, enabled) VALUES(4, 1, 1);
 COMMIT;

@@ -11,13 +11,27 @@ import dao
 
 dao.initialize(":memory:", "tests/schema.sql")
 
+
 class SubscriberDaoTest(unittest.TestCase):
     def setUp(self):
         dao.connector.get_db()
-        self.dao = dao.ConnectionProfileDao()
+        self.dao = dao.SubscriberDao()
 
     def tearDown(self):
         dao.connector.close()
+
+    def test_get_all(self):
+        success, status, subs = self.dao.get_all()
+        self.assertTrue(success)
+        self.assertNotEquals(0, len(subs))
+        self.assertEquals(4, len(subs))
+
+        # self.assertEquals(subs[1].name, "3G")
+        # self.assertEquals(subs[1].latency_up, 50)
+        # self.assertEquals(subs[2].name, "2.5G")
+        # self.assertEquals(subs[2].speed_up, 59.3)
+
+
 
 class ConnDaoTest(unittest.TestCase):
     def setUp(self):

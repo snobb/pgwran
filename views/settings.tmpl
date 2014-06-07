@@ -1,33 +1,34 @@
-<form class="form" role="form" method="post" id="settings_form">
-    <table class="table" id="settings_screen">
-        <tr>
-            <td>
-                <div class="form-group">
-                    <label for="settings_rad_ip">Radius IP</label>
-                    <input type="text" class="form-control" name="settings_rad_ip" id="settings_rad_ip" placeholder="Radius IP">
-                </div>
-                <div class="form-group">
-                    <label for="settings_rad_port">Radius Port</label>
-                    <input type="number" class="form-control" name="settings_rad_port" id="settings_rad_port" min="1" max="65536" placeholder="Radius Port">
-                </div>
+<div id="settings_screen">
+    <form class="form" role="form" method="post">
+        <table class="table">
+            <tr>
+                <td>
+                    <div class="form-group">
+                        <label for="rad_ip">Radius IP</label>
+                        <input type="text" class="form-control" name="rad_ip" id="rad_ip" placeholder="Radius IP">
+                    </div>
+                    <div class="form-group">
+                        <label for="rad_port">Radius Port</label>
+                        <input type="number" class="form-control" name="rad_port" id="rad_port" min="1" max="65536" placeholder="Radius Port">
+                    </div>
+                </td><td>
+                    <div class="form-group">
+                        <label for="rad_user">Radius User</label>
+                        <input type="text" class="form-control" name="rad_user" id="rad_user" placeholder="Radius User">
+                    </div>
 
-            </td><td>
-                <div class="form-group">
-                    <label for="settings_rad_user">Radius User</label>
-                    <input type="text" class="form-control" name="settings_rad_user" id="settings_rad_user" placeholder="Radius User">
-                </div>
+                    <div class="form-group">
+                        <label for="rad_pass">Radius Password</label>
+                        <input type="password" class="form-control" name="rad_pass" id="rad_pass" placeholder="Radius Password">
+                    </div>
+                    <div class="form-group">
+                        <label for="rad_secret">Radius Secret</label>
+                        <input type="text" class="form-control" name="rad_secret" id="rad_secret" placeholder="Radius Secret">
+                    </div>
+                </td>
+            </tr>
+        </table>
 
-                <div class="form-group">
-                    <label for="settings_rad_pass">Radius Password</label>
-                    <input type="password" class="form-control" name="settings_rad_pass" id="settings_rad_pass" placeholder="Radius Password">
-                </div>
-                <div class="form-group">
-                    <label for="settings_rad_secret">Radius Secret</label>
-                    <input type="text" class="form-control" name="settings_rad_secret" id="settings_rad_secret" placeholder="Radius Secret">
-                </div>
-            </td>
-        </tr>
-    </table>
-
-    <button type="button" class="btn btn-default" id="button_settings_save">Save</button>
-</form>
+        <button type="button" class="btn btn-default" id="button_save">Save</button>
+    </form>
+</div>
