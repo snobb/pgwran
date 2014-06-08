@@ -31,14 +31,17 @@ def server_static(filepath):
     """serving static files located at the static"""
     return bottle.static_file(filepath, root="static/")
 
+
 @app.get("/")
 def home_get():
     """GET handler for home"""
     return bottle.template("base.tmpl")
 
+
 @app.get("/json/subscriber/get/")
 def get_json_subscriber():
     errors = []
+    connp_json, subs_json = [], []
     success, status_text, data = conn_prof_dao.get_all()
     if not success:
         errors.append("ERROR: {}".format(status_text))
@@ -54,19 +57,19 @@ def get_json_subscriber():
         "statusText" : "\n".join(errors),
         "data" : {
             "conn_profiles" : connp_json,
-            "subscribers" : subs_json
+            "subscribers" : sorted(subs_json, key=lambda x: x["subs_id"])
             }
         }
 
 
-@app.get("/json/subscriber/save")
+@app.post("/json/subscriber/save/")
 def save_json_subscriber():
     form = bottle.request.forms
 
     subscriber = dao.Subscriber(
             subs_id = int(form.get("subs_id")),
             conn_id = int(form.get("conn_id")),
-            enabled = int(form.get("enabled")),
+            enabled = form.get("enabled") == 'on',
             );
 
     success, status_text, data = subs_dao.save(subscriber)
@@ -80,7 +83,6 @@ def save_json_subscriber():
             "statusText" : status_text,
             "data": None
             }
-
 
 
 @app.get("/json/subs_profile/get/")
@@ -151,7 +153,6 @@ def delete_json_subs_profile(subs_id):
     return {"success" : success,
             "statusText" : status_text,
             "data": data }
-
 
 
 @app.get("/json/conn_profile/get/")

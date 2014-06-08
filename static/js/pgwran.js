@@ -28,43 +28,6 @@ $('document').ready(function() {
 
 /********* Subscribers code **********/
 function handleSubscribers() {
-    updateSubscribersData();
-    $('#subscriber_screen .cbox').each(function(index) {
-        $(this).on('click', function(data) {
-            console.log('clicked checkbox');
-            action = (this.checked) ? 'enable' : 'disable';
-            uri = 'json/subscriber/' + action + '/' + this.id;
-            $.getJSON(uri, {}, function(data) {
-                if (!data.success) {
-                    showError('ERROR: ' + data.statusText);
-                }
-            }).fail(function (e) {
-                showError('ERROR: ' + e.statusText);
-            });
-        });
-    });
-    $('#subscriber_screen select').each(function(index) {
-        $(this).on('change', function(data) {
-            $.ajax({
-                type: 'POST',
-                url: '/json/subscriber/save/',
-                data: $(this).form.serialize(),
-                success: function(response) {
-                    if (response.success) {
-                        showSuccess('The subscriber has been updated successfully');
-                        updateSubscribersData();
-                    } else {
-                        showError(response.statusText);
-                    }
-                }
-            }).fail(function(e) {
-                showError('ERROR: ' + e.statusText);
-            });
-        });
-    });
-};
-
-function updateSubscribersData() {
     $('#subscriber_screen').html('');
     $.getJSON('/json/subscriber/get/', {}, function(data) {
         if (data.success) {
@@ -75,13 +38,53 @@ function updateSubscribersData() {
                 subs_body += getSubsTemplate(subs[i], conn_profiles);
             }
             $('#subscriber_screen').html(subs_body);
+            $('#subscriber_screen .cbox').each(function(index) {
+                $(this).on('click', function(data) {
+                    action = (this.checked) ? 'enable' : 'disable';
+                    uri = '/json/subscriber/' + action + '/' + this.id;
+                    $.getJSON(uri, {}, function(data) {
+                        if (!data.success) {
+                            showError('ERROR: ' + data.statusText);
+                        }
+                    }).fail(function (e) {
+                        showError('ERROR: ' + e.statusText);
+                    });
+                });
+            });
+            $('#subscriber_screen select').each(function(index) {
+                $(this).on('change', function(data) {
+                    current_subs_id = this.id;
+                    $.ajax({
+                        type: 'POST',
+                        url: '/json/subscriber/save/',
+                        data: $('#subscriber_screen #form' + this.id).serialize(),
+                        success: function(response) {
+                            if (response.success) {
+                                showSuccess('The subscriber has been updated successfully');
+                                $('#subscriber_screen select').each(function(index) {
+                                    this.unbind()
+                                });
+                                $('#subscriber_screen .cbox').each(function(index) {
+                                    this.unbind()
+                                });
+                                handleSubscribers();
+                                return false;
+                            } else {
+                                showError(response.statusText);
+                            }
+                        }
+                    }).fail(function(e) {
+                        showError('ERROR: ' + e.statusText);
+                    });
+                });
+            });
         } else {
             showError('ERROR: ' + data.statusText);
         }
     }).fail(function(e) {
         showError('ERROR: ' + e.statusText);
     });
-    return true;
+    return false;
 }
 
 function getSubsTemplate(obj, conn_list) {
@@ -90,13 +93,12 @@ function getSubsTemplate(obj, conn_list) {
     for (var i = 0; i < conn_list.length; i++) {
         conn = conn_list[i];
         selected = (conn.conn_id == id) ? ' selected' : ''
-        options += '<option value="' + conn.conn_id + '"' +
-           selected + '>' + conn.name + '</option>'
+        options += '<option value="' + conn.conn_id + '"' + selected + '>' + conn.name + '</option>'
     }
     checked = (obj.enabled) ? ' checked' : '';
     return '<form class="form" role="form" method="post" ' +
         'action="/json/subscriber/save" id="form' + id + '">' +
-        '<div class="panel panel-default" id="subs' + obj.subs_id + '"> ' +
+        '<div class="panel panel-default"> ' +
         '    <div class="panel-body">' +
         '        <input type="hidden" name="subs_id" id="subs_id" value="' + id + '">' +
         '        <div class="row">' +
@@ -116,7 +118,7 @@ function getSubsTemplate(obj, conn_list) {
         '                </div>' +
         '            </div>' +
         '            <div class="col-md-1">' +
-        '                <input type="checkbox" class="cbox" id="' + id + '"' +
+        '                <input type="checkbox" class="cbox" name="enabled" id="' + id + '"' +
         checked + '> ON</div>' +
         '        </div>' +
         '    </div>' +

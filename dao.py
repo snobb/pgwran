@@ -98,7 +98,7 @@ class GenericDaoObject(object):
 
     def get_keys(self, has_filter=True):
         """get list of field names of the object"""
-        fields = self.__dict__
+        fields = self.get_dict()
         if not has_filter:
             fields.pop(self.get_id_name())
         return ([name for name in fields.keys() if
@@ -108,7 +108,7 @@ class GenericDaoObject(object):
     def get_values(self, has_filter=True):
         """get the values of the object fields in the same order as in
         get_keys()"""
-        fields = self.__dict__
+        fields = self.get_dict()
         if not has_filter:
             fields.pop(self.get_id_name())
         return ([getattr(self, name) for name in fields.keys() if
@@ -119,7 +119,7 @@ class GenericDaoObject(object):
         """get the object related INSERT query"""
         keys = self.get_keys(has_filter=False)
         return "INSERT INTO {}({}) VALUES ({})".format(
-                self.__table__,
+                self.get_table_name(),
                 ",".join(keys),
                 ",".join(["?"] * len(keys))
                 )
@@ -128,7 +128,7 @@ class GenericDaoObject(object):
     def get_update_query(self):
         """get the object related UPDATE query"""
         return "UPDATE {} SET {}=? WHERE {}=?".format(
-                self.__table__,
+                self.get_table_name(),
                 "=?,".join(self.get_keys()),
                 self.get_id_name())
 
@@ -176,23 +176,40 @@ class Subscriber(GenericDaoObject):
         self.subs_id = subs_id
         self.conn_id = conn_id
         self.enabled = enabled
-        self.name = name 
+        self.name = name
+
+    def get_dict(self):
+        return {"subs_id": self.subs_id,
+                "conn_id": self.conn_id,
+                "enabled": self.enabled,
+                "name": self.name}
+
+
+    def get_update_query(self):
+        fields = self.get_keys()
+        fields.remove("name")
+        return "UPDATE {} SET {}=? WHERE {}=?".format(
+                self.get_table_name(),
+                "=?,".join(fields),
+                self.get_id_name())
+
 
     def get_select_query(self, filtered=False):
         query_filter = ""
         sprofile_obj = SubscriberProfile()
-        fields = [ # the order here should be the same as in constructor
-                "{}.subs_id".format(self.get_table_name()),
-                "{}.conn_id".format(self.get_table_name()),
-                "{}.enabled".format(self.get_table_name()),
-                "{}.name".format(sprofile_obj.get_table_name())
-                ]
+
+        fields_dict = self.get_keys()
+        fields_dict.remove("name")
+        fields = map(lambda x: "{}.{}".format(
+            self.get_table_name(),
+            x), fields_dict)
+
         if filtered:
             query_filter = "AND {}=?".format(self.get_id_name())
-        return ("SELECT {fields} FROM {table},{subsp_table} "
-                    "WHERE {subsp_id} == {table}.{id} {qfilter} ORDER BY "
-                    "{table}.{id}").format(
+        return ("SELECT {fields},{name} FROM {table},{subsp_table} "
+                    "WHERE {subsp_id} == {table}.{id} {qfilter}").format(
                 fields=",".join(fields),
+                name="{}.{}".format(sprofile_obj.get_table_name(), "name"),
                 table=self.get_table_name(),
                 subsp_table=sprofile_obj.get_table_name(),
                 subsp_id="{}.{}".format(
@@ -200,7 +217,6 @@ class Subscriber(GenericDaoObject):
                     sprofile_obj.get_id_name()),
                 id=self.get_id_name(),
                 qfilter=query_filter)
-
 
 
 class SubscriberProfile(GenericDaoObject):
@@ -266,6 +282,49 @@ class Settings(GenericDaoObject):
 
 class SubscriberDao(GenericDaoImpl):
     __obj_class__ = Subscriber
+
+    @Transaction()
+    def get_all(self):
+        cls = self.__obj_class__
+        child = cls()
+        subs_table = child.get_table_name()
+        subs_prof_table = SubscriberProfile().get_table_name()
+
+        fields = [child.get_id_name(), "conn_id", "enabled", "name"]
+        tables = [subs_table] * 3 + [subs_prof_table]
+        qfields = ["{}.{}".format(k,v) for k,v in zip(tables, fields)]
+
+        query = ("SELECT {fields} FROM {ts},{tsp} "
+                    "WHERE {ts}.subs_id == {tsp}.subs_id").format(
+                fields=",".join(qfields), ts=subs_table, tsp=subs_prof_table)
+
+        obj_list = connector.query_db(query, [])
+        if len(obj_list):
+            return [cls(**(dict(zip(fields, obj)))) for obj in obj_list]
+        return None
+
+
+    @Transaction()
+    def save(self, obj):
+        """save the object. If the object's ID -1 insert else update."""
+        obj_id = getattr(obj, obj.get_id_name())
+        fields = obj.get_dict()
+        fields.pop("name")
+        fields.pop("subs_id")
+        query = "UPDATE {} SET {}=? WHERE {}=?".format(
+                obj.get_table_name(),
+                "=?,".join(fields),
+                obj.get_id_name())
+        return connector.execute_db(query, fields.values() + [obj_id])
+
+
+    @Transaction()
+    def set_state(self, obj_id, state=True):
+        cls = self.__obj_class__
+        obj = cls()
+        query = "UPDATE {} SET enabled=? WHERE subs_id == ?".format(
+                obj.get_table_name())
+        return connector.execute_db(query, [state, obj_id])
 
 
 class ConnectionProfileDao(GenericDaoImpl):
