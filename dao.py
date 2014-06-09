@@ -13,6 +13,7 @@ def initialize(db_name, db_schema):
     connector.initialize(db_name, db_schema)
 
 
+
 class Transaction(object):
     """Transaction Decorator class"""
     def __init__(self):
@@ -34,6 +35,7 @@ class Transaction(object):
                 connector.rollback()
             return (success, status, data)
         return wrapped
+
 
 
 class GenericDaoImpl(object):
@@ -85,10 +87,10 @@ class GenericDaoImpl(object):
                 [obj_id])
 
 
+
 class GenericDaoObject(object):
     __table__   = "GenericTable"
     __id_name__ = None
-
 
     def get_dict(self):
         fields = self.__dict__
@@ -169,6 +171,7 @@ class GenericDaoObject(object):
         return ", ".join(str_list)
 
 
+
 class Subscriber(GenericDaoObject):
     """Subscriber storage object"""
     __table__   = "subscriber"
@@ -179,6 +182,7 @@ class Subscriber(GenericDaoObject):
         self.conn_id = conn_id
         self.enabled = enabled
         self.name = name
+
 
     def get_dict(self):
         return {"subs_id": self.subs_id,
@@ -194,6 +198,7 @@ class Subscriber(GenericDaoObject):
                 self.get_table_name(),
                 "=?,".join(fields),
                 self.get_id_name())
+
 
 
 class SubscriberProfile(GenericDaoObject):
@@ -212,6 +217,7 @@ class SubscriberProfile(GenericDaoObject):
         self.imsi = imsi
         self.imei = imei
         self.loc_info = loc_info
+
 
 
 class ConnectionProfile(GenericDaoObject):
@@ -237,6 +243,7 @@ class ConnectionProfile(GenericDaoObject):
         self.loss_jitter = loss_jitter
 
 
+
 class Settings(GenericDaoObject):
     """Settings storage object"""
     __table__   = "settings"
@@ -250,11 +257,13 @@ class Settings(GenericDaoObject):
         self.rad_pass = rad_pass
         self.rad_secret = rad_secret
 
+
     def get_update_query(self):
         """get the object related UPDATE query"""
         return "UPDATE {} SET {}=?".format(
                 self.__table__,
                 "=?,".join(self.get_keys()))
+
 
 
 class SubscriberDao(GenericDaoImpl):
@@ -278,8 +287,10 @@ class SubscriberDao(GenericDaoImpl):
         return connector.execute_db(query, fields.values() + [obj_id])
 
 
+
 class ConnectionProfileDao(GenericDaoImpl):
     __obj_class__ = ConnectionProfile
+
 
 
 class SubscriberProfileDao(GenericDaoImpl):
@@ -302,6 +313,7 @@ class SubscriberProfileDao(GenericDaoImpl):
                     obj.get_update_query(),
                     obj.get_values() + [obj_id])
         return new_obj_id
+
 
 
 class SettingsDao(GenericDaoImpl):
@@ -332,5 +344,6 @@ class SettingsDao(GenericDaoImpl):
     def delete(self, obj):
         """delete: this action does not make sense for this object"""
         raise NotImplementedError("not applicable for this object")
+
 
 # vim: ts=4 sts=4 sw=4 tw=80 ai smarttab et fo=rtcq list

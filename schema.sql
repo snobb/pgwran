@@ -75,8 +75,8 @@ INSERT INTO subs_profile(name, ipaddr, calling_id, called_id, imsi, imei, loc_in
 INSERT INTO subs_profile(name, ipaddr, calling_id, called_id, imsi, imei, loc_info) VALUES ("Alex", "10.0.0.40",
     "004412345678901", "telepathy.apn", "90156451177999", "66657422830999", "bishkek");
 
-INSERT INTO subscriber(subs_id, conn_id, enabled) VALUES(1, 4, 1);
-INSERT INTO subscriber(subs_id, conn_id, enabled) VALUES(2, 3, 1);
-INSERT INTO subscriber(subs_id, conn_id, enabled) VALUES(3, 2, 1);
-INSERT INTO subscriber(subs_id, conn_id, enabled) VALUES(4, 1, 1);
+INSERT INTO subscriber(subs_id, conn_id, enabled) VALUES(1, 1, 1);
+INSERT INTO subscriber(subs_id, conn_id, enabled) VALUES(2, 2, 1);
+INSERT INTO subscriber(subs_id, conn_id, enabled) VALUES(3, 3, 1);
+INSERT INTO subscriber(subs_id, conn_id, enabled) VALUES(4, 4, 1);
 COMMIT;

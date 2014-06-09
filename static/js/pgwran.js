@@ -61,14 +61,6 @@ function handleSubscribers() {
                         success: function(response) {
                             if (response.success) {
                                 showSuccess('The subscriber has been updated successfully');
-                                $('#subscriber_screen select').each(function(index) {
-                                    this.unbind()
-                                });
-                                $('#subscriber_screen .cbox').each(function(index) {
-                                    this.unbind()
-                                });
-                                handleSubscribers();
-                                return false;
                             } else {
                                 showError(response.statusText);
                             }
@@ -92,7 +84,7 @@ function getSubsTemplate(obj, conn_list) {
     var id = obj.subs_id
     for (var i = 0; i < conn_list.length; i++) {
         conn = conn_list[i];
-        selected = (conn.conn_id == id) ? ' selected' : ''
+        selected = (conn.conn_id == obj.conn_id) ? ' selected' : ''
         options += '<option value="' + conn.conn_id + '"' + selected + '>' + conn.name + '</option>'
     }
     checked = (obj.enabled) ? ' checked' : '';
