@@ -41,6 +41,15 @@ CREATE TABLE subscriber (
     enabled INTEGER DEFAULT 0,
     FOREIGN KEY(subs_id) REFERENCES subs_profile(subs_id) ON DELETE CASCADE ON UPDATE CASCADE
 );
+DROP VIEW IF EXISTS subscriber_view;
+CREATE VIEW subscriber_view AS
+    SELECT  subscriber.subs_id,
+            subscriber.conn_id,
+            subscriber.enabled,
+            subs_profile.name
+    FROM subscriber, subs_profile
+    WHERE subscriber.subs_id == subs_profile.subs_id;
+
 INSERT INTO settings(rad_ip, rad_port, rad_user, rad_pass, rad_secret) VALUES ("10.0.16.1", 1813, "admin", "password", "secret");
 
 INSERT INTO conn_profile(name, description, speed_down, speed_up, speed_var, latency_up,
@@ -48,14 +57,14 @@ INSERT INTO conn_profile(name, description, speed_down, speed_up, speed_var, lat
     "4G/LTE technology allows for high troughput with low latency and low packet loss rates", 20000, 20000, 5000, 50, 50, 10, 0.01, 0.01, 0.005);
 INSERT INTO conn_profile(name, description, speed_down, speed_up, speed_var, latency_up,
     latency_down, latency_jitter, loss_down, loss_up, loss_jitter) VALUES ("3G",
-    "HSPA Connections are quicker than 2G Connections, but are still suffering from high latency and high loss rates. ",4000, 1000, 500, 50, 50, 20, 0.1, 0.1, 0.05);
+    "HSPA Connections are quicker than 2G Connections, but are still suffering from high latency and high loss rates. ",4000, 1000, 500, 100, 100, 20, 0.1, 0.1, 0.05);
 INSERT INTO conn_profile(name, description, speed_down, speed_up, speed_var, latency_up,
     latency_down, latency_jitter, loss_down, loss_up, loss_jitter) VALUES ("2.5G",
     "GPRS Connections are slow and lossy", 236.8, 59.3, 2, 150, 150, 20, 1, 1, 0.5);
 
 INSERT INTO conn_profile(name, description, speed_down, speed_up, speed_var, latency_up,
     latency_down, latency_jitter, loss_down, loss_up, loss_jitter) VALUES ("2G",
-    "GPRS Connections are slow and lossy", 9.6, 9.6, 2, 150, 150, 20, 1, 1, 0.5);
+    "GPRS Connections are slow and lossy", 9.6, 9.6, 2, 200, 200, 20, 1, 1, 0.5);
 
 INSERT INTO subs_profile(name, ipaddr, calling_id, called_id, imsi, imei, loc_info) VALUES ("Marie", "10.0.0.10",
     "004917489639813", "web.apn", "90125827556293", "66619348724005", "seattle");
@@ -66,8 +75,8 @@ INSERT INTO subs_profile(name, ipaddr, calling_id, called_id, imsi, imei, loc_in
 INSERT INTO subs_profile(name, ipaddr, calling_id, called_id, imsi, imei, loc_info) VALUES ("Alex", "10.0.0.40",
     "004412345678901", "telepathy.apn", "90156451177999", "66657422830999", "bishkek");
 
-INSERT INTO subscriber(subs_id, conn_id, enabled) VALUES(1, 4, 1);
-INSERT INTO subscriber(subs_id, conn_id, enabled) VALUES(2, 3, 1);
-INSERT INTO subscriber(subs_id, conn_id, enabled) VALUES(3, 2, 1);
-INSERT INTO subscriber(subs_id, conn_id, enabled) VALUES(4, 1, 1);
+INSERT INTO subscriber(subs_id, conn_id, enabled) VALUES(1, 1, 1);
+INSERT INTO subscriber(subs_id, conn_id, enabled) VALUES(2, 2, 1);
+INSERT INTO subscriber(subs_id, conn_id, enabled) VALUES(3, 3, 1);
+INSERT INTO subscriber(subs_id, conn_id, enabled) VALUES(4, 4, 1);
 COMMIT;

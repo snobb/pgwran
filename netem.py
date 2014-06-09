@@ -12,24 +12,9 @@ in_iface = "ifb0"
 out_iface = None
 class_registry = {}
 
-class Commands(object):
-    def __init__(self):
-        self.commands = []
 
-    @property
-    def buffer(self):
-        return self.commands
-
-    @buffer.setter
-    def buffer(self, cmd_list):
-        self.commands.extend(cmd_list)
-
-    def commit(self):
-        os.system(";".join(self.commands))
-        self.reset()
-
-    def reset(self):
-        self.commands = []
+def commit(commands):
+    os.system(";".join(commands))
 
 
 def load_ingress_prerequisites():
@@ -183,25 +168,5 @@ def initialize(connections, outif, inif):
 
     return cmd
 
-
-if __name__ == "__main__":
-    try:
-        connector = dao.DaoConnectorSQLite("database.db")
-        dao_obj = dao.Dao(connector)
-        connections = dao_obj.get_all_connections()
-
-        c = Commands()
-        c.cmd = initialize(connections, "eth0", "eth1")
-        print "\n".join(c.cmd)
-        c.reset()
-        # commit(cmd)
-
-        c.cmd = add_filter(3, "192.168.56.10")
-        print "\n".join(c.cmd)
-        c.reset()
-        # commit(cmd)
-
-    finally:
-        pass
 
 # vim: ts=4 sts=4 sw=4 tw=80 ai smarttab et fo=rtcq list

@@ -45,7 +45,7 @@ RADIUS_HDR_TMPL="!BBH16s"
 RADIUS_AVP_TMPL="!BB%ss"
 
 # actions
-RESTART, START, STOP = range(3) # also ACCT_STATUS_TYPE start/stop
+START, STOP = range(1, 3) # also ACCT_STATUS_TYPE start/stop
 
 # Attributes
 AVP_TYPE = {

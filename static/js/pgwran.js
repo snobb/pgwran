@@ -39,38 +39,14 @@ function handleSubscribers() {
             }
             $('#subscriber_screen').html(subs_body);
             $('#subscriber_screen .cbox').each(function(index) {
-                $(this).on('click', function(data) {
+                $(this).on('change', function(data) {
                     action = (this.checked) ? 'enable' : 'disable';
-                    uri = '/json/subscriber/' + action + '/' + this.id;
-                    $.getJSON(uri, {}, function(data) {
-                        if (!data.success) {
-                            showError('ERROR: ' + data.statusText);
-                        }
-                    }).fail(function (e) {
-                        showError('ERROR: error accessing the backend - ' + e.statusText);
-                        $('#subscriber_screen').html('');
-                    });
+                    updateForm(this, action);
                 });
             });
             $('#subscriber_screen select').each(function(index) {
                 $(this).on('change', function(data) {
-                    current_subs_id = this.id;
-                    $.ajax({
-                        type: 'POST',
-                        url: '/json/subscriber/save/',
-                        data: $('#subscriber_screen #form' + this.id).serialize(),
-                        success: function(response) {
-                            if (response.success) {
-                                showSuccess('The subscriber has been updated successfully');
-                            } else {
-                                showError(response.statusText);
-                                $('#subscriber_screen').html('');
-                            }
-                        }
-                    }).fail(function(e) {
-                        showError('ERROR: error accessing the backend - ' + e.statusText);
-                        $('#subscriber_screen').html('');
-                    });
+                    updateForm(this, 'save');
                 });
             });
         } else {
@@ -80,6 +56,24 @@ function handleSubscribers() {
         showError('ERROR: error accessing the backend - ' + e.statusText);
     });
     return false;
+}
+
+function updateForm(obj, action) {
+    $.ajax({
+        type: 'POST',
+        url: '/json/subscriber/' + action + '/',
+        data: $('#subscriber_screen #form' + obj.id).serialize(),
+        success: function(response) {
+            if (response.success) {
+                showSuccess('The subscriber has been updated successfully');
+            } else {
+                showError(response.statusText);
+            }
+        }
+    }).fail(function (e) {
+        showError('ERROR: error accessing the backend - ' + e.statusText);
+        $('#subscriber_screen').html('');
+    });
 }
 
 function getSubsTemplate(obj, conn_list) {
@@ -385,7 +379,7 @@ function showError(msg) {
     $('.msg-board').fadeIn(500).delay(2000).fadeOut(500, function(success) {
         $('.msg-board').html('')
     });
-
 }
+
 /* vim: ts=4 sts=8 sw=4 smarttab et si tw=80 ci cino+=t0(0:0 fo=crtocl list */
 

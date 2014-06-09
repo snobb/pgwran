@@ -6,24 +6,94 @@
 
 import dao
 import bottle
-from json import JSONEncoder, dumps as jsonify
+import radius, netem
+
 
 # Configuration
 config = {
     "DATABASE"  : "database.db",
     "DB_SCHEMA" : "schema.sql",
     "DEBUG"     : True,
-    "EGRESS_IFACE": "eth1",
-    "INGRESS_IFACE": "eth3",
+    "RELOADER"  : True,
+    "EGRESS_IFACE": "eth0",
+    "INGRESS_IFACE": "eth1",
 }
 
 # Globals
 app = bottle.Bottle()
+radius_config = radius.Config()
 
+
+# DAO initialization
 subs_dao = dao.SubscriberDao()
 conn_prof_dao = dao.ConnectionProfileDao()
 subs_prof_dao = dao.SubscriberProfileDao()
 settings_dao = dao.SettingsDao()
+
+
+### RADI functions ###
+def radius_configure(subscriber):
+    """configure radi as per current settings/subscriber profile"""
+    global radius_config
+    settings = dao_obj.get_settings()
+    radius_config.radius_dest = settings.rad_ip.encode("ascii")
+    radius_config.radius_port = int(settings.rad_port)
+
+    if len(settings.rad_user) > 0:
+        radius_config.username = settings.rad_user.encode("ascii")
+
+    if len(settings.rad_secret) > 0:
+        radius_config.radius_secret = settings.rad_secret.encode("ascii")
+
+    if len(subscriber.called_id) > 0:
+        radius_config.called_id = subscriber.called_id.encode("ascii")
+
+    radius_config.framed_ip = subscriber.ipaddr.encode("ascii")
+
+    if len(subscriber.calling_id) > 0:
+        radius_config.calling_id = subscriber.calling_id.encode("ascii")
+
+    if len(subscriber.imsi) > 0:
+        radius_config.imsi = subscriber.imsi.encode("ascii")
+
+    if len(subscriber.imei) > 0:
+        radius_config.imei = subscriber.imei.encode("ascii")
+
+    if len(subscriber.loc_info) > 0:
+        radius_config.subs_loc_info = subscriber.loc_info.encode("ascii")
+
+
+def radius_send(action):
+    """send radius packet"""
+    global radius_config
+    radius_config.action = action
+    radius.start_stop_session(radius_config)
+
+
+### netem functions ###
+def netem_obj_redo_filters(subscribers):
+    """update and reapply filters based on the enabled_subscribers list"""
+    cmd = netem.clear_filters()
+    for subs in subscribers:
+        if subs.enabled:
+            cmd.extend(netem.add_filter(subs.conn_id, subs.ipaddr))
+    netem.commit(cmd)
+
+
+### session management ###
+def enable_session(subs_profile, subs_profile_list):
+    """enable session"""
+    netem_obj_redo_filters(subs_profile)
+    radius_configure(subs_profile_list)
+    radius_send(radius.START)
+
+
+def disable_session(subs_profile, subs_profile_list):
+    """diable session"""
+    netem_obj_redo_filters(subs_profile)
+    radius_configure(subs_profile_list)
+    radius_send(radius.STOP)
+
 
 # dispatch handlers
 @app.get("/static/<filepath:path>")
@@ -81,8 +151,44 @@ def save_json_subscriber():
 
     return {"success" : success,
             "statusText" : status_text,
-            "data": None
-            }
+            "data": None}
+
+
+@app.post("/json/subscriber/<action>/")
+def enable_json_subscriber(action):
+    """enable subscriber"""
+    form = bottle.request.forms
+
+    subs_id = int(form.get("subs_id")),
+    subscriber = dao.Subscriber(
+            subs_id = subs_id,
+            conn_id = int(form.get("conn_id")),
+            enabled = form.get("enabled") == 'on',
+            );
+
+    success, status_text, data = subs_dao.save(subscriber)
+    if not success:
+        status_text = ("ERROR: {}").format(status_text)
+    else:
+        success, status_text, subs_profile_list = subs_dao.get_all()
+        if not success:
+            status_text = "ERROR: {}".format(status_text)
+        else:
+            success, status_text, subs_profile = subs_dao.get(subs_id)
+            if not success:
+                status_text = "ERROR: {}".format(status_text)
+            else:
+                if action == "enable":
+                    enable_session(subs_profile, subs_profile_list)
+                elif action == "disable":
+                    disable_session(subs_profile, subs_profile_list)
+                else:
+                    success = False
+                    status_text = "ERROR: Unknown action"
+
+    return {"success" : success,
+            "statusText" : status_text,
+            "data": None}
 
 
 @app.get("/json/subs_profile/get/")
@@ -263,11 +369,23 @@ def save_json_settings():
 
     return {"success" : success,
             "statusText" : status_text,
-            "data" : "" }
+            "data" : None }
 
 
 if __name__ == "__main__":
-    dao.initialize("database.db", "schema.sql")
-    app.run(host="localhost", port=8080, debug=True, reloader=True)
+    dao.initialize(config["DATABASE"], config["DB_SCHEMA"])
+    success, status_text, connections = conn_prof_dao.get_all()
+    if success:
+        try:
+            netem.commit(netem.initialize(connections,
+                config["EGRESS_IFACE"], config["INGRESS_IFACE"]))
+            app.run(host="0.0.0.0", port=8080,
+                    debug=config["DEBUG"],
+                    reloader=config["RELOADER"])
+        finally:
+            netem.commit(netem.clear_all())
+    else:
+        print >> sys.stderr, "ERROR: {}".format(status_text)
+
 
 # vim: ts=4 sts=4 sw=4 tw=80 ai smarttab et fo=rtcq list

@@ -70,11 +70,11 @@ class GenericDaoImpl(object):
         if obj_id == -1:    # Insert
             new_obj_id = connector.execute_db(
                     obj.get_insert_query(),
-                    obj.get_values())
+                    obj.get_values(has_id=False))
         else:               # Update
             new_obj_id = connector.execute_db(
                     obj.get_update_query(),
-                    obj.get_values() + [obj_id])
+                    obj.get_values(has_id=False) + [obj_id])
         return new_obj_id
 
 
@@ -98,20 +98,20 @@ class GenericDaoObject(object):
                 not k.startswith("__")}
 
 
-    def get_keys(self, has_filter=True):
+    def get_keys(self, has_id=True):
         """get list of field names of the object"""
         fields = self.get_dict()
-        if not has_filter:
+        if not has_id:
             fields.pop(self.get_id_name())
         return ([name for name in fields.keys() if
                 not name.startswith("__")])
 
 
-    def get_values(self, has_filter=True):
+    def get_values(self, has_id=True):
         """get the values of the object fields in the same order as in
         get_keys()"""
         fields = self.get_dict()
-        if not has_filter:
+        if not has_id:
             fields.pop(self.get_id_name())
         return ([getattr(self, name) for name in fields.keys() if
                 not name.startswith("__")])
@@ -119,7 +119,7 @@ class GenericDaoObject(object):
 
     def get_insert_query(self):
         """get the object related INSERT query"""
-        keys = self.get_keys(has_filter=False)
+        keys = self.get_keys(has_id=False)
         return "INSERT INTO {}({}) VALUES ({})".format(
                 self.get_table_name(),
                 ",".join(keys),
@@ -131,7 +131,7 @@ class GenericDaoObject(object):
         """get the object related UPDATE query"""
         return "UPDATE {} SET {}=? WHERE {}=?".format(
                 self.get_table_name(),
-                "=?,".join(self.get_keys()),
+                "=?,".join(self.get_keys(has_id=False)),
                 self.get_id_name())
 
 
@@ -299,10 +299,11 @@ class SubscriberProfileDao(GenericDaoImpl):
     @Transaction()
     def save(self, obj):
         obj_id = getattr(obj, obj.get_id_name())
+        items = obj.get_dict()
         if obj_id == -1:    # Insert
             new_obj_id = connector.execute_db(
                     obj.get_insert_query(),
-                    obj.get_values())
+                    obj.get_values(has_id=False))
 
             # adding subscriber as well
             subscriber = Subscriber(subs_id=new_obj_id)
@@ -311,7 +312,7 @@ class SubscriberProfileDao(GenericDaoImpl):
         else:               # Update
             new_obj_id = connector.execute_db(
                     obj.get_update_query(),
-                    obj.get_values() + [obj_id])
+                    obj.get_values(has_id=False) + [obj_id])
         return new_obj_id
 
 

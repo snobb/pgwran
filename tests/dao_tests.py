@@ -33,7 +33,7 @@ class SubscriberDaoTest(unittest.TestCase):
 
 
 
-class ConnDaoTest(unittest.TestCase):
+class ConnProfDaoTest(unittest.TestCase):
     def setUp(self):
         dao.connector.get_db()
         self.dao = dao.ConnectionProfileDao()
@@ -50,7 +50,7 @@ class ConnDaoTest(unittest.TestCase):
         self.assertEquals(4, len(conns))
 
         self.assertEquals(conns[1].name, "3G")
-        self.assertEquals(conns[1].latency_up, 50)
+        self.assertEquals(conns[1].latency_up, 100)
         self.assertEquals(conns[2].name, "2.5G")
         self.assertEquals(conns[2].speed_up, 59.3)
 
@@ -113,7 +113,7 @@ class ConnDaoTest(unittest.TestCase):
         self.assertEquals(None, data)
 
 
-class SubscriberDaoTest(unittest.TestCase):
+class SubscriberProfDaoTest(unittest.TestCase):
     def setUp(self):
         dao.initialize(":memory:", "tests/schema.sql")
         self.dao = dao.SubscriberProfileDao()
