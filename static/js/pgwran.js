@@ -47,7 +47,8 @@ function handleSubscribers() {
                             showError('ERROR: ' + data.statusText);
                         }
                     }).fail(function (e) {
-                        showError('ERROR: ' + e.statusText);
+                        showError('ERROR: error accessing the backend - ' + e.statusText);
+                        $('#subscriber_screen').html('');
                     });
                 });
             });
@@ -63,10 +64,12 @@ function handleSubscribers() {
                                 showSuccess('The subscriber has been updated successfully');
                             } else {
                                 showError(response.statusText);
+                                $('#subscriber_screen').html('');
                             }
                         }
                     }).fail(function(e) {
-                        showError('ERROR: ' + e.statusText);
+                        showError('ERROR: error accessing the backend - ' + e.statusText);
+                        $('#subscriber_screen').html('');
                     });
                 });
             });
@@ -74,7 +77,7 @@ function handleSubscribers() {
             showError('ERROR: ' + data.statusText);
         }
     }).fail(function(e) {
-        showError('ERROR: ' + e.statusText);
+        showError('ERROR: error accessing the backend - ' + e.statusText);
     });
     return false;
 }
@@ -128,8 +131,8 @@ function handleSubsProfile() {
                 // output success
                 showSuccess('The value has been deleted successfully');
                 updateSubscriberProfileData(0);
-            }).fail(function(data) {
-                showError('ERROR: ' + data.statusText);
+            }).fail(function(e) {
+                showError('ERROR: error accessing the backend - ' + e.statusText);
             });
         });
     });
@@ -156,7 +159,7 @@ function handleSubsProfile() {
                 }
             }
         }).fail(function(e) {
-            showError('ERROR: ' + e.statusText);
+            showError('ERROR: error accessing the backend - ' + e.statusText);
         });
     });
 
@@ -189,7 +192,7 @@ function updateSubscriberProfileData(current) {
             showError('ERROR: ' + data.statusText)
         }
     }).fail(function(e) {
-        showError('ERROR: ' + e.statusText)
+        showError('ERROR: error accessing the backend - ' + e.statusText);
     });
 }
 

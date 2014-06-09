@@ -54,12 +54,12 @@ def get_json_subscriber():
             subs_json = [subs.get_dict() for subs in data]
 
         return {"success" : success,
-        "statusText" : "\n".join(errors),
-        "data" : {
-            "conn_profiles" : connp_json,
-            "subscribers" : sorted(subs_json, key=lambda x: x["subs_id"])
-            }
-        }
+                "statusText" : "\n".join(errors),
+                "data" : {
+                    "conn_profiles" : connp_json,
+                    "subscribers" : sorted(subs_json, key=lambda x: x["subs_id"])
+                    }
+                }
 
 
 @app.post("/json/subscriber/save/")
