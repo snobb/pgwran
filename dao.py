@@ -38,12 +38,12 @@ class Transaction(object):
 
 class GenericDaoImpl(object):
     @Transaction()
-    def get_all(self):
+    def get_all(self, table=None):
         """get all objects"""
         cls = self.__obj_class__
         child = cls()
         obj_list = connector.query_db(
-                child.get_select_query(), [])
+                child.get_select_query(table=table), [])
         if len(obj_list):
             return [cls(**(dict(zip(child.get_keys(), obj)))) for obj in obj_list]
         return None
@@ -133,13 +133,15 @@ class GenericDaoObject(object):
                 self.get_id_name())
 
 
-    def get_select_query(self, filtered=False):
+    def get_select_query(self, filtered=False, table=None):
         """get the object related SELECT query"""
         query_filter = ""
+        if not table:
+            table = self.get_table_name()
         if filtered:
             query_filter = "WHERE {}=?".format(self.get_id_name())
         return "SELECT {} FROM {} {}".format(
-                ",".join(self.get_keys()), self.get_table_name(), query_filter)
+                ",".join(self.get_keys()), table, query_filter)
 
 
     def get_delete_query(self):
@@ -192,31 +194,6 @@ class Subscriber(GenericDaoObject):
                 self.get_table_name(),
                 "=?,".join(fields),
                 self.get_id_name())
-
-
-    def get_select_query(self, filtered=False):
-        query_filter = ""
-        sprofile_obj = SubscriberProfile()
-
-        fields_dict = self.get_keys()
-        fields_dict.remove("name")
-        fields = map(lambda x: "{}.{}".format(
-            self.get_table_name(),
-            x), fields_dict)
-
-        if filtered:
-            query_filter = "AND {}=?".format(self.get_id_name())
-        return ("SELECT {fields},{name} FROM {table},{subsp_table} "
-                    "WHERE {subsp_id} == {table}.{id} {qfilter}").format(
-                fields=",".join(fields),
-                name="{}.{}".format(sprofile_obj.get_table_name(), "name"),
-                table=self.get_table_name(),
-                subsp_table=sprofile_obj.get_table_name(),
-                subsp_id="{}.{}".format(
-                    sprofile_obj.get_table_name(),
-                    sprofile_obj.get_id_name()),
-                id=self.get_id_name(),
-                qfilter=query_filter)
 
 
 class SubscriberProfile(GenericDaoObject):
@@ -283,25 +260,8 @@ class Settings(GenericDaoObject):
 class SubscriberDao(GenericDaoImpl):
     __obj_class__ = Subscriber
 
-    @Transaction()
     def get_all(self):
-        cls = self.__obj_class__
-        child = cls()
-        subs_table = child.get_table_name()
-        subs_prof_table = SubscriberProfile().get_table_name()
-
-        fields = [child.get_id_name(), "conn_id", "enabled", "name"]
-        tables = [subs_table] * 3 + [subs_prof_table]
-        qfields = ["{}.{}".format(k,v) for k,v in zip(tables, fields)]
-
-        query = ("SELECT {fields} FROM {ts},{tsp} "
-                    "WHERE {ts}.subs_id == {tsp}.subs_id").format(
-                fields=",".join(qfields), ts=subs_table, tsp=subs_prof_table)
-
-        obj_list = connector.query_db(query, [])
-        if len(obj_list):
-            return [cls(**(dict(zip(fields, obj)))) for obj in obj_list]
-        return None
+        return super(SubscriberDao, self).get_all(table="subscriber_view")
 
 
     @Transaction()
@@ -316,15 +276,6 @@ class SubscriberDao(GenericDaoImpl):
                 "=?,".join(fields),
                 obj.get_id_name())
         return connector.execute_db(query, fields.values() + [obj_id])
-
-
-    @Transaction()
-    def set_state(self, obj_id, state=True):
-        cls = self.__obj_class__
-        obj = cls()
-        query = "UPDATE {} SET enabled=? WHERE subs_id == ?".format(
-                obj.get_table_name())
-        return connector.execute_db(query, [state, obj_id])
 
 
 class ConnectionProfileDao(GenericDaoImpl):
