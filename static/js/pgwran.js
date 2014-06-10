@@ -41,12 +41,12 @@ function handleSubscribers() {
             $('#subscriber_screen .cbox').each(function(index) {
                 $(this).on('change', function(data) {
                     action = (this.checked) ? 'enable' : 'disable';
-                    updateForm(this, action);
+                    updateForm(this, action, false);
                 });
             });
             $('#subscriber_screen select').each(function(index) {
                 $(this).on('change', function(data) {
-                    updateForm(this, 'save');
+                    updateForm(this, 'save', true);
                 });
             });
         } else {
@@ -58,14 +58,16 @@ function handleSubscribers() {
     return false;
 }
 
-function updateForm(obj, action) {
+function updateForm(obj, action, show_success) {
     $.ajax({
         type: 'POST',
         url: '/json/subscriber/' + action + '/',
         data: $('#subscriber_screen #form' + obj.id).serialize(),
         success: function(response) {
             if (response.success) {
-                showSuccess('The subscriber has been updated successfully');
+                if (show_success) {
+                    showSuccess('The subscriber has been updated successfully');
+                }
             } else {
                 showError(response.statusText);
             }
@@ -82,7 +84,8 @@ function getSubsTemplate(obj, conn_list) {
     for (var i = 0; i < conn_list.length; i++) {
         conn = conn_list[i];
         selected = (conn.conn_id == obj.conn_id) ? ' selected' : ''
-        options += '<option value="' + conn.conn_id + '"' + selected + '>' + conn.name + '</option>'
+        options += '<option value="' + conn.conn_id + '"' + selected + '>'
+                    + conn.name + '</option>'
     }
     checked = (obj.enabled) ? ' checked' : '';
     return '<form class="form" role="form" method="post" ' +

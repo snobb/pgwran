@@ -15,8 +15,8 @@ config = {
     "DB_SCHEMA" : "schema.sql",
     "DEBUG"     : True,
     "RELOADER"  : True,
-    "EGRESS_IFACE": "eth0",
-    "INGRESS_IFACE": "eth1",
+    "EGRESS_IFACE": "eth1",
+    "INGRESS_IFACE": "eth0",
 }
 
 # Globals
@@ -35,32 +35,34 @@ settings_dao = dao.SettingsDao()
 def radius_configure(subscriber):
     """configure radi as per current settings/subscriber profile"""
     global radius_config
-    settings = dao_obj.get_settings()
-    radius_config.radius_dest = settings.rad_ip.encode("ascii")
-    radius_config.radius_port = int(settings.rad_port)
+    success, status_text, settings = settings_dao.get_all()
+    if success:
+        radius_config.radius_dest = settings.rad_ip.encode("ascii")
+        radius_config.radius_port = int(settings.rad_port)
 
-    if len(settings.rad_user) > 0:
-        radius_config.username = settings.rad_user.encode("ascii")
+        if len(settings.rad_user) > 0:
+            radius_config.username = settings.rad_user.encode("ascii")
 
-    if len(settings.rad_secret) > 0:
-        radius_config.radius_secret = settings.rad_secret.encode("ascii")
+        if len(settings.rad_secret) > 0:
+            radius_config.radius_secret = settings.rad_secret.encode("ascii")
 
-    if len(subscriber.called_id) > 0:
-        radius_config.called_id = subscriber.called_id.encode("ascii")
+        if len(subscriber.called_id) > 0:
+            radius_config.called_id = subscriber.called_id.encode("ascii")
 
-    radius_config.framed_ip = subscriber.ipaddr.encode("ascii")
+        radius_config.framed_ip = subscriber.ipaddr.encode("ascii")
 
-    if len(subscriber.calling_id) > 0:
-        radius_config.calling_id = subscriber.calling_id.encode("ascii")
+        if len(subscriber.calling_id) > 0:
+            radius_config.calling_id = subscriber.calling_id.encode("ascii")
 
-    if len(subscriber.imsi) > 0:
-        radius_config.imsi = subscriber.imsi.encode("ascii")
+        if len(subscriber.imsi) > 0:
+            radius_config.imsi = subscriber.imsi.encode("ascii")
 
-    if len(subscriber.imei) > 0:
-        radius_config.imei = subscriber.imei.encode("ascii")
+        if len(subscriber.imei) > 0:
+            radius_config.imei = subscriber.imei.encode("ascii")
 
-    if len(subscriber.loc_info) > 0:
-        radius_config.subs_loc_info = subscriber.loc_info.encode("ascii")
+        if len(subscriber.loc_info) > 0:
+            radius_config.subs_loc_info = subscriber.loc_info.encode("ascii")
+    return success, status_text
 
 
 def radius_send(action):
@@ -81,17 +83,17 @@ def netem_obj_redo_filters(subscribers):
 
 
 ### session management ###
-def enable_session(subs_profile, subs_profile_list):
+def enable_session(subs_profile, subs_status_list):
     """enable session"""
-    netem_obj_redo_filters(subs_profile)
-    radius_configure(subs_profile_list)
+    netem_obj_redo_filters(subs_status_list)
+    radius_configure(subs_profile)
     radius_send(radius.START)
 
 
-def disable_session(subs_profile, subs_profile_list):
+def disable_session(subs_profile, subs_status_list):
     """diable session"""
-    netem_obj_redo_filters(subs_profile)
-    radius_configure(subs_profile_list)
+    netem_obj_redo_filters(subs_status_list)
+    radius_configure(subs_profile)
     radius_send(radius.STOP)
 
 
@@ -155,33 +157,32 @@ def save_json_subscriber():
 
 
 @app.post("/json/subscriber/<action>/")
-def enable_json_subscriber(action):
+def change_json_subscriber(action):
     """enable subscriber"""
     form = bottle.request.forms
 
-    subs_id = int(form.get("subs_id")),
     subscriber = dao.Subscriber(
-            subs_id = subs_id,
+            subs_id = int(form.get("subs_id")),
             conn_id = int(form.get("conn_id")),
             enabled = form.get("enabled") == 'on',
             );
 
     success, status_text, data = subs_dao.save(subscriber)
     if not success:
-        status_text = ("ERROR: {}").format(status_text)
+        status_text = ("ERROR: subs_dao.save(subs) - {}").format(status_text)
     else:
-        success, status_text, subs_profile_list = subs_dao.get_all()
+        success, status_text, subs_status_list = subs_dao.get_all_status()
         if not success:
-            status_text = "ERROR: {}".format(status_text)
+            status_text = "ERROR: subs_dao.get_all_status() - {}".format(status_text)
         else:
-            success, status_text, subs_profile = subs_dao.get(subs_id)
+            success, status_text, subs_profile = subs_prof_dao.get(subscriber.subs_id)
             if not success:
-                status_text = "ERROR: {}".format(status_text)
+                status_text = "ERROR: subs_dao.get(obj) - {}".format(status_text)
             else:
                 if action == "enable":
-                    enable_session(subs_profile, subs_profile_list)
+                    enable_session(subs_profile, subs_status_list)
                 elif action == "disable":
-                    disable_session(subs_profile, subs_profile_list)
+                    disable_session(subs_profile, subs_status_list)
                 else:
                     success = False
                     status_text = "ERROR: Unknown action"

@@ -14,6 +14,13 @@ def initialize(db_name, db_schema):
 
 
 
+class Obj(object):
+    """wrapper object to create an object out of dictionary"""
+    def __init__(self, obj_dict):
+        self.__dict__.update(obj_dict)
+
+
+
 class Transaction(object):
     """Transaction Decorator class"""
     def __init__(self):
@@ -52,12 +59,12 @@ class GenericDaoImpl(object):
 
 
     @Transaction()
-    def get(self, obj_id):
+    def get(self, obj_id, table=None):
         """get the objects with id - obj_id"""
         cls = self.__obj_class__
         child = cls()
         obj = connector.query_db(
-                child.get_select_query(True), [obj_id], True)
+                child.get_select_query(True, table=table), [obj_id], True)
         if obj:
             return cls(**(dict(zip(child.get_keys(), obj))))
         return None
@@ -184,11 +191,11 @@ class Subscriber(GenericDaoObject):
         self.name = name
 
 
-    def get_dict(self):
-        return {"subs_id": self.subs_id,
-                "conn_id": self.conn_id,
-                "enabled": self.enabled,
-                "name": self.name}
+#    def get_dict(self):
+#        return {"subs_id": self.subs_id,
+#                "conn_id": self.conn_id,
+#                "enabled": self.enabled,
+#                "name": self.name}
 
 
     def get_update_query(self):
@@ -270,7 +277,23 @@ class SubscriberDao(GenericDaoImpl):
     __obj_class__ = Subscriber
 
     def get_all(self):
+        """get a list of subscriber objects"""
         return super(SubscriberDao, self).get_all(table="subscriber_view")
+
+
+    def get(self, obj):
+        """get a single subscriber object"""
+        return super(SubscriberDao, self).get(obj, table="subscriber_view")
+
+
+    @Transaction()
+    def get_all_status(self):
+        """get subs_id, status and IP address tuple list"""
+        fields = ["subs_id", "conn_id", "ipaddr", "enabled"]
+        query  = "SELECT {} FROM subscriber_state_view".format(",".join(fields))
+        obj_list = connector.query_db(query, [])
+        status_list = ([Obj(dict(zip(fields, obj))) for obj in obj_list])
+        return status_list
 
 
     @Transaction()
