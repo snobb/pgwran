@@ -8,7 +8,7 @@
 $('document').ready(function() {
     handleSubscribers();
     $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
-        e.target // activated tab
+        e.target        // activated tab
         e.relatedTarget // previous tab
         $('#title').text('PGW-RAN: ' + $('.active a').text())
 
@@ -40,13 +40,12 @@ function handleSubscribers() {
             $('#subscriber_screen').html(subs_body);
             $('#subscriber_screen .cbox').each(function(index) {
                 $(this).on('change', function(data) {
-                    action = (this.checked) ? 'enable' : 'disable';
-                    updateForm(this, action, false);
+                    updateForm(this, false);
                 });
             });
             $('#subscriber_screen select').each(function(index) {
                 $(this).on('change', function(data) {
-                    updateForm(this, 'save', true);
+                    updateForm(this, true);
                 });
             });
         } else {
@@ -58,10 +57,10 @@ function handleSubscribers() {
     return false;
 }
 
-function updateForm(obj, action, show_success) {
+function updateForm(obj, show_success) {
     $.ajax({
         type: 'POST',
-        url: '/json/subscriber/' + action + '/',
+        url: '/json/subscriber/save/',
         data: $('#subscriber_screen #form' + obj.id).serialize(),
         success: function(response) {
             if (response.success) {

@@ -46,7 +46,8 @@ CREATE VIEW subscriber_view AS
     SELECT  subscriber.subs_id,
             subscriber.conn_id,
             subscriber.enabled,
-            subs_profile.name
+            subs_profile.name,
+            subs_profile.ipaddr
     FROM subscriber, subs_profile
     WHERE subscriber.subs_id == subs_profile.subs_id;
 

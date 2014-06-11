@@ -46,17 +46,9 @@ CREATE VIEW subscriber_view AS
     SELECT  subscriber.subs_id,
             subscriber.conn_id,
             subscriber.enabled,
-            subs_profile.name
-    FROM subscriber, subs_profile
-    WHERE subscriber.subs_id == subs_profile.subs_id;
-
-DROP VIEW IF EXISTS subscriber_state_view;
-CREATE VIEW subscriber_state_view AS
-    SELECT  subscriber.subs_id,
-            subscriber.conn_id,
-            subscriber.enabled,
+            subs_profile.name,
             subs_profile.ipaddr
-    FROM subs_profile, subscriber
+    FROM subscriber, subs_profile
     WHERE subscriber.subs_id == subs_profile.subs_id;
 
 INSERT INTO settings(rad_ip, rad_port, rad_user, rad_pass, rad_secret) VALUES ("10.0.16.1", 1813, "admin", "password", "secret");

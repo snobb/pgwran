@@ -47,24 +47,24 @@ class Transaction(object):
 
 class GenericDaoImpl(object):
     @Transaction()
-    def get_all(self, table=None):
+    def get_all(self):
         """get all objects"""
         cls = self.__obj_class__
         child = cls()
         obj_list = connector.query_db(
-                child.get_select_query(table=table), [])
+                child.get_select_query(), [])
         if len(obj_list):
             return [cls(**(dict(zip(child.get_keys(), obj)))) for obj in obj_list]
         return None
 
 
     @Transaction()
-    def get(self, obj_id, table=None):
+    def get(self, obj_id):
         """get the objects with id - obj_id"""
         cls = self.__obj_class__
         child = cls()
         obj = connector.query_db(
-                child.get_select_query(True, table=table), [obj_id], True)
+                child.get_select_query(True), [obj_id], True)
         if obj:
             return cls(**(dict(zip(child.get_keys(), obj))))
         return None
@@ -98,6 +98,11 @@ class GenericDaoImpl(object):
 class GenericDaoObject(object):
     __table__   = "GenericTable"
     __id_name__ = None
+
+    def set_dict(self, field_dict):
+        """update the object fields from a dictionary"""
+        self.__dict__.update(field_dict)
+
 
     def get_dict(self):
         fields = self.__dict__
@@ -184,27 +189,10 @@ class Subscriber(GenericDaoObject):
     __table__   = "subscriber"
     __id_name__ = "subs_id"
 
-    def __init__(self, subs_id=-1, conn_id=0, enabled=0, name=None):
+    def __init__(self, subs_id=-1, conn_id=0, enabled=0):
         self.subs_id = subs_id
         self.conn_id = conn_id
         self.enabled = enabled
-        self.name = name
-
-
-#    def get_dict(self):
-#        return {"subs_id": self.subs_id,
-#                "conn_id": self.conn_id,
-#                "enabled": self.enabled,
-#                "name": self.name}
-
-
-    def get_update_query(self):
-        fields = self.get_keys()
-        fields.remove("name")
-        return "UPDATE {} SET {}=? WHERE {}=?".format(
-                self.get_table_name(),
-                "=?,".join(fields),
-                self.get_id_name())
 
 
 
@@ -276,38 +264,49 @@ class Settings(GenericDaoObject):
 class SubscriberDao(GenericDaoImpl):
     __obj_class__ = Subscriber
 
+    @Transaction()
     def get_all(self):
-        """get a list of subscriber objects"""
-        return super(SubscriberDao, self).get_all(table="subscriber_view")
-
-
-    def get(self, obj):
-        """get a single subscriber object"""
-        return super(SubscriberDao, self).get(obj, table="subscriber_view")
+        """get all objects"""
+        cls = self.__obj_class__
+        fields = ["subs_id", "conn_id", "enabled", "name", "ipaddr"]
+        query  = "SELECT {} FROM subscriber_view".format(",".join(fields))
+        obj_list = connector.query_db(query, [])
+        subs_list = []
+        for obj in obj_list:
+            subs_obj = cls()
+            subs_obj.set_dict(dict(zip(fields, obj)))
+            subs_list.append(subs_obj)
+        return subs_list
 
 
     @Transaction()
-    def get_all_status(self):
-        """get subs_id, status and IP address tuple list"""
-        fields = ["subs_id", "conn_id", "ipaddr", "enabled"]
-        query  = "SELECT {} FROM subscriber_state_view".format(",".join(fields))
-        obj_list = connector.query_db(query, [])
-        status_list = ([Obj(dict(zip(fields, obj))) for obj in obj_list])
-        return status_list
+    def get(self, obj_id, table=None):
+        """get the objects with id - obj_id"""
+        cls = self.__obj_class__
+        fields = ["subs_id", "conn_id", "enabled", "name", "ipaddr"]
+        query  = "SELECT {} FROM subscriber_view".format(",".join(fields))
+        obj = connector.query_db(query, [], True)
+        if obj:
+            subs_obj = cls()
+            subs_obj.set_dict(dict(zip(fields, obj)))
+            return subs_obj
+        return None
 
 
     @Transaction()
     def save(self, obj):
         """save the object. If the object's ID -1 insert else update."""
         obj_id = getattr(obj, obj.get_id_name())
-        fields = obj.get_dict()
-        fields.pop("name")
-        fields.pop("subs_id")
+        fields_names = ["subs_id", "conn_id", "enabled"]
+        fields_dict = dict(
+                filter(lambda x: x[0] in fields_names,
+                    obj.get_dict().items()))
+
         query = "UPDATE {} SET {}=? WHERE {}=?".format(
                 obj.get_table_name(),
-                "=?,".join(fields),
+                "=?,".join(fields_dict.keys()),
                 obj.get_id_name())
-        return connector.execute_db(query, fields.values() + [obj_id])
+        return connector.execute_db(query, fields_dict.values() + [obj_id])
 
 
 

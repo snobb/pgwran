@@ -15,8 +15,8 @@ config = {
     "DB_SCHEMA" : "schema.sql",
     "DEBUG"     : True,
     "RELOADER"  : True,
-    "EGRESS_IFACE": "eth1",
-    "INGRESS_IFACE": "eth0",
+    "EGRESS_IFACE": "eth3",
+    "INGRESS_IFACE": "eth2",
 }
 
 # Globals
@@ -136,29 +136,7 @@ def get_json_subscriber():
 
 @app.post("/json/subscriber/save/")
 def save_json_subscriber():
-    form = bottle.request.forms
-
-    subscriber = dao.Subscriber(
-            subs_id = int(form.get("subs_id")),
-            conn_id = int(form.get("conn_id")),
-            enabled = form.get("enabled") == 'on',
-            );
-
-    success, status_text, data = subs_dao.save(subscriber)
-    if not success:
-        status_text = ("ERROR: Could not update the subscriber: "
-                "{}").format(status_text)
-    else:
-        status_text = "The subscriber profile was updated successfully"
-
-    return {"success" : success,
-            "statusText" : status_text,
-            "data": None}
-
-
-@app.post("/json/subscriber/<action>/")
-def change_json_subscriber(action):
-    """enable subscriber"""
+    """save the subscriber and reapply current status"""
     form = bottle.request.forms
 
     subscriber = dao.Subscriber(
@@ -171,7 +149,7 @@ def change_json_subscriber(action):
     if not success:
         status_text = ("ERROR: subs_dao.save(subs) - {}").format(status_text)
     else:
-        success, status_text, subs_status_list = subs_dao.get_all_status()
+        success, status_text, subs_status_list = subs_dao.get_all()
         if not success:
             status_text = "ERROR: subs_dao.get_all_status() - {}".format(status_text)
         else:
@@ -179,13 +157,10 @@ def change_json_subscriber(action):
             if not success:
                 status_text = "ERROR: subs_dao.get(obj) - {}".format(status_text)
             else:
-                if action == "enable":
+                if subscriber.enabled:
                     enable_session(subs_profile, subs_status_list)
-                elif action == "disable":
-                    disable_session(subs_profile, subs_status_list)
                 else:
-                    success = False
-                    status_text = "ERROR: Unknown action"
+                    disable_session(subs_profile, subs_status_list)
 
     return {"success" : success,
             "statusText" : status_text,

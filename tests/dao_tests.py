@@ -26,10 +26,10 @@ class SubscriberDaoTest(unittest.TestCase):
         self.assertNotEquals(0, len(subs))
         self.assertEquals(4, len(subs))
 
-        # self.assertEquals(subs[1].name, "3G")
-        # self.assertEquals(subs[1].latency_up, 50)
-        # self.assertEquals(subs[2].name, "2.5G")
-        # self.assertEquals(subs[2].speed_up, 59.3)
+        self.assertEquals(subs[1].name, "John")
+        self.assertEquals(subs[1].ipaddr, "10.0.0.20")
+        self.assertEquals(subs[2].name, "Linus")
+        self.assertEquals(subs[2].ipaddr, "10.0.0.30")
 
 
 
