@@ -61,7 +61,7 @@ INSERT INTO conn_profile(name, description, speed_down, speed_up, speed_var, lat
     "HSPA Connections are quicker than 2G Connections, but are still suffering from high latency and high loss rates. ",4000, 1000, 500, 100, 100, 20, 0.1, 0.1, 0.05);
 INSERT INTO conn_profile(name, description, speed_down, speed_up, speed_var, latency_up,
     latency_down, latency_jitter, loss_down, loss_up, loss_jitter) VALUES ("2.5G",
-    "GPRS Connections are slow and lossy", 236.8, 59.3, 2, 150, 150, 20, 1, 1, 0.5);
+    "GPRS Connections are slow and lossy", 236.8, 59.3, 2, 150, 50, 20, 1, 1, 0.5);
 
 INSERT INTO conn_profile(name, description, speed_down, speed_up, speed_var, latency_up,
     latency_down, latency_jitter, loss_down, loss_up, loss_jitter) VALUES ("2G",

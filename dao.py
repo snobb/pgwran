@@ -14,13 +14,6 @@ def initialize(db_name, db_schema):
 
 
 
-class Obj(object):
-    """wrapper object to create an object out of dictionary"""
-    def __init__(self, obj_dict):
-        self.__dict__.update(obj_dict)
-
-
-
 class Transaction(object):
     """Transaction Decorator class"""
     def __init__(self):

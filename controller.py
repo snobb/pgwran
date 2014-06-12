@@ -72,8 +72,17 @@ def radius_send(action):
     radius.start_stop_session(radius_config)
 
 
+def radius_session(subs_profile, do_start=True):
+    """send radius accounting for the given subscriber"""
+    radius_configure(subs_profile)
+    if do_start:
+        radius_send(radius.START)
+    else:
+        radius_send(radius.STOP)
+
+
 ### netem functions ###
-def netem_obj_redo_filters(subscribers):
+def netem_redo_filters(subscribers):
     """update and reapply filters based on the enabled_subscribers list"""
     cmd = netem.clear_filters()
     for subs in subscribers:
@@ -82,19 +91,32 @@ def netem_obj_redo_filters(subscribers):
     netem.commit(cmd)
 
 
-### session management ###
-def enable_session(subs_profile, subs_status_list):
-    """enable session"""
-    netem_obj_redo_filters(subs_status_list)
-    radius_configure(subs_profile)
-    radius_send(radius.START)
+def netem_update_profiles(do_cleanup=False):
+    """apply connection profiles"""
+    if do_cleanup:
+        netem.commit(netem.clear_all())
+
+    success, status_text, connections = conn_prof_dao.get_all()
+    if success:
+        netem.commit(netem.initialize(connections,
+            config["EGRESS_IFACE"], config["INGRESS_IFACE"]))
+    return success, status_text, connections
 
 
-def disable_session(subs_profile, subs_status_list):
-    """diable session"""
-    netem_obj_redo_filters(subs_status_list)
-    radius_configure(subs_profile)
-    radius_send(radius.STOP)
+def netem_update_status():
+    """go through all subscribers and update netem status"""
+    success, status_text, subs_list = subs_dao.get_all()
+    if not success:
+        status_text = "ERROR: subs_dao.get_all() - {}".format(status_text)
+    else:
+        netem_redo_filters(subs_list)
+    return success, status_text, subs_list
+
+
+def netem_full_reload():
+    # Updating the netem
+    netem_update_profiles(do_cleanup=True)
+    netem_update_status()
 
 
 # dispatch handlers
@@ -149,22 +171,16 @@ def save_json_subscriber():
     if not success:
         status_text = ("ERROR: subs_dao.save(subs) - {}").format(status_text)
     else:
-        success, status_text, subs_status_list = subs_dao.get_all()
+        success, status_text, subs_prof_profile = subs_prof_dao.get(subscriber.subs_id)
         if not success:
-            status_text = "ERROR: subs_dao.get_all_status() - {}".format(status_text)
+            status_text = "ERROR: subs_dao.get_all() - {}".format(status_text)
         else:
-            success, status_text, subs_profile = subs_prof_dao.get(subscriber.subs_id)
-            if not success:
-                status_text = "ERROR: subs_dao.get(obj) - {}".format(status_text)
-            else:
-                if subscriber.enabled:
-                    enable_session(subs_profile, subs_status_list)
-                else:
-                    disable_session(subs_profile, subs_status_list)
+            radius_session(subs_prof_profile, subscriber.enabled)
+            netem_update_status()
 
     return {"success" : success,
             "statusText" : status_text,
-            "data": None}
+            "data" : None}
 
 
 @app.get("/json/subs_profile/get/")
@@ -219,6 +235,13 @@ def save_json_subs_profile():
                         "profile: {}").format(status_text)
         else:
             status_text = "The subscriber profile was updated successfully"
+
+        # updating radius and netem
+        success, status, subs = subs_dao.get(subs_profile.subs_id)
+        if success and subs.enabled:
+            radius.session(subs_profile, True)
+            netem_update_status()
+
 
     return {"success" : success,
             "statusText" : status_text,
@@ -293,6 +316,10 @@ def save_json_conn_profile():
         else:
             status_text = "The connection profile was updated successfully"
 
+        #updating netem
+        netem_full_reload()
+
+
     return {"success" : success,
             "statusText" : status_text,
             "data": {
@@ -350,18 +377,14 @@ def save_json_settings():
 
 if __name__ == "__main__":
     dao.initialize(config["DATABASE"], config["DB_SCHEMA"])
-    success, status_text, connections = conn_prof_dao.get_all()
-    if success:
-        try:
-            netem.commit(netem.initialize(connections,
-                config["EGRESS_IFACE"], config["INGRESS_IFACE"]))
-            app.run(host="0.0.0.0", port=8080,
-                    debug=config["DEBUG"],
-                    reloader=config["RELOADER"])
-        finally:
-            netem.commit(netem.clear_all())
-    else:
-        print >> sys.stderr, "ERROR: {}".format(status_text)
+    try:
+        success, status_text, data = netem_update_profiles()
+        netem_update_status()
+        app.run(host="0.0.0.0", port=8088,
+                debug=config["DEBUG"],
+                reloader=config["RELOADER"])
+    finally:
+        netem.commit(netem.clear_all())
 
 
 # vim: ts=4 sts=4 sw=4 tw=80 ai smarttab et fo=rtcq list
