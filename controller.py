@@ -7,17 +7,8 @@
 import dao
 import bottle
 import radius, netem
+import config
 
-
-# Configuration
-config = {
-    "DATABASE"  : "database.db",
-    "DB_SCHEMA" : "schema.sql",
-    "DEBUG"     : True,
-    "RELOADER"  : True,
-    "EGRESS_IFACE": "eth3",
-    "INGRESS_IFACE": "eth2",
-}
 
 # Globals
 app = bottle.Bottle()
@@ -99,7 +90,7 @@ def netem_update_profiles(do_cleanup=False):
     success, status_text, connections = conn_prof_dao.get_all()
     if success:
         netem.commit(netem.initialize(connections,
-            config["EGRESS_IFACE"], config["INGRESS_IFACE"]))
+            config.egress_iface, config.ingress_iface))
     return success, status_text, connections
 
 
@@ -376,13 +367,13 @@ def save_json_settings():
 
 
 if __name__ == "__main__":
-    dao.initialize(config["DATABASE"], config["DB_SCHEMA"])
+    dao.initialize(config.database, config.db_schema)
     try:
         success, status_text, data = netem_update_profiles()
         netem_update_status()
-        app.run(host="0.0.0.0", port=8088,
-                debug=config["DEBUG"],
-                reloader=config["RELOADER"])
+        app.run(host=config.listen_address, port=config.listen_port,
+                debug=config.debug,
+                reloader=config.reloader)
     finally:
         netem.commit(netem.clear_all())
 
