@@ -175,7 +175,7 @@ class RadiusAcctRequest(object):
                 self.code,
                 self.pid,
                 len(self),
-                bytes(IntegerType(0, length=4)))
+                bytes(chr(0x00) * 16))
         packet = "".join([header, avps, self.secret])
         return hashlib.md5(packet).digest()
 
