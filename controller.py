@@ -6,7 +6,7 @@
 
 import dao
 import bottle
-import radius, netem
+import netem, radi as radius
 import config
 
 

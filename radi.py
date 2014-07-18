@@ -8,7 +8,7 @@ import getopt, sys
 import struct, socket
 import pickle, hashlib
 
-__version__ = "0.03"
+__version__ = "0.04"
 
 # Radius-Request
 #    0                   1                   2                   3
@@ -45,7 +45,21 @@ RADIUS_HDR_TMPL="!BBH16s"
 RADIUS_AVP_TMPL="!BB%ss"
 
 # actions
-START, STOP = range(1, 3) # also ACCT_STATUS_TYPE start/stop
+RESTART, START, STOP = range(3) # also ACCT_STATUS_TYPE start/stop
+
+RAN_TYPE = {
+    "WLAN" : 0,
+    "VIRTUAL" : 1,
+    "UTRAN" : 1000,
+    "GERAN" : 1001,
+    "GAN" : 1002,
+    "HSPA_EVOLUTION" : 1003,
+    "EUTRAN" : 1004,
+    "CDMA2000_1X" : 2000,
+    "HRPD" : 2001,
+    "UMB" : 2002,
+    "EHRPD" : 2003,
+}
 
 # Attributes
 AVP_TYPE = {
@@ -63,8 +77,21 @@ AVP_TYPE = {
 
     # Vendor specific (26)
     "3GPP-IMSI" : 1,
+    "3GPP-Charging-ID" : 2,
+    "3GPP-PDP-Type" : 3,
+    "3GPP-GPRS-Negotiated-QoS-profile" : 5,
+    "3GPP-SGSN-Address" : 6,
+    "3GPP-GGSN-Address" : 7,
+    "3GPP-IMSI-MCC-MNC" : 8,
+    "3GPP-GGSN-MCC-MNC" : 9,
+    "3GPP-NSAPI" : 10,
+    "3GPP-Selection-Mode" : 12,
+    "3GPP-Charging-Characteristics" : 13,
+    "3GPP-SGSN-MCC-MNC" : 18,
     "3GPP-IMEISV" : 20,
-    "3GPP-User-Location-Info" : 22
+    "3GPP-RAT-Type" : 21,
+    "3GPP-User-Location-Info" : 22,
+    "3GPP-MS-Time-Zone" : 23,
 }
 
 __verbose__ = False     # enabling verbose logging
@@ -81,7 +108,7 @@ class Config(object):
         self.radius_secret = "secret"
         self.username = "johndoe"
         self.imsi = "12345678901234"
-        self.imei = "45678901234567"
+        self.imei = "3456789012345678901234567890"
         self.framed_ip ="10.0.0.1"
         self.framed_mask = 32
         self.calling_id = "00441234987654"
@@ -95,6 +122,20 @@ class Config(object):
                 0xffff) # CI
         self.delay = 1
         self.action = START
+        self.rat_type = 6       # E-UTRAN
+        self.pdp_type = 0           # ipv4
+        self.charging_id = 1234     # random number currnetly
+        self.sgsn_address = "1.1.1.1"
+        self.ggsn_address = "2.2.2.2"
+        self.imsi_mcc_mnc = "aaaaaa"
+        self.ggsn_mcc_mnc = "bbbbbb"
+        self.sgsn_mcc_mnc = "cccccc"
+        self.gprs_negotiated_qos = "99-0B811F7396878774010000"
+        self.nsapi = "nsapi"
+        self.selection_mode = "selection_mode"
+        self.charging_characteristics = "charging_characteristics"
+        self.ms_time_zone=44
+
 
 
     def update(self, config):
@@ -366,6 +407,25 @@ def create_packet(config):
     rad.add_avp(RadiusAvp("3GPP-IMSI", TextType(config.imsi)))
     rad.add_avp(RadiusAvp("3GPP-IMEISV", TextType(config.imei)))
 
+    rad.add_avp(RadiusAvp("3GPP-RAT-Type", IntegerType(config.rat_type)))
+    rad.add_avp(RadiusAvp("3GPP-PDP-Type", IntegerType(config.pdp_type)))
+    rad.add_avp(RadiusAvp("3GPP-Charging-ID", IntegerType(config.charging_id)))
+
+    rad.add_avp(RadiusAvp("3GPP-SGSN-Address", AddressType(config.sgsn_address)))
+    rad.add_avp(RadiusAvp("3GPP-GGSN-Address", AddressType(config.ggsn_address)))
+    rad.add_avp(RadiusAvp("3GPP-IMSI-MCC-MNC", TextType(config.imsi_mcc_mnc)))
+    rad.add_avp(RadiusAvp("3GPP-GGSN-MCC-MNC", TextType(config.ggsn_mcc_mnc)))
+    rad.add_avp(RadiusAvp("3GPP-SGSN-MCC-MNC", TextType(config.sgsn_mcc_mnc)))
+    rad.add_avp(RadiusAvp("3GPP-GPRS-Negotiated-QoS-profile",
+        TextType(config.gprs_negotiated_qos)))
+
+    rad.add_avp(RadiusAvp("3GPP-NSAPI", TextType(config.nsapi)))
+    rad.add_avp(RadiusAvp("3GPP-Selection-Mode", TextType(config.selection_mode)))
+    rad.add_avp(RadiusAvp("3GPP-Charging-Characteristics",
+        TextType(config.charging_characteristics)))
+
+    rad.add_avp(RadiusAvp("3GPP-MS-Time-Zone", IntegerType(config.ms_time_zone)))
+
     debug(str(rad))
 
     return bytes(rad.dump())
@@ -399,10 +459,155 @@ def start_stop_session(config):
     send_packet((config.radius_dest, config.radius_port), create_packet(config))
 
 
+def restart_session(config):
+    """restart session
+    1. stop the current session
+    2. wait for <delay>
+    3. start the new session with the given config
+    """
+    import time
+    config.action = STOP
+    start_stop_session(config)
+    time.sleep(float(config.delay))
+    config.action = START
+    start_stop_session(config)
+
+
+def usage():
+    print("Radius accounting session management tool\n\n"
+        "usage: radi.py [-h] [-d RADIUS_DEST] [-p RADIUS_SECRET]"
+        " [-S | -T | -R]\n"
+        "               [-i SUBS_ID] [-t {imsi,imei}] [-f FRAMED_IP]"
+        " [-c CALLING_ID]\n"
+        "               [-C CALLED_ID] [-D DELAY] [-L] [-v]\n\n"
+        "optional arguments:\n"
+        "  -h, --help            show this help message and exit\n"
+        "  -d RADIUS_DEST, --destination RADIUS_DEST\n"
+        "                        ip of radius endpoint\n"
+        "  -p RADIUS_SECRET, --secret RADIUS_SECRET\n"
+        "                        radius secret\n"
+        "  -S, --start           start session\n"
+        "  -T, --stop            stop session\n"
+        "  -R, --restart         restart session\n"
+        "  -i IMSI, --imsi IMSIzn"
+        "                        subscriber imsi\n"
+        "  -t IMEI, --imei IMEI\n"
+        "                        subscriber imei\n"
+        "  -f FRAMED_IP, --framed-ip FRAMED_IP\n"
+        "                        framed ip\n"
+        "  -c CALLING_ID, --calling-id CALLING_ID\n"
+        "                        3GPP calling id\n"
+        "  -C CALLED_ID, --called-id CALLED_ID\n"
+        "                        3GPP called id\n"
+        "  -D, --delay DELAY     the delay between stopping and starting\n"
+        "                        the session in the restart mode (-R/--restart)\n"
+        "  -L, --clean           clean the cached configuration\n"
+        "  -v, --verbose         enable verbose output\n\n"
+        "PLEASE NOTE: If action is specified multiple times, the last one\n"
+        "             will be used. Eg. -S -R -T will run the session\n"
+        "             stop (-T/--stop).\n")
+
+
+def parse_args():
+    """parse CLI arguments"""
+    global __verbose__
+    config = dict()
+    config["name"] = sys.argv.pop(0)
+    try:
+        opt_list, arg_list = getopt.getopt(sys.argv, "hd:p:STRi:t:f:c:C:D:Lv",
+                ["help", "destination", "secret", "start", "stop", "restart",
+                "id", "id-type", "framed-ip", "calling-id", "called_id",
+                "delay", "clean", "verbose"])
+    except getopt.GetoptError as err:
+        usage()
+        print "\n%s" % str(err)
+        sys.exit(2)
+
+    for opt, value in opt_list:
+        if opt in ("-h", "--help"):
+            usage()
+            sys.exit(0)
+        elif opt in ("-d", "--destination"):
+            config["radius_dest"] = value
+        elif opt in ("-p", "--secret"):
+            config["radius_secret"] = value
+        elif opt in ("-S", "--start"):
+            config["action"] = START
+        elif opt in ("-T", "--stop"):
+            config["action"] = STOP
+        elif opt in ("-R", "--restart"):
+            config["action"] = RESTART
+        elif opt in ("-i", "--imsi"):
+            config["imsi"] = value
+        elif opt in ("-t", "--imei"):
+            config["imei"] = value
+        elif opt in ("-f", "--framed-ip"):
+            if "/" in value:
+                value, mask = value.split("/")
+                if mask.isdigit():
+                    config["framed_mask"] = min(int(mask), 128)
+            config["framed_ip"] = value
+        elif opt in ("-c", "--calling-id"):
+            config["calling_id"] = value
+        elif opt in ("-C", "--called-id"):
+            config["called_id"] = value
+        elif opt in ("-D", "--delay"):
+            config["delay"] = value
+        elif opt in ("-L", "--clean"):
+            config["cleancache"] = True
+        elif opt in ("-v", "--verbose"):
+            __verbose__ = True
+
+    return config
+
+
 def debug(message, force=False):
     """debug output - printed only if the verbose config option is set"""
     global __verbose__
     if __verbose__ or force:
         print message
+
+
+def main(config):
+    # reading the event arguments
+    args = parse_args()
+
+    # try loading the pickled configuration
+    if not "cleancache" in args:
+        try:
+            with open(PICKLED_FILE_NAME, "r") as f:
+                cache = pickle.load(f)
+            if "verbose" in args:
+                debug("Cache found. Loading...", force=True)
+            config.update(cache.__dict__)
+        except IOError:
+            cache = None
+
+    config.update(args)     # merging configuration
+    action_strings = ["Restarting", "Starting", "Stoping"]
+
+    debug("%s the session" % action_strings[config.action])
+
+    if config.action == RESTART:
+        restart_session(config)
+    else:
+        start_stop_session(config)
+
+    # pickling the current configuration for future reuse
+    debug("Caching the current config for future use")
+    with open(PICKLED_FILE_NAME, "w") as f:
+        pickle.dump(config, f)
+
+
+if __name__ == "__main__":
+    config = Config()
+
+    try:
+        main(config)        # main logic
+    except (KeyboardInterrupt):
+        print "Interrupted... Exiting"
+        sys.exit(1)
+    except (ValueError, NotImplementedError, IOError) as e:
+        print "ERROR: %s" % e.message
 
 # vim: set ts=4 sts=4 sw=4 tw=80 ai smarttab et list
