@@ -10,19 +10,19 @@ import netem, radi as radius
 import config
 
 
-# Globals
+# == Globals ==================================================================
 app = bottle.Bottle()
 radius_config = radius.Config()
 
 
-# DAO initialization
+# == DAO initialization =======================================================
 subs_dao = dao.SubscriberDao()
 conn_prof_dao = dao.ConnectionProfileDao()
 subs_prof_dao = dao.SubscriberProfileDao()
 settings_dao = dao.SettingsDao()
 
 
-### RADI functions ###
+# == RADI functions ===========================================================
 def radius_configure(subscriber):
     """configure radi as per current settings/subscriber profile"""
     global radius_config
@@ -55,13 +55,11 @@ def radius_configure(subscriber):
             radius_config.subs_loc_info = subscriber.loc_info.encode("ascii")
     return success, status_text
 
-
 def radius_send(action):
     """send radius packet"""
     global radius_config
     radius_config.action = action
     radius.start_stop_session(radius_config)
-
 
 def radius_session(subs_profile, do_start=True):
     """send radius accounting for the given subscriber"""
@@ -71,8 +69,7 @@ def radius_session(subs_profile, do_start=True):
     else:
         radius_send(radius.STOP)
 
-
-### netem functions ###
+# == netem functions ==========================================================
 def netem_redo_filters(subscribers):
     """update and reapply filters based on the enabled_subscribers list"""
     cmd = netem.clear_filters()
@@ -80,7 +77,6 @@ def netem_redo_filters(subscribers):
         if subs.enabled:
             cmd.extend(netem.add_filter(subs.conn_id, subs.ipaddr))
     netem.commit(cmd)
-
 
 def netem_update_profiles(do_cleanup=False):
     """apply connection profiles"""
@@ -93,7 +89,6 @@ def netem_update_profiles(do_cleanup=False):
             config.egress_iface, config.ingress_iface))
     return success, status_text, connections
 
-
 def netem_update_status():
     """go through all subscribers and update netem status"""
     success, status_text, subs_list = subs_dao.get_all()
@@ -103,14 +98,13 @@ def netem_update_status():
         netem_redo_filters(subs_list)
     return success, status_text, subs_list
 
-
 def netem_full_reload():
     # Updating the netem
     netem_update_profiles(do_cleanup=True)
     netem_update_status()
 
 
-# dispatch handlers
+# == dispatch handlers ========================================================
 @app.get("/static/<filepath:path>")
 def server_static(filepath):
     """serving static files located at the static"""

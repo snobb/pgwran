@@ -13,13 +13,11 @@ def initialize(db_name, db_schema):
     connector.initialize(db_name, db_schema)
 
 
-
 class Transaction(object):
     """Transaction Decorator class"""
     def __init__(self):
         """constructor for the transaction"""
         pass
-
 
     def __call__(self, func):
         """wrap the function and do the transaction handling"""
@@ -37,7 +35,6 @@ class Transaction(object):
         return wrapped
 
 
-
 class GenericDaoImpl(object):
     @Transaction()
     def get_all(self):
@@ -50,7 +47,6 @@ class GenericDaoImpl(object):
             return [cls(**(dict(zip(child.get_keys(), obj)))) for obj in obj_list]
         return None
 
-
     @Transaction()
     def get(self, obj_id):
         """get the objects with id - obj_id"""
@@ -61,7 +57,6 @@ class GenericDaoImpl(object):
         if obj:
             return cls(**(dict(zip(child.get_keys(), obj))))
         return None
-
 
     @Transaction()
     def save(self, obj):
@@ -77,7 +72,6 @@ class GenericDaoImpl(object):
                     obj.get_values(has_id=False) + [obj_id])
         return new_obj_id
 
-
     @Transaction()
     def delete(self, obj_id):
         """delete the object"""
@@ -85,7 +79,6 @@ class GenericDaoImpl(object):
         connector.execute_db(
                 obj.get_delete_query(),
                 [obj_id])
-
 
 
 class GenericDaoObject(object):
@@ -96,12 +89,10 @@ class GenericDaoObject(object):
         """update the object fields from a dictionary"""
         self.__dict__.update(field_dict)
 
-
     def get_dict(self):
         fields = self.__dict__
         return {k:v for k, v in fields.items() if
                 not k.startswith("__")}
-
 
     def get_keys(self, has_id=True):
         """get list of field names of the object"""
@@ -110,7 +101,6 @@ class GenericDaoObject(object):
             fields.pop(self.get_id_name())
         return ([name for name in fields.keys() if
                 not name.startswith("__")])
-
 
     def get_values(self, has_id=True):
         """get the values of the object fields in the same order as in
@@ -121,7 +111,6 @@ class GenericDaoObject(object):
         return ([getattr(self, name) for name in fields.keys() if
                 not name.startswith("__")])
 
-
     def get_insert_query(self):
         """get the object related INSERT query"""
         keys = self.get_keys(has_id=False)
@@ -131,14 +120,12 @@ class GenericDaoObject(object):
                 ",".join(["?"] * len(keys))
                 )
 
-
     def get_update_query(self):
         """get the object related UPDATE query"""
         return "UPDATE {} SET {}=? WHERE {}=?".format(
                 self.get_table_name(),
                 "=?,".join(self.get_keys(has_id=False)),
                 self.get_id_name())
-
 
     def get_select_query(self, filtered=False, table=None):
         """get the object related SELECT query"""
@@ -150,23 +137,19 @@ class GenericDaoObject(object):
         return "SELECT {} FROM {} {}".format(
                 ",".join(self.get_keys()), table, query_filter)
 
-
     def get_delete_query(self):
         """get the object related DELETE query"""
         return "DELETE FROM {} WHERE {}=?".format(
                 self.get_table_name(),
                 self.get_id_name())
 
-
     def get_table_name(self):
         """get table name"""
         return self.__class__.__table__
 
-
     def get_id_name(self):
         """get id name"""
         return self.__class__.__id_name__
-
 
     def __str__(self):
         """string representation of the class"""
@@ -174,7 +157,6 @@ class GenericDaoObject(object):
         for k, v in zip(self.get_keys(), self.get_values()):
             str_list.append("{}: {}".format(k, v))
         return ", ".join(str_list)
-
 
 
 class Subscriber(GenericDaoObject):
@@ -186,7 +168,6 @@ class Subscriber(GenericDaoObject):
         self.subs_id = subs_id
         self.conn_id = conn_id
         self.enabled = enabled
-
 
 
 class SubscriberProfile(GenericDaoObject):
@@ -205,7 +186,6 @@ class SubscriberProfile(GenericDaoObject):
         self.imsi = imsi
         self.imei = imei
         self.loc_info = loc_info
-
 
 
 class ConnectionProfile(GenericDaoObject):
@@ -231,7 +211,6 @@ class ConnectionProfile(GenericDaoObject):
         self.loss_jitter = loss_jitter
 
 
-
 class Settings(GenericDaoObject):
     """Settings storage object"""
     __table__   = "settings"
@@ -245,13 +224,11 @@ class Settings(GenericDaoObject):
         self.rad_pass = rad_pass
         self.rad_secret = rad_secret
 
-
     def get_update_query(self):
         """get the object related UPDATE query"""
         return "UPDATE {} SET {}=?".format(
                 self.__table__,
                 "=?,".join(self.get_keys()))
-
 
 
 class SubscriberDao(GenericDaoImpl):
@@ -271,7 +248,6 @@ class SubscriberDao(GenericDaoImpl):
             subs_list.append(subs_obj)
         return subs_list
 
-
     @Transaction()
     def get(self, obj_id, table=None):
         """get the objects with id - obj_id"""
@@ -284,7 +260,6 @@ class SubscriberDao(GenericDaoImpl):
             subs_obj.set_dict(dict(zip(fields, obj)))
             return subs_obj
         return None
-
 
     @Transaction()
     def save(self, obj):
@@ -302,10 +277,8 @@ class SubscriberDao(GenericDaoImpl):
         return connector.execute_db(query, fields_dict.values() + [obj_id])
 
 
-
 class ConnectionProfileDao(GenericDaoImpl):
     __obj_class__ = ConnectionProfile
-
 
 
 class SubscriberProfileDao(GenericDaoImpl):
@@ -331,7 +304,6 @@ class SubscriberProfileDao(GenericDaoImpl):
         return new_obj_id
 
 
-
 class SettingsDao(GenericDaoImpl):
     __obj_class__ = Settings
 
@@ -345,17 +317,14 @@ class SettingsDao(GenericDaoImpl):
         if obj:
             return cls(**(dict(zip(child.get_keys(), obj))))
 
-
     def get(self, obj_id=None):
         """get: this action does not make sense for this object"""
         return self.get_all()
-
 
     @Transaction()
     def save(self, obj):
         """save the object"""
         connector.execute_db(obj.get_update_query(), obj.get_values())
-
 
     def delete(self, obj):
         """delete: this action does not make sense for this object"""

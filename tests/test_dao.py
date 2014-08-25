@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# dao_tests.py
+# test_dao.py
 # Author: Alex Kozadaev (2014)
 #
 
@@ -32,16 +32,13 @@ class SubscriberDaoTest(unittest.TestCase):
         self.assertEquals(subs[2].ipaddr, "10.0.0.30")
 
 
-
 class ConnProfDaoTest(unittest.TestCase):
     def setUp(self):
         dao.connector.get_db()
         self.dao = dao.ConnectionProfileDao()
 
-
     def tearDown(self):
         dao.connector.close()
-
 
     def test_get_all(self):
         success, status, conns = self.dao.get_all()
@@ -53,7 +50,6 @@ class ConnProfDaoTest(unittest.TestCase):
         self.assertEquals(conns[1].latency_up, 100)
         self.assertEquals(conns[2].name, "2.5G")
         self.assertEquals(conns[2].speed_up, 59.3)
-
 
     def test_save_update(self):
         success, status, data = self.dao.get_all()
@@ -74,7 +70,6 @@ class ConnProfDaoTest(unittest.TestCase):
         self.assertEquals(101, conn.speed_up);
         self.assertEquals(202, conn.loss_down);
 
-
     def test_save_insert(self):
         conn = dao.ConnectionProfile()
         conn.name = "test"
@@ -92,7 +87,6 @@ class ConnProfDaoTest(unittest.TestCase):
                 self.assertEquals(101, conn.speed_up);
                 self.assertEquals(202, conn.loss_down);
         self.assertTrue(found)
-
 
     def test_delete(self):
         success, _, data = self.dao.get_all()
@@ -121,7 +115,6 @@ class SubscriberProfDaoTest(unittest.TestCase):
     def tearDown(self):
         dao.connector.close()
 
-
     def test_get_all(self):
         success, status, subs = self.dao.get_all()
         self.assertTrue(success)
@@ -130,7 +123,6 @@ class SubscriberProfDaoTest(unittest.TestCase):
 
         self.assertEquals(subs[0].name, "Marie")
         self.assertEquals(subs[2].name, "Linus")
-
 
     def test_save_update(self):
         success, status, subs = self.dao.get_all()
@@ -150,7 +142,6 @@ class SubscriberProfDaoTest(unittest.TestCase):
         self.assertEquals("test", subs.name);
         self.assertEquals("1234", subs.imsi);
         self.assertEquals("4567", subs.called_id);
-
 
     def test_save_insert(self):
         subs = dao.SubscriberProfile(
@@ -176,7 +167,6 @@ class SubscriberProfDaoTest(unittest.TestCase):
                 self.assertEquals("f5f5", sub.loc_info);
         self.assertTrue(found)
 
-
     def test_delete(self):
         success, _, data = self.dao.get_all()
         self.assertTrue(success)
@@ -201,10 +191,8 @@ class SettingsDaoTest(unittest.TestCase):
         dao.connector.get_db()
         self.dao = dao.SettingsDao()
 
-
     def tearDown(self):
         dao.connector.close()
-
 
     def test_get_all(self):
         success, status, settings = self.dao.get()
@@ -213,7 +201,6 @@ class SettingsDaoTest(unittest.TestCase):
         self.assertIsNotNone(settings)
         self.assertEquals("10.0.16.1", settings.rad_ip)
         self.assertEquals(1813, settings.rad_port)
-
 
     def test_save(self):
         sett_update_res = self.dao.save(

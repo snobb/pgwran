@@ -12,10 +12,8 @@ in_iface = "ifb0"
 out_iface = None
 class_registry = {}
 
-
 def commit(commands):
     os.system(";".join(commands))
-
 
 def load_ingress_prerequisites():
     """make sure the kernel modules and interfaces are ready"""
@@ -24,7 +22,6 @@ def load_ingress_prerequisites():
     cmd.append("ip link set ifb0 up")
 
     return cmd
-
 
 def create_ingress_egress():
     """initialize the ingress queues"""
@@ -41,14 +38,12 @@ def create_ingress_egress():
     cmd.append("tc qdisc add dev ifb0 handle 1: root htb")
     return cmd
 
-
 def clear_filters():
     """remove all filters"""
     cmd = []
     for iface in [in_iface, out_iface]:
         cmd.append("tc filter del dev {} pref 3".format(iface))
     return cmd
-
 
 def clear_all():
     """clear all the queues"""
@@ -57,7 +52,6 @@ def clear_all():
     cmd.append("tc qdisc del dev {} ingress".format(phys_in_iface))
     cmd.append("tc qdisc del dev {} root".format(in_iface))
     return cmd
-
 
 def netem_make_command(iface, classid, handle, delay=0, jitter=0,
         delay_corr=0, distribution="", loss=0, loss_corr=0, bandwidth=0):
@@ -100,7 +94,6 @@ def netem_make_command(iface, classid, handle, delay=0, jitter=0,
 
     return cmd
 
-
 def setup_connections(connections):
     """create a connection class for every connection in the connections
     (egress and egress)
@@ -138,7 +131,6 @@ def setup_connections(connections):
 
     return cmd
 
-
 def add_filter(connid, src_ip):
     cmd = []
     if connid in class_registry:
@@ -158,7 +150,6 @@ def add_filter(connid, src_ip):
 
     return cmd
 
-
 def initialize(connections, outif, inif):
     cmd = []
     global phys_in_iface, out_iface
@@ -167,6 +158,5 @@ def initialize(connections, outif, inif):
     cmd.extend(setup_connections(connections))
 
     return cmd
-
 
 # vim: ts=4 sts=4 sw=4 tw=80 ai smarttab et fo=rtcq list

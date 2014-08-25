@@ -1,0 +1,4 @@
+include dict/dictionary
+include dict/dictionary.*
+include static/*
+include static/js/*

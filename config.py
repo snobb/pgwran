@@ -4,7 +4,7 @@
 # Author: Alex Kozadaev (2014)
 #
 
-# Configuration
+# == configuration ============================================================
 listen_address  = "0.0.0.0"
 listen_port     = 8088
 
