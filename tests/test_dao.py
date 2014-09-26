@@ -26,10 +26,12 @@ class SubscriberDaoTest(unittest.TestCase):
         self.assertNotEquals(0, len(subs))
         self.assertEquals(4, len(subs))
 
-        self.assertEquals(subs[1].name, "John")
-        self.assertEquals(subs[1].ipaddr, "10.0.0.20")
-        self.assertEquals(subs[2].name, "Linus")
-        self.assertEquals(subs[2].ipaddr, "10.0.0.30")
+        self.assertEquals(subs[1].profile.name, "John")
+        self.assertEquals(subs[1].profile.ipaddr, "10.0.0.20")
+        self.assertEquals(subs[1].profile.imsi, "90108576436201")
+        self.assertEquals(subs[2].profile.name, "Linus")
+        self.assertEquals(subs[2].profile.ipaddr, "10.0.0.30")
+        self.assertEquals(subs[2].profile.imsi, "90156451177704")
 
 
 class ConnProfDaoTest(unittest.TestCase):

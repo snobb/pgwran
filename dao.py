@@ -237,44 +237,24 @@ class SubscriberDao(GenericDaoImpl):
     @Transaction()
     def get_all(self):
         """get all objects"""
-        cls = self.__obj_class__
-        fields = ["subs_id", "conn_id", "enabled", "name", "ipaddr"]
-        query  = "SELECT {} FROM subscriber_view".format(",".join(fields))
-        obj_list = connector.query_db(query, [])
-        subs_list = []
-        for obj in obj_list:
-            subs_obj = cls()
-            subs_obj.set_dict(dict(zip(fields, obj)))
-            subs_list.append(subs_obj)
-        return subs_list
+        subs_prof_dao = SubscriberProfileDao()
+        success, msg, all_subs = super(SubscriberDao, self).get_all()
+        if all_subs:
+            for subs in all_subs:
+                success, msg, subs.profile = subs_prof_dao.get(subs.subs_id)
+                if not success:
+                    return success, msg, None
+        return all_subs
 
     @Transaction()
-    def get(self, obj_id, table=None):
-        """get the objects with id - obj_id"""
-        cls = self.__obj_class__
-        fields = ["subs_id", "conn_id", "enabled", "name", "ipaddr"]
-        query  = "SELECT {} FROM subscriber_view".format(",".join(fields))
-        obj = connector.query_db(query, [], True)
-        if obj:
-            subs_obj = cls()
-            subs_obj.set_dict(dict(zip(fields, obj)))
-            return subs_obj
-        return None
+    def get(self, obj_id):
+        """get method is not supported for Subscribers"""
+        raise NotImplementedError("not supported for this object")
 
     @Transaction()
     def save(self, obj):
         """save the object. If the object's ID -1 insert else update."""
-        obj_id = getattr(obj, obj.get_id_name())
-        fields_names = ["subs_id", "conn_id", "enabled"]
-        fields_dict = dict(
-                filter(lambda x: x[0] in fields_names,
-                    obj.get_dict().items()))
-
-        query = "UPDATE {} SET {}=? WHERE {}=?".format(
-                obj.get_table_name(),
-                "=?,".join(fields_dict.keys()),
-                obj.get_id_name())
-        return connector.execute_db(query, fields_dict.values() + [obj_id])
+        raise NotImplementedError("not implemented yet")
 
 
 class ConnectionProfileDao(GenericDaoImpl):
