@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# sqlite_connector.py
+# sqlite_conn.py
 # Author: Alex Kozadaev (2014)
 #
 

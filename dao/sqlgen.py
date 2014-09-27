@@ -1,17 +1,8 @@
-#!/usr/bin/env python
+#/usr/bin/env python
 #
-# sql_generator.py
+# sqlgen.py
 # Author: Alex Kozadaev (2014)
 #
-
-class ClassGenerator(object):
-    def __init__(self, **args):
-        """generate an object out of a dictionary"""
-        self.__dict__.update(args)
-
-    def get_dictionary(self):
-        return self.__dict__
-
 
 def get_select_query(fields, tables, sql_filter=None):
     """get a select query based on fields, tables
@@ -54,6 +45,11 @@ def get_insert_query(fields, table):
             ",".join("?"*len(fields)))
 
 
+def get_delete_query(table, sql_filter):
+    return "DELETE FROM {} WHERE {}".format(
+            table,
+            sql_filter)
+
 
 if __name__ == "__main__":
     print get_select_query(
@@ -74,5 +70,7 @@ if __name__ == "__main__":
     print get_insert_query(
             ["subs_id", "conn_id", "value1", "value2", "value3"],
             "table1")
+
+    print get_delete_query("table1", "id = 1")
 
 # vim: ts=4 sts=4 sw=4 tw=80 ai smarttab et fo=rtcq list
