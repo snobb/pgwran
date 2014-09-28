@@ -1,29 +1,29 @@
 #!/usr/bin/env python
 #
-# subs_profile.py
+# conn_profile.py
 # Author: Alex Kozadaev (2014)
 #
 
 import common
 import sqlgen
 
-__table__ = "subs_profile"
-__pkey__ = "subs_id"
+__table__ = "conn_profile"
+__pkey__ = "conn_id"
 __fields__ = [
-        "subs_id", "name", "ipaddr",
-        "calling_id", "called_id",
-        "imsi", "imei",
-        "loc_info"
+        "conn_id", "name", "description",
+        "speed_down", "speed_up", "speed_var",
+        "latency_up", "latency_down", "latency_jitter",
+        "loss_down", "loss_up", "loss_jitter"
         ]
 
 def new():
     """get a blank object with default values"""
     defaults = [
             -1, "New", "",
-            "000000000000000", "web.apn",
-            "90000000000000", "012345678901234",
-            "f5f5"]
-
+            2000, 2000, 100,
+            200, 200, 100,
+            0.01, 0.01, 0.005
+            ]
     return common.map2obj(dict(zip(__fields__, defaults)))
 
 @common.Transaction()
@@ -48,12 +48,12 @@ def save(obj):
     assert(obj != None)
     obj_dict = obj.__dict__.copy()
     obj_dict.pop(__pkey__)
-    if obj.subs_id == -1:
+    if obj.conn_id == -1:
         # insert
         query = sqlgen.get_insert_query(obj_dict.keys(), __table__)
     else:
         # update
-        sql_filter = "{}={}".format(__pkey__, obj.subs_id)
+        sql_filter = "{}={}".format(__pkey__, obj.conn_id)
         query = sqlgen.get_update_query(obj_dict.keys(), __table__, sql_filter)
     return common.sql_save(query, obj_dict.values())
 
@@ -63,6 +63,5 @@ def delete(obj_id):
     sql_filter = "{}={}".format(__pkey__, obj_id)
     query = sqlgen.get_delete_query(__table__, sql_filter)
     return common.sql_delete(query)
-
 
 # vim: ts=4 sts=4 sw=4 tw=80 ai smarttab et fo=rtcq list

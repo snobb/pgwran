@@ -39,38 +39,14 @@ def get_insert_query(fields, table):
         table       string:name of a table
         sql_filter  string:
     Returns: sql insert query"""
-    return "INSERT INTO {}({}) VALUES {}".format(
+    return "INSERT INTO {}({}) VALUES ({})".format(
             table,
             ",".join(fields),
             ",".join("?"*len(fields)))
-
 
 def get_delete_query(table, sql_filter):
     return "DELETE FROM {} WHERE {}".format(
             table,
             sql_filter)
-
-
-if __name__ == "__main__":
-    print get_select_query(
-            ["subs_id", "conn_id", "value1", "value2", "value3"],
-            ["table1", "table2"],
-            "subs_id = conn_id")
-    print get_select_query(
-            ["subs_id"],
-            ["table1"])
-    print get_update_query(
-            ["subs_id", "conn_id", "value1", "value2", "value3"],
-            "table1",
-            "subs_id = conn_id")
-    print get_update_query(
-            ["key"],
-            "table1",
-            "subs_id = conn_id")
-    print get_insert_query(
-            ["subs_id", "conn_id", "value1", "value2", "value3"],
-            "table1")
-
-    print get_delete_query("table1", "id = 1")
 
 # vim: ts=4 sts=4 sw=4 tw=80 ai smarttab et fo=rtcq list

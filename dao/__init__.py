@@ -4,6 +4,8 @@
 # Author: Alex Kozadaev (2014)
 #
 
+import subscriber
+import conn_profile
 import subs_profile
 import settings
 

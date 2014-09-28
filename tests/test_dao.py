@@ -25,12 +25,52 @@ class SubscriberDaoTest(unittest.TestCase):
         self.assertNotEquals(0, len(subs))
         self.assertEquals(4, len(subs))
 
-        self.assertEquals(subs[1].profile.name, "John")
-        self.assertEquals(subs[1].profile.ipaddr, "10.0.0.20")
-        self.assertEquals(subs[1].profile.imsi, "90108576436201")
-        self.assertEquals(subs[2].profile.name, "Linus")
-        self.assertEquals(subs[2].profile.ipaddr, "10.0.0.30")
-        self.assertEquals(subs[2].profile.imsi, "90156451177704")
+
+        self.assertEquals(2, subs[1].subs_id)
+        self.assertEquals(2, subs[1].conn_id)
+        self.assertEquals(subs[1].subs_profile.name, "John")
+        self.assertEquals(subs[1].subs_profile.ipaddr, "10.0.0.20")
+        self.assertEquals(subs[1].subs_profile.imsi, "90108576436201")
+        self.assertEquals(subs[1].conn_profile.name, "3G")
+        self.assertEquals(subs[2].subs_profile.name, "Linus")
+        self.assertEquals(subs[2].subs_profile.ipaddr, "10.0.0.30")
+        self.assertEquals(subs[2].subs_profile.imsi, "90156451177704")
+        self.assertEquals(subs[2].conn_profile.name, "2.5G")
+
+    def test_get(self):
+        success, status, subs = dao.settings.get(1)
+        self.assertFalse(success)
+        self.assertTrue(status.startswith("Method"))
+
+    def test_save_update(self):
+        success, status, subs = dao.subscriber.get_all()
+        self.assertTrue(success)
+        self.assertNotEquals(0, len(subs))
+        self.assertEquals(4, len(subs))
+
+        s1 = subs[1]
+        s2 = subs[2]
+        s1.conn_id = s2.conn_id
+        success, status, subs = dao.subscriber.save(s1)
+        print status
+        self.assertTrue(success)
+
+        success, status, subs = dao.subscriber.get_all()
+        self.assertTrue(success)
+        self.assertNotEquals(0, len(subs))
+        self.assertEquals(4, len(subs))
+        self.assertEquals(subs[1].conn_profile.name, "2.5G")
+
+    def test_save_insert(self):
+        subs = dao.subscriber.new()
+        success, status, subs = dao.subscriber.save(subs)
+        self.assertFalse(success)
+        self.assertTrue(status.startswith("Method"))
+
+    def test_delete(self):
+        success, status, subs = dao.settings.get(1)
+        self.assertFalse(success)
+        self.assertTrue(status.startswith("Method"))
 
 
 class ConnProfDaoTest(unittest.TestCase):
@@ -71,14 +111,15 @@ class ConnProfDaoTest(unittest.TestCase):
         self.assertEquals(202, conn.loss_down);
 
     def test_save_insert(self):
-        conn = dao.ConnectionProfile()
+        conn = dao.conn_profile.new()
         conn.name = "test"
         conn.speed_up = 101
         conn.loss_down = 202
         success, status, ins_data = dao.conn_profile.save(conn)
         self.assertTrue(success)
 
-        conns = dao.conn_profile.get_all()[2]
+        res, _, conns = dao.conn_profile.get_all()
+        self.assertTrue(res)
         self.assertEquals(5, len(conns))
         for conn in conns:
             if conn.name == "test":
@@ -126,7 +167,6 @@ class SubscriberProfDaoTest(unittest.TestCase):
         self.assertEquals("012345678901234", obj.imei)
         self.assertEquals("f5f5", obj.loc_info)
 
-
     def test_get_all(self):
         success, status, subs = dao.subs_profile.get_all()
         self.assertTrue(success)
@@ -165,7 +205,6 @@ class SubscriberProfDaoTest(unittest.TestCase):
         insert_res = dao.subs_profile.save(obj)
         self.assertTrue(insert_res[0])
         new_id = insert_res[2]
-        self.assertEquals(0, new_id)
         self.assertTrue(new_id > 0)
 
         found = False
@@ -215,7 +254,6 @@ class SettingsDaoTest(unittest.TestCase):
         self.assertEquals("", obj.rad_user)
         self.assertEquals("", obj.rad_pass)
         self.assertEquals("", obj.rad_secret)
-
 
     def test_get_all(self):
         success, status, settings = dao.settings.get_all()
