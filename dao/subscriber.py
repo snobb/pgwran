@@ -37,7 +37,13 @@ def get_all():
 @common.Transaction()
 def get(obj_id):
     """get a single object by id"""
-    raise NotImplementedError("Method not supported for this object ")
+    sql_filter = "{}={}".format(__pkey__, obj_id)
+    query = sqlgen.get_select_query(__fields__, [__table__], sql_filter)
+    subs = common.sql_get(query, __fields__)
+    subs.subs_profile = subs_profile.notrans_get(subs.subs_id)
+    subs.conn_profile = conn_profile.notrans_get(subs.subs_id)
+
+    return subs
 
 @common.Transaction()
 def save(obj):

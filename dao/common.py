@@ -35,7 +35,7 @@ def map2obj(values):
         def __init__(self, **args):
             """generate an object out of a dictionary"""
             self.__dict__.update(args)
-        def get_dictionary(self):
+        def get_dict(self):
             return self.__dict__
     return ClassGen(**values)
 

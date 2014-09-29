@@ -97,7 +97,7 @@ function getSubsTemplate(obj, conn_list) {
         '                <div class="input-group">' +
         '                    <span class="input-group-addon">Subscriber</span>' +
         '                    <input type="text" class="form-control input-sm"' +
-        ' readonly="true" value="' + obj.name + '">' +
+        ' readonly="true" value="' + obj.subs_profile.name + '">' +
         '                </div>' +
         '            </div>' +
         '            <div class="col-md-5">' +
@@ -148,7 +148,7 @@ function handleSubsProfile() {
                     showSuccess(response.statusText);
                     if (response.data.action == 'insert') {
                         $('#subs_screen #subs_id').val(response.data.subs_id);
-                        updateSubscriberProfileData(response.data.subs_id)
+                        updateSubscriberProfileData(response.data.subs_id);
                     }
                 } else {
                     showError(response.statusText);

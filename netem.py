@@ -13,7 +13,8 @@ out_iface = None
 class_registry = {}
 
 def commit(commands):
-    os.system(";".join(commands))
+    #os.system(";".join(commands))
+    pass
 
 def load_ingress_prerequisites():
     """make sure the kernel modules and interfaces are ready"""
