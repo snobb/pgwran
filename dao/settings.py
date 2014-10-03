@@ -13,7 +13,7 @@ __fields__ = ["rad_ip", "rad_port", "rad_user", "rad_pass", "rad_secret"]
 def new():
     """get a blank object with default values"""
     defaults = ["", 1813, "", "", ""]
-    return common.map2obj(dict(zip(__fields__, defaults)))
+    return dict(zip(__fields__, defaults))
 
 @common.Transaction()
 def get_all():
@@ -27,10 +27,9 @@ def get(obj_id):
     raise NotImplementedError("Method not supported for Settings")
 
 @common.Transaction()
-def save(obj):
+def save(obj_dict):
     """update object"""
-    assert(obj != None)
-    obj_dict = obj.__dict__
+    assert(obj_dict != None)
     query = sqlgen.get_update_query(obj_dict.keys(), __table__)
     return common.sql_save(query, obj_dict.values())
 

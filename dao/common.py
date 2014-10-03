@@ -48,7 +48,7 @@ def sql_get_all(query, fields):
     all the necessary informaton about the query (eg. table, filters, etc)"""
     obj_list = connector.query_db(query, [])
     if len(obj_list):
-        return [map2obj(dict(zip(fields, obj))) for obj in obj_list]
+        return [dict(zip(fields, obj)) for obj in obj_list]
     return None
 
 def sql_get(query, fields):
@@ -56,7 +56,7 @@ def sql_get(query, fields):
     all the necessary informaton about the query (eg. table, filters, etc)"""
     obj = connector.query_db(query, [], True)
     if obj:
-        return map2obj(dict(zip(fields, obj)))
+        return dict(zip(fields, obj))
     return None
 
 def sql_save(query, values):

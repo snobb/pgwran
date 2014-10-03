@@ -24,7 +24,7 @@ def new():
             "90000000000000", "012345678901234",
             "f5f5"]
 
-    return common.map2obj(dict(zip(__fields__, defaults)))
+    return dict(zip(__fields__, defaults))
 
 @common.Transaction()
 def get_all():
@@ -43,17 +43,18 @@ def get(obj_id):
     return notrans_get(obj_id)
 
 @common.Transaction()
-def save(obj):
+def save(obj_dict):
     """update object"""
-    assert(obj != None)
-    obj_dict = obj.__dict__.copy()
+    assert(obj_dict != None)
+    subs_id = obj_dict[__pkey__]
+    obj_dict = obj_dict.copy()
     obj_dict.pop(__pkey__)
-    if obj.subs_id == -1:
+    if subs_id == -1:
         # insert
         query = sqlgen.get_insert_query(obj_dict.keys(), __table__)
     else:
         # update
-        sql_filter = "{}={}".format(__pkey__, obj.subs_id)
+        sql_filter = "{}={}".format(__pkey__, subs_id)
         query = sqlgen.get_update_query(obj_dict.keys(), __table__, sql_filter)
     return common.sql_save(query, obj_dict.values())
 

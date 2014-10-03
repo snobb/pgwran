@@ -21,31 +21,31 @@ def radius_configure(subscriber):
     global radius_config
     success, status_text, settings = dao.settings.get_all()
     if success:
-        radius_config.radius_dest = settings.rad_ip.encode("ascii")
-        radius_config.radius_port = int(settings.rad_port)
+        radius_config.radius_dest = settings["rad_ip"].encode("ascii")
+        radius_config.radius_port = int(settings["rad_port"])
 
-        if len(settings.rad_user) > 0:
-            radius_config.username = settings.rad_user.encode("ascii")
+        if len(settings["rad_user"]) > 0:
+            radius_config.username = settings["rad_user"].encode("ascii")
 
-        if len(settings.rad_secret) > 0:
-            radius_config.radius_secret = settings.rad_secret.encode("ascii")
+        if len(settings["rad_secret"]) > 0:
+            radius_config.radius_secret = settings["rad_secret"].encode("ascii")
 
-        if len(subscriber.called_id) > 0:
-            radius_config.called_id = subscriber.called_id.encode("ascii")
+        if len(subscriber["called_id"]) > 0:
+            radius_config.called_id = subscriber["called_id"].encode("ascii")
 
-        radius_config.framed_ip = subscriber.ipaddr.encode("ascii")
+        radius_config.framed_ip = subscriber["ipaddr"].encode("ascii")
 
-        if len(subscriber.calling_id) > 0:
-            radius_config.calling_id = subscriber.calling_id.encode("ascii")
+        if len(subscriber["calling_id"]) > 0:
+            radius_config.calling_id = subscriber["calling_id"].encode("ascii")
 
-        if len(subscriber.imsi) > 0:
-            radius_config.imsi = subscriber.imsi.encode("ascii")
+        if len(subscriber["imsi"]) > 0:
+            radius_config.imsi = subscriber["imsi"].encode("ascii")
 
-        if len(subscriber.imei) > 0:
-            radius_config.imei = subscriber.imei.encode("ascii")
+        if len(subscriber["imei"]) > 0:
+            radius_config.imei = subscriber["imei"].encode("ascii")
 
-        if len(subscriber.loc_info) > 0:
-            radius_config.subs_loc_info = subscriber.loc_info.encode("ascii")
+        if len(subscriber["loc_info"]) > 0:
+            radius_config.subs_loc_info = subscriber["loc_info"].encode("ascii")
     return success, status_text
 
 def radius_send(action):
@@ -67,8 +67,8 @@ def netem_redo_filters(subscribers):
     """update and reapply filters based on the enabled_subscribers list"""
     cmd = netem.clear_filters()
     for subs in subscribers:
-        if subs.enabled:
-            cmd.extend(netem.add_filter(subs.conn_id, subs.ipaddr))
+        if subs["enabled"]:
+            cmd.extend(netem.add_filter(subs["conn_id"], subs["ipaddr"]))
     netem.commit(cmd)
 
 def netem_update_profiles(do_cleanup=False):
@@ -114,28 +114,19 @@ def home_get():
 @app.get("/json/subscriber/get/")
 def get_json_subscriber():
     errors = []
-    connp_json, subs_json = [], []
-    success, status_text, data = dao.conn_profile.get_all()
+    success, status_text, connp_data = dao.conn_profile.get_all()
     if not success:
         errors.append("ERROR: {}".format(status_text))
     else:
-        connp_json = [conn.get_dict() for conn in data]
-        success, status_text, data = dao.subscriber.get_all()
+        success, status_text, subs_data = dao.subscriber.get_all()
         if not success:
             errors.append("ERROR: {}".format(status_text))
-        else:
-            subs_json = []
-            for subs in data:
-                subs.subs_profile = subs.subs_profile.get_dict()
-                subs.conn_profile = subs.conn_profile.get_dict()
-                subs_dict = subs.get_dict()
-                subs_json.append(subs_dict)
 
         return {"success" : success,
                 "statusText" : "\n".join(errors),
                 "data" : {
-                    "conn_profiles" : connp_json,
-                    "subscribers" : sorted(subs_json, key=lambda x: x["subs_id"])
+                    "conn_profiles" : connp_data,
+                    "subscribers" : sorted(subs_data, key=lambda x: x["subs_id"])
                     }
                 }
 
@@ -145,20 +136,24 @@ def save_json_subscriber():
     """save the subscriber and reapply current status"""
     form = bottle.request.forms
 
-    subscriber = dao.subscriber.new()
-    subscriber.subs_id = int(form.get("subs_id"))
-    subscriber.conn_id = int(form.get("conn_id"))
-    subscriber.enabled = form.get("enabled") == 'on'
+    subscriber = {
+            "subs_id" :  int(form.get("subs_id")),
+            "conn_id" :  int(form.get("conn_id")),
+            "enabled" :  form.get("enabled") == 'on'
+    }
 
+    subs_id = subscriber["subs_id"]
     success, status_text, data = dao.subscriber.save(subscriber)
     if not success:
-        status_text = ("ERROR: dao.subscriber.save(subs) - {}").format(status_text)
+        status_text = ("ERROR: dao.subscriber.save(subs) - {}").format(
+                status_text)
     else:
-        success, status_text, subs_prof_profile = dao.subs_profile.get(subscriber.subs_id)
+        success, status_text, subs_prof_profile = dao.subs_profile.get(subs_id)
         if not success:
-            status_text = "ERROR: dao.subscriber.get_all() - {}".format(status_text)
+            status_text = "ERROR: dao.subscriber.get_all() - {}".format(
+                    status_text)
         else:
-            radius_session(subs_prof_profile, subscriber.enabled)
+            radius_session(subs_prof_profile, subscriber["enabled"])
             netem_update_status()
 
     return {"success" : success,
@@ -190,19 +185,20 @@ def save_json_subs_profile():
     """save subscriber profile data in one json blob"""
     form = bottle.request.forms
 
-    subs_profile = dao.subs_profile.new()
-    subs_profile.subs_id = int(form.get("subs_id"))
-    subs_profile.name = form.get("name")
-    subs_profile.ipaddr = form.get("ipaddr")
-    subs_profile.calling_id = form.get("calling_id")
-    subs_profile.called_id = form.get("called_id")
-    subs_profile.imsi = form.get("imsi")
-    subs_profile.imei = form.get("imei")
-    subs_profile.loc_info = form.get("loc_info")
+    subs_profile = {
+            "subs_id"       : int(form.get("subs_id")),
+            "name"          : form.get("name"),
+            "ipaddr"        : form.get("ipaddr"),
+            "calling_id"    : form.get("calling_id"),
+            "called_id"     : form.get("called_id"),
+            "imsi"          : form.get("imsi"),
+            "imei"          : form.get("imei"),
+            "loc_info"      : form.get("loc_info")
+            }
 
-    if subs_profile.subs_id == -1:
+    if subs_id == -1:
         success, status_text, data = dao.subs_profile.save(subs_profile)
-        subs_profile.subs_id = data
+        subs_profile["subs_id"] = data
         action = "insert"
         if not success:
             status_text = ("ERROR: Could not create a subscriber "
@@ -219,8 +215,8 @@ def save_json_subs_profile():
             status_text = "The subscriber profile was updated successfully"
 
         # updating radius and netem
-        success, status, subs = dao.subscriber.get(subs_profile.subs_id)
-        if success and subs.enabled:
+        success, status, subs = dao.subscriber.get(subs_profile["subs_id"])
+        if success and subs["enabled"]:
             radius_session(subs_profile, True)
             netem_update_status()
 
@@ -228,7 +224,7 @@ def save_json_subs_profile():
     return {"success" : success,
             "statusText" : status_text,
             "data": {
-                "subs_id": subs_profile.subs_id,
+                "subs_id": subs_profile["subs_id"],
                 "action": action
                 }
             }
@@ -245,13 +241,9 @@ def delete_json_subs_profile(subs_id):
 @app.get("/json/conn_profile/get/")
 def get_json_conn_profile():
     """get connection profile data in one json blob"""
-    conn_json = None
-
-    success, status_text, data = dao.conn_profile.get_all()
+    success, status_text, conn_json = dao.conn_profile.get_all()
     if not success:
         status_text = "ERROR: {}".format(status_text)
-    else:
-        conn_json = [conn.get_dict() for conn in data]
 
     return {"success" : success,
             "statusText" : status_text,
@@ -265,23 +257,24 @@ def get_json_conn_profile():
 def save_json_conn_profile():
     """save connection profile data in one json blob"""
     form = bottle.request.forms
-    conn_profile = dao.conn_profile.new()
-    conn_profile.name = form.get("name")
-    conn_profile.description = form.get("description")
-    conn_profile.speed_down = form.get("speed_down")
-    conn_profile.speed_up = form.get("speed_up")
-    conn_profile.speed_var = form.get("speed_var")
-    conn_profile.latency_up = form.get("latency_up")
-    conn_profile.latency_down = form.get("latency_down")
-    conn_profile.latency_jitter = form.get("latency_jitter")
-    conn_profile.loss_down = form.get("loss_down")
-    conn_profile.loss_up = form.get("loss_up")
-    conn_profile.loss_jitter = form.get("loss_jitter")
-    conn_profile.conn_id = int(form.get("conn_id"))
+    conn_profile = {
+        "name"              : form.get("name"),
+        "description"       : form.get("description"),
+        "speed_down"        : form.get("speed_down"),
+        "speed_up"          : form.get("speed_up"),
+        "speed_var"         : form.get("speed_var"),
+        "latency_up"        : form.get("latency_up"),
+        "latency_down"      : form.get("latency_down"),
+        "latency_jitter"    : form.get("latency_jitter"),
+        "loss_down"         : form.get("loss_down"),
+        "loss_up"           : form.get("loss_up"),
+        "loss_jitter"       : form.get("loss_jitter"),
+        "conn_id"           : int(form.get("conn_id")),
+    }
 
-    if conn_profile.conn_id == -1:
+    if conn_profile["conn_id"] == -1:
         success, status_text, data = dao.conn_profile.save(conn_profile)
-        conn_profile.conn_id = data
+        conn_profile["conn_id"] = data
         action = "insert"
         if not success:
             status_text = ("ERROR: Could not create a connection "
@@ -303,7 +296,7 @@ def save_json_conn_profile():
     return {"success" : success,
             "statusText" : status_text,
             "data": {
-                "conn_id": conn_profile.conn_id,
+                "conn_id": conn_profile["conn_id"],
                 "action": action
                 }
             }
@@ -327,7 +320,7 @@ def get_json_settings():
     return {"success" : success,
             "statusText" : status_text,
             "data": {
-                "settings" : data.get_dict()
+                "settings" : data
                 }
             }
 
@@ -338,11 +331,11 @@ def save_json_settings():
     success, status_text, settings = dao.settings.get_all()
     if success:
         form = bottle.request.forms
-        settings.rad_ip = form.get("rad_ip")
-        settings.rad_port = form.get("rad_port")
-        settings.rad_user = form.get("rad_user")
-        settings.rad_pass = form.get("rad_pass")
-        settings.rad_secret = form.get("rad_secret")
+        settings["rad_ip"] = form.get("rad_ip")
+        settings["rad_port"] = form.get("rad_port")
+        settings["rad_user"] = form.get("rad_user")
+        settings["rad_pass"] = form.get("rad_pass")
+        settings["rad_secret"] = form.get("rad_secret")
         success, status_text, data = dao.settings.save(settings)
         if not success:
             status_text = ("Could not update the settings: "
@@ -369,7 +362,7 @@ if __name__ == "__main__":
             exit(1)
 
         for subs in subscribers:
-            if subs.enabled:
+            if subs["enabled"]:
                 radius_session(subs.subs_profile, True)
 
         netem_update_status()
