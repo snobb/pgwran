@@ -1,6 +1,7 @@
 check: test
 test:
-	@python -c "import tests"
+	@echo testing project
+	@python -m unittest discover tests
 
 run:
 	@python controller.py
@@ -20,6 +21,7 @@ clean:
 	-rm -rf .radi.py.dat
 	-rm -rf *.pyc
 	-rm -rf libradi/*.pyc
+	-rm -rf dao/*.pyc
 	-rm -rf tests/*.pyc
 	-rm -rf MANIFEST
 	-rm -rf build dist

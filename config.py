@@ -10,8 +10,8 @@ listen_port     = 8088
 
 database        = "database.db"
 db_schema       = "schema.sql"
-egress_iface    = "eth3"
-ingress_iface   = "eth2"
+egress_iface    = "eth2"
+ingress_iface   = "eth1"
 
 debug           = True
 reloader        = True

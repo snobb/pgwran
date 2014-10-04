@@ -107,18 +107,18 @@ def setup_connections(connections):
 
     for conn in connections:
         egress_cmd = netem_make_command(out_iface,
-                egress_classid, egress_handle, delay=conn.latency_up,
-                jitter=conn.latency_jitter, loss=conn.loss_up,
-                loss_corr=conn.loss_jitter, bandwidth=conn.speed_up)
+                egress_classid, egress_handle, delay=conn["latency_up"],
+                jitter=conn["latency_jitter"], loss=conn["loss_up"],
+                loss_corr=conn["loss_jitter"], bandwidth=conn["speed_up"])
         ingress_cmd = netem_make_command(in_iface,
-                ingress_classid, ingress_handle, delay=conn.latency_down,
-                jitter=conn.latency_jitter, loss=conn.loss_down,
-                loss_corr=conn.loss_jitter, bandwidth=conn.speed_down)
+                ingress_classid, ingress_handle, delay=conn["latency_down"],
+                jitter=conn["latency_jitter"], loss=conn["loss_down"],
+                loss_corr=conn["loss_jitter"], bandwidth=conn["speed_down"])
 
         cmd.extend(egress_cmd)
         cmd.extend(ingress_cmd)
 
-        class_registry[conn.conn_id] = {
+        class_registry[conn["conn_id"]] = {
                 "egress_classid": egress_classid,
                 "ingress_classid": ingress_classid,
                 "egress_handle": egress_handle,
