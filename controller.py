@@ -68,7 +68,9 @@ def netem_redo_filters(subscribers):
     cmd = netem.clear_filters()
     for subs in subscribers:
         if subs["enabled"]:
-            cmd.extend(netem.add_filter(subs["conn_id"], subs["ipaddr"]))
+            subs_profile = subs["subs_profile"]
+            cmd.extend(netem.add_filter(subs["conn_id"],
+                subs_profile["ipaddr"]))
     netem.commit(cmd)
 
 def netem_update_profiles(do_cleanup=False):
@@ -88,8 +90,7 @@ def netem_update_status():
     if not success:
         status_text = "ERROR: dao.subscriber.get_all() - {}".format(status_text)
     else:
-        print subs_list
-        #netem_redo_filters(subs_list)
+        netem_redo_filters(subs_list)
     return success, status_text, subs_list
 
 def netem_full_reload():
@@ -164,18 +165,14 @@ def save_json_subscriber():
 @app.get("/json/subs_profile/get/")
 def get_json_subs_profile():
     """get subscriber profile data in one json blob"""
-    subs_json = None
-
-    success, status_text, data = dao.subs_profile.get_all()
+    success, status_text, subs_data = dao.subs_profile.get_all()
     if not success:
         status_text = "ERROR: {}".format(status_text)
-    else:
-        subs_json = [subs.get_dict() for subs in data]
 
     return {"success" : success,
             "statusText" : status_text,
             "data": {
-                "subs_profiles" : subs_json
+                "subs_profiles" : subs_data
                 }
             }
 
@@ -196,7 +193,7 @@ def save_json_subs_profile():
             "loc_info"      : form.get("loc_info")
             }
 
-    if subs_id == -1:
+    if subs_profile["subs_id"] == -1:
         success, status_text, data = dao.subs_profile.save(subs_profile)
         subs_profile["subs_id"] = data
         action = "insert"
@@ -363,7 +360,7 @@ if __name__ == "__main__":
 
         for subs in subscribers:
             if subs["enabled"]:
-                radius_session(subs.subs_profile, True)
+                radius_session(subs["subs_profile"], True)
 
         netem_update_status()
         app.run(host=config.listen_address, port=config.listen_port,

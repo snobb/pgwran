@@ -55,8 +55,11 @@ def save(obj_dict):
         raise NotImplementedError("Method is not supported (addition disabled)")
     else:
         obj_dict.pop(__pkey__)       # removing subs_id for query generation
-        obj_dict.pop("conn_profile") # removing the profile objects
-        obj_dict.pop("subs_profile") #
+        try:
+            obj_dict.pop("conn_profile") # removing the profile objects
+            obj_dict.pop("subs_profile") #
+        except KeyError:
+            pass
         sql_filter = "{}={}".format(__pkey__, subs_id)
     query = sqlgen.get_update_query(obj_dict.keys(), __table__, sql_filter)
     return common.sql_save(query, obj_dict.values())
