@@ -82,15 +82,14 @@ class ConnProfDaoTest(unittest.TestCase):
     def test_get_all(self):
         success, status, conns = dao.conn_profile.get_all()
         self.assertTrue(success)
-        conns = [dao.common.map2obj(c) for c in conns]
 
         self.assertNotEquals(0, len(conns))
         self.assertEquals(4, len(conns))
 
-        self.assertEquals(conns[1].name, "3G")
-        self.assertEquals(conns[1].latency_up, 100)
-        self.assertEquals(conns[2].name, "2.5G")
-        self.assertEquals(conns[2].speed_up, 59.3)
+        self.assertEquals(conns[1]["name"], "3G")
+        self.assertEquals(conns[1]["latency_up"], 100)
+        self.assertEquals(conns[2]["name"], "2.5G")
+        self.assertEquals(conns[2]["speed_up"], 59.3)
 
     def test_save_update(self):
         success, status, data = dao.conn_profile.get_all()
@@ -247,24 +246,21 @@ class SettingsDaoTest(unittest.TestCase):
 
     def test_new(self):
         obj_dict = dao.settings.new()
-        obj = dao.common.map2obj(obj_dict)
 
-        self.assertIsNotNone(obj)
-        self.assertEquals("", obj.rad_ip)
-        self.assertEquals(1813, obj.rad_port)
-        self.assertEquals("", obj.rad_user)
-        self.assertEquals("", obj.rad_pass)
-        self.assertEquals("", obj.rad_secret)
+        self.assertIsNotNone(obj_dict)
+        self.assertEquals("", obj_dict["rad_ip"])
+        self.assertEquals(1813, obj_dict["rad_port"])
+        self.assertEquals("", obj_dict["rad_user"])
+        self.assertEquals("", obj_dict["rad_pass"])
+        self.assertEquals("", obj_dict["rad_secret"])
 
     def test_get_all(self):
         success, status, settings = dao.settings.get_all()
-        settings = dao.common.map2obj(settings)
-
         self.assertTrue(success)
         self.assertEquals("", status)
         self.assertIsNotNone(settings)
-        self.assertEquals("10.0.16.1", settings.rad_ip)
-        self.assertEquals(1813, settings.rad_port)
+        self.assertEquals("10.0.16.1", settings["rad_ip"])
+        self.assertEquals(1813, settings["rad_port"])
 
     def test_get(self):
         success, status, settings = dao.settings.get(1)
@@ -280,9 +276,8 @@ class SettingsDaoTest(unittest.TestCase):
 
         success, status, settings = dao.settings.get_all()
         self.assertTrue(success)
-        settings = dao.common.map2obj(settings)
-        self.assertEquals(settings.rad_secret, "qwerty");
-        self.assertEquals(settings.rad_ip, "1.1.1.1");
+        self.assertEquals(settings["rad_secret"], "qwerty");
+        self.assertEquals(settings["rad_ip"], "1.1.1.1");
 
     def test_delete(self):
         success, status, settings = dao.settings.delete(1)

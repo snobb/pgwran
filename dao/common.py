@@ -28,21 +28,6 @@ class Transaction(object):
             return (success, status, data)
         return wrapped
 
-
-def map2obj(values):
-    """convert a dictionary to an object"""
-    class ClassGen(object):
-        def __init__(self, **args):
-            """generate an object out of a dictionary"""
-            self.__dict__.update(args)
-        def get_dict(self):
-            return self.__dict__
-    return ClassGen(**values)
-
-def obj2map(obj):
-    """convert object to a dictionary"""
-    return obj.__dict__
-
 def sql_get_all(query, fields):
     """get all the values from the db. At ths point the query should contain
     all the necessary informaton about the query (eg. table, filters, etc)"""
