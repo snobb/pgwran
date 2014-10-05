@@ -62,6 +62,7 @@ def radius_session(subs_profile, do_start=True):
     else:
         radius_send(radius.STOP)
 
+
 # == netem functions ==========================================================
 def netem_redo_filters(subscribers):
     """update and reapply filters based on the enabled_subscribers list"""
@@ -287,7 +288,8 @@ def save_json_conn_profile():
         else:
             status_text = "The connection profile was updated successfully"
 
-        #updating netem
+    #updating netem
+    if success:
         netem_full_reload()
 
     return {"success" : success,
