@@ -41,6 +41,13 @@ CREATE TABLE subscriber (
     enabled INTEGER DEFAULT 0,
     FOREIGN KEY(subs_id) REFERENCES subs_profile(subs_id) ON DELETE CASCADE ON UPDATE CASCADE
 );
+DROP TABLE IF EXISTS radius_avps;
+CREATE TABLE radius_avps (
+    ra_id   INTEGER PRIMARY KEY,
+    subs_id INTEGER NOT NULL,
+    name    VARCHAR NOT NULL,
+    value   VARCHAR NOT NULL
+);
 
 INSERT INTO settings(rad_ip, rad_port, rad_user, rad_pass, rad_secret) VALUES ("10.0.16.1", 1813, "admin", "password", "secret");
 

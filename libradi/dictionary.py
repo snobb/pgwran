@@ -135,6 +135,10 @@ class Dictionary(object):
         except KeyError:
             raise ValueError("attribute {} not found".format(name))
 
+    def get_attribute_names(self):
+        """get the list of all known attributes"""
+        return self.attributes.keys();
+
     def __iter__(self):
         return iter(self.attributes)
 
