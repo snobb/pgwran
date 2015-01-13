@@ -6,7 +6,8 @@
 
 import dao
 import bottle
-import netem, radi as radius
+import netem
+import radi as radius
 import config
 
 
@@ -28,7 +29,8 @@ def radius_configure(subscriber):
             radius_config.username = settings["rad_user"].encode("ascii")
 
         if len(settings["rad_secret"]) > 0:
-            radius_config.radius_secret = settings["rad_secret"].encode("ascii")
+            setting_ascii = settings["rad_secret"].encode("ascii")
+            radius_config.radius_secret = setting_ascii
 
         if len(subscriber["called_id"]) > 0:
             radius_config.called_id = subscriber["called_id"].encode("ascii")
@@ -45,14 +47,17 @@ def radius_configure(subscriber):
             radius_config.imei = subscriber["imei"].encode("ascii")
 
         if len(subscriber["loc_info"]) > 0:
-            radius_config.subs_loc_info = subscriber["loc_info"].encode("ascii")
+            loc_info_ascii = subscriber["loc_info"].encode("ascii")
+            radius_config.subs_loc_info = loc_info_ascii
     return success, status_text
+
 
 def radius_send(action):
     """send radius packet"""
     global radius_config
     radius_config.action = action
     radius.start_stop_session(radius_config)
+
 
 def radius_session(subs_profile, do_start=True):
     """send radius accounting for the given subscriber"""
@@ -71,8 +76,9 @@ def netem_redo_filters(subscribers):
         if subs["enabled"]:
             subs_profile = subs["subs_profile"]
             cmd.extend(netem.add_filter(subs["conn_id"],
-                subs_profile["ipaddr"]))
+                                        subs_profile["ipaddr"]))
     netem.commit(cmd)
+
 
 def netem_update_profiles(do_cleanup=False):
     """apply connection profiles"""
@@ -82,17 +88,21 @@ def netem_update_profiles(do_cleanup=False):
     success, status_text, connections = dao.conn_profile.get_all()
     if success:
         netem.commit(netem.initialize(connections,
-            config.egress_iface, config.ingress_iface))
+                                      config.egress_iface,
+                                      config.ingress_iface))
     return success, status_text, connections
+
 
 def netem_update_status():
     """go through all subscribers and update netem status"""
     success, status_text, subs_list = dao.subscriber.get_all()
     if not success:
-        status_text = "ERROR: dao.subscriber.get_all() - {}".format(status_text)
+        status_text = "ERROR: dao.subscriber.get_all() - ""{}".format(
+            status_text)
     else:
         netem_redo_filters(subs_list)
     return success, status_text, subs_list
+
 
 def netem_full_reload():
     # Updating the netem
@@ -124,11 +134,12 @@ def get_json_subscriber():
         if not success:
             errors.append("ERROR: {}".format(status_text))
 
-        return {"success" : success,
-                "statusText" : "\n".join(errors),
-                "data" : {
-                    "conn_profiles" : connp_data,
-                    "subscribers" : sorted(subs_data, key=lambda x: x["subs_id"])
+        return {"success": success,
+                "statusText": "\n".join(errors),
+                "data": {
+                    "conn_profiles": connp_data,
+                    "subscribers": sorted(subs_data,
+                                          key=lambda x: x["subs_id"])
                     }
                 }
 
@@ -139,28 +150,29 @@ def save_json_subscriber():
     form = bottle.request.forms
 
     subscriber = {
-            "subs_id" :  int(form.get("subs_id")),
-            "conn_id" :  int(form.get("conn_id")),
-            "enabled" :  form.get("enabled") == 'on'
+        "subs_id":  int(form.get("subs_id")),
+        "conn_id":  int(form.get("conn_id")),
+        "enabled":  form.get("enabled") == 'on'
     }
 
     subs_id = subscriber["subs_id"]
     success, status_text, data = dao.subscriber.save(subscriber)
     if not success:
         status_text = ("ERROR: dao.subscriber.save(subs) - {}").format(
-                status_text)
+            status_text)
     else:
         success, status_text, subs_prof_profile = dao.subs_profile.get(subs_id)
+
         if not success:
-            status_text = "ERROR: dao.subscriber.get_all() - {}".format(
-                    status_text)
+            status_text = ("ERROR: dao.subscriber.get_all() - "
+                           "{}".format(status_text))
         else:
             radius_session(subs_prof_profile, subscriber["enabled"])
             netem_update_status()
 
-    return {"success" : success,
-            "statusText" : status_text,
-            "data" : None}
+    return {"success": success,
+            "statusText": status_text,
+            "data": None}
 
 
 @app.get("/json/subs_profile/get/")
@@ -170,10 +182,10 @@ def get_json_subs_profile():
     if not success:
         status_text = "ERROR: {}".format(status_text)
 
-    return {"success" : success,
-            "statusText" : status_text,
+    return {"success": success,
+            "statusText": status_text,
             "data": {
-                "subs_profiles" : subs_data
+                "subs_profiles": subs_data
                 }
             }
 
@@ -184,15 +196,15 @@ def save_json_subs_profile():
     form = bottle.request.forms
 
     subs_profile = {
-            "subs_id"       : int(form.get("subs_id")),
-            "name"          : form.get("name"),
-            "ipaddr"        : form.get("ipaddr"),
-            "calling_id"    : form.get("calling_id"),
-            "called_id"     : form.get("called_id"),
-            "imsi"          : form.get("imsi"),
-            "imei"          : form.get("imei"),
-            "loc_info"      : form.get("loc_info")
-            }
+        "subs_id":      int(form.get("subs_id")),
+        "name":         form.get("name"),
+        "ipaddr":       form.get("ipaddr"),
+        "calling_id":   form.get("calling_id"),
+        "called_id":    form.get("called_id"),
+        "imsi":         form.get("imsi"),
+        "imei":         form.get("imei"),
+        "loc_info":     form.get("loc_info")
+    }
 
     if subs_profile["subs_id"] == -1:
         success, status_text, data = dao.subs_profile.save(subs_profile)
@@ -200,7 +212,7 @@ def save_json_subs_profile():
         action = "insert"
         if not success:
             status_text = ("ERROR: Could not create a subscriber "
-                        "profile: {}").format(status_text)
+                           "profile: {}").format(status_text)
         else:
             status_text = "The subscriber profile was created successfully"
     else:
@@ -208,7 +220,7 @@ def save_json_subs_profile():
         action = "update"
         if not success:
             status_text = ("ERROR: Could not update the subscriber "
-                        "profile: {}").format(status_text)
+                           "profile: {}").format(status_text)
         else:
             status_text = "The subscriber profile was updated successfully"
 
@@ -218,9 +230,8 @@ def save_json_subs_profile():
             radius_session(subs_profile, True)
             netem_update_status()
 
-
-    return {"success" : success,
-            "statusText" : status_text,
+    return {"success": success,
+            "statusText": status_text,
             "data": {
                 "subs_id": subs_profile["subs_id"],
                 "action": action
@@ -231,9 +242,9 @@ def save_json_subs_profile():
 @app.get("/json/subs_profile/delete/<subs_id>")
 def delete_json_subs_profile(subs_id):
     success, status_text, data = dao.subs_profile.delete(subs_id)
-    return {"success" : success,
-            "statusText" : status_text,
-            "data": data }
+    return {"success": success,
+            "statusText": status_text,
+            "data": data}
 
 
 @app.get("/json/conn_profile/get/")
@@ -243,10 +254,10 @@ def get_json_conn_profile():
     if not success:
         status_text = "ERROR: {}".format(status_text)
 
-    return {"success" : success,
-            "statusText" : status_text,
-            "data" : {
-                "conn_profiles" : conn_json
+    return {"success": success,
+            "statusText": status_text,
+            "data": {
+                "conn_profiles": conn_json
                 }
             }
 
@@ -256,18 +267,18 @@ def save_json_conn_profile():
     """save connection profile data in one json blob"""
     form = bottle.request.forms
     conn_profile = {
-        "name"              : form.get("name"),
-        "description"       : form.get("description"),
-        "speed_down"        : form.get("speed_down"),
-        "speed_up"          : form.get("speed_up"),
-        "speed_var"         : form.get("speed_var"),
-        "latency_up"        : form.get("latency_up"),
-        "latency_down"      : form.get("latency_down"),
-        "latency_jitter"    : form.get("latency_jitter"),
-        "loss_down"         : form.get("loss_down"),
-        "loss_up"           : form.get("loss_up"),
-        "loss_jitter"       : form.get("loss_jitter"),
-        "conn_id"           : int(form.get("conn_id")),
+        "name": form.get("name"),
+        "description":      form.get("description"),
+        "speed_down":       form.get("speed_down"),
+        "speed_up":         form.get("speed_up"),
+        "speed_var":        form.get("speed_var"),
+        "latency_up":       form.get("latency_up"),
+        "latency_down":     form.get("latency_down"),
+        "latency_jitter":   form.get("latency_jitter"),
+        "loss_down":        form.get("loss_down"),
+        "loss_up":          form.get("loss_up"),
+        "loss_jitter":      form.get("loss_jitter"),
+        "conn_id":          int(form.get("conn_id")),
     }
 
     if conn_profile["conn_id"] == -1:
@@ -276,7 +287,7 @@ def save_json_conn_profile():
         action = "insert"
         if not success:
             status_text = ("ERROR: Could not create a connection "
-                        "profile: {}").format(status_text)
+                           "profile: {}").format(status_text)
         else:
             status_text = "The connection profile was created successfully"
     else:
@@ -284,29 +295,28 @@ def save_json_conn_profile():
         action = "update"
         if not success:
             status_text = ("ERROR: Could not update the connection "
-                        "profile: {}").format(status_text)
+                           "profile: {}").format(status_text)
         else:
             status_text = "The connection profile was updated successfully"
 
-    #updating netem
+    # updating netem
     if success:
         netem_full_reload()
 
-    return {"success" : success,
-            "statusText" : status_text,
+    return {"success": success,
+            "statusText": status_text,
             "data": {
                 "conn_id": conn_profile["conn_id"],
                 "action": action
-                }
-            }
+            }}
 
 
 @app.get("/json/conn_profile/delete/<conn_id>")
 def delete_json_conn_profile(conn_id):
     success, status_text, data = dao.conn_profile.delete(conn_id)
-    return {"success" : success,
-            "statusText" : status_text,
-            "data": data }
+    return {"success": success,
+            "statusText": status_text,
+            "data": data}
 
 
 @app.get("/json/settings/get/")
@@ -316,12 +326,11 @@ def get_json_settings():
     if not success:
         status_text = "ERROR: {}".format(status_text)
 
-    return {"success" : success,
-            "statusText" : status_text,
+    return {"success": success,
+            "statusText": status_text,
             "data": {
-                "settings" : data
-                }
-            }
+                "settings": data
+            }}
 
 
 @app.post("/json/settings/save/")
@@ -338,13 +347,13 @@ def save_json_settings():
         success, status_text, data = dao.settings.save(settings)
         if not success:
             status_text = ("Could not update the settings: "
-               " {}").format(status_text)
+                           " {}").format(status_text)
         else:
             status_text = "The settings were updated successfully"
 
-    return {"success" : success,
-            "statusText" : status_text,
-            "data" : None }
+    return {"success": success,
+            "statusText": status_text,
+            "data": None}
 
 
 if __name__ == "__main__":

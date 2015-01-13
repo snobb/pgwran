@@ -25,7 +25,6 @@ class SubscriberDaoTest(unittest.TestCase):
         self.assertNotEquals(0, len(subs))
         self.assertEquals(4, len(subs))
 
-
         self.assertEquals(2, subs[1]["subs_id"])
         self.assertEquals(2, subs[1]["conn_id"])
         self.assertEquals(subs[1]["subs_profile"]["name"], "John")
@@ -106,9 +105,9 @@ class ConnProfDaoTest(unittest.TestCase):
         success, status, conn = dao.conn_profile.get(conn_id)
         self.assertTrue(success)
         self.assertEquals(conn_id, conn["conn_id"])
-        self.assertEquals("test", conn["name"]);
-        self.assertEquals(101, conn["speed_up"]);
-        self.assertEquals(202, conn["loss_down"]);
+        self.assertEquals("test", conn["name"])
+        self.assertEquals(101, conn["speed_up"])
+        self.assertEquals(202, conn["loss_down"])
 
     def test_save_insert(self):
         conn = dao.conn_profile.new()
@@ -125,8 +124,8 @@ class ConnProfDaoTest(unittest.TestCase):
             if conn["name"] == "test":
                 found = True
                 self.assertTrue(ins_data > 0)
-                self.assertEquals(101, conn["speed_up"]);
-                self.assertEquals(202, conn["loss_down"]);
+                self.assertEquals(101, conn["speed_up"])
+                self.assertEquals(202, conn["loss_down"])
         self.assertTrue(found)
 
     def test_delete(self):
@@ -190,16 +189,16 @@ class SubscriberProfDaoTest(unittest.TestCase):
         success, status, subs = dao.subs_profile.get(subs_id)
         self.assertTrue(success)
         self.assertEquals(subs_id, subs["subs_id"])
-        self.assertEquals("test", subs["name"]);
-        self.assertEquals("1234", subs["imsi"]);
-        self.assertEquals("4567", subs["called_id"]);
+        self.assertEquals("test", subs["name"])
+        self.assertEquals("1234", subs["imsi"])
+        self.assertEquals("4567", subs["called_id"])
 
     def test_save_insert(self):
         obj_dict = dao.subs_profile.new()
-        obj_dict["name"]="test_aaa"
-        obj_dict["imsi"]=2345
-        obj_dict["calling_id"]=3456
-        obj_dict["loc_info"]="f5f5"
+        obj_dict["name"] = "test_aaa"
+        obj_dict["imsi"] = 2345
+        obj_dict["calling_id"] = 3456
+        obj_dict["loc_info"] = "f5f5"
 
         insert_res = dao.subs_profile.save(obj_dict)
         self.assertTrue(insert_res[0])
@@ -214,9 +213,9 @@ class SubscriberProfDaoTest(unittest.TestCase):
             if sub["subs_id"] == new_id:
                 found = True
                 self.assertEquals(new_id, sub["subs_id"])
-                self.assertEquals(2345, int(sub["imsi"]));
-                self.assertEquals(3456, int(sub["calling_id"]));
-                self.assertEquals("f5f5", sub["loc_info"]);
+                self.assertEquals(2345, int(sub["imsi"]))
+                self.assertEquals(3456, int(sub["calling_id"]))
+                self.assertEquals("f5f5", sub["loc_info"])
         self.assertTrue(found)
 
     def test_delete(self):
@@ -276,8 +275,8 @@ class SettingsDaoTest(unittest.TestCase):
 
         success, status, settings = dao.settings.get_all()
         self.assertTrue(success)
-        self.assertEquals(settings["rad_secret"], "qwerty");
-        self.assertEquals(settings["rad_ip"], "1.1.1.1");
+        self.assertEquals(settings["rad_secret"], "qwerty")
+        self.assertEquals(settings["rad_ip"], "1.1.1.1")
 
     def test_delete(self):
         success, status, settings = dao.settings.delete(1)
