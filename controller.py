@@ -20,6 +20,7 @@ radius_config = radius.Config()
 def radius_configure(subscriber):
     """configure radi as per current settings/subscriber profile"""
     global radius_config
+    subs_profile = subscriber["subs_profile"]
     success, status_text, settings = dao.settings.get_all()
     if success:
         radius_config.radius_dest = settings["rad_ip"].encode("ascii")
@@ -32,23 +33,29 @@ def radius_configure(subscriber):
             setting_ascii = settings["rad_secret"].encode("ascii")
             radius_config.radius_secret = setting_ascii
 
-        if len(subscriber["called_id"]) > 0:
-            radius_config.called_id = subscriber["called_id"].encode("ascii")
+        if len(subs_profile["called_id"]) > 0:
+            radius_config.called_id = subs_profile["called_id"].encode("ascii")
 
-        radius_config.framed_ip = subscriber["ipaddr"].encode("ascii")
+        radius_config.framed_ip = subs_profile["ipaddr"].encode("ascii")
 
-        if len(subscriber["calling_id"]) > 0:
-            radius_config.calling_id = subscriber["calling_id"].encode("ascii")
+        if len(subs_profile["calling_id"]) > 0:
+            radius_config.calling_id = subs_profile["calling_id"].encode("ascii")
 
-        if len(subscriber["imsi"]) > 0:
-            radius_config.imsi = subscriber["imsi"].encode("ascii")
+        if len(subs_profile["imsi"]) > 0:
+            radius_config.imsi = subs_profile["imsi"].encode("ascii")
 
-        if len(subscriber["imei"]) > 0:
-            radius_config.imei = subscriber["imei"].encode("ascii")
+        if len(subs_profile["imei"]) > 0:
+            radius_config.imei = subs_profile["imei"].encode("ascii")
 
-        if len(subscriber["loc_info"]) > 0:
-            loc_info_ascii = subscriber["loc_info"].encode("ascii")
+        if len(subs_profile["loc_info"]) > 0:
+            loc_info_ascii = subs_profile["loc_info"].encode("ascii")
             radius_config.subs_loc_info = loc_info_ascii
+
+        if "conn_profile" in subscriber:
+            conn_profile = subscriber["conn_profile"]
+            if "rat_type" in conn_profile:
+                rat_type = conn_profile["rat_type"].encode("ascii")
+                radius_config.avps.append(("3GPP_RAT_Type", rat_type))
     return success, status_text
 
 
@@ -371,7 +378,7 @@ if __name__ == "__main__":
 
         for subs in subscribers:
             if subs["enabled"]:
-                radius_session(subs["subs_profile"], True)
+                radius_session(subs, True)
 
         netem_update_status()
         app.run(host=config.listen_address, port=config.listen_port,

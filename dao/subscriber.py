@@ -70,5 +70,4 @@ def delete(obj_id):
     raise NotImplementedError("Method not supported for this object ")
 
 
-
 # vim: ts=4 sts=4 sw=4 tw=80 ai smarttab et fo=rtcq list
