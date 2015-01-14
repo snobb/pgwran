@@ -13,10 +13,12 @@ __table__ = "subscriber"
 __pkey__ = "subs_id"
 __fields__ = ["subs_id", "conn_id", "enabled"]
 
+
 def new():
     """get a blank object with default values"""
     defaults = [-1, 0, 0]
     return dict(zip(__fields__, defaults))
+
 
 @common.Transaction()
 def get_all():
@@ -34,35 +36,41 @@ def get_all():
 
     return subscribers
 
+
 @common.Transaction()
 def get(obj_id):
     """get a single object by id"""
     sql_filter = "{}={}".format(__pkey__, obj_id)
     query = sqlgen.get_select_query(__fields__, [__table__], sql_filter)
-    subs = common.sql_get(query, __fields__)
-    subs["subs_profile"] = subs_profile.notrans_get(subs["subs_id"])
-    subs["conn_profile"] = conn_profile.notrans_get(subs["subs_id"])
+    subscriber = common.sql_get(query, __fields__)
+    subscriber["subs_profile"] = subs_profile.notrans_get(
+        subscriber["subs_id"])
+    subscriber["conn_profile"] = conn_profile.notrans_get(
+        subscriber["subs_id"])
 
-    return subs
+    return subscriber
+
 
 @common.Transaction()
 def save(obj_dict):
     """update object"""
-    assert(obj_dict != None)
+    assert(obj_dict is not None)
     obj_dict = obj_dict.copy()
     subs_id = obj_dict["subs_id"]
     if subs_id == -1:
-        raise NotImplementedError("Method is not supported (addition disabled)")
+        raise NotImplementedError("Method is not supported (addition "
+                                  "disabled)")
     else:
         obj_dict.pop(__pkey__)       # removing subs_id for query generation
         try:
-            obj_dict.pop("conn_profile") # removing the profile objects
-            obj_dict.pop("subs_profile") #
+            obj_dict.pop("conn_profile")  # removing the profile objects
+            obj_dict.pop("subs_profile")  #
         except KeyError:
             pass
         sql_filter = "{}={}".format(__pkey__, subs_id)
     query = sqlgen.get_update_query(obj_dict.keys(), __table__, sql_filter)
     return common.sql_save(query, obj_dict.values())
+
 
 @common.Transaction()
 def delete(obj_id):

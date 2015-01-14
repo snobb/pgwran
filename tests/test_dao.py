@@ -31,10 +31,12 @@ class SubscriberDaoTest(unittest.TestCase):
         self.assertEquals(subs[1]["subs_profile"]["ipaddr"], "10.0.0.20")
         self.assertEquals(subs[1]["subs_profile"]["imsi"], "90108576436201")
         self.assertEquals(subs[1]["conn_profile"]["name"], "3G")
+        self.assertEquals(subs[1]["conn_profile"]["rat_type"], 3)
         self.assertEquals(subs[2]["subs_profile"]["name"], "Linus")
         self.assertEquals(subs[2]["subs_profile"]["ipaddr"], "10.0.0.30")
         self.assertEquals(subs[2]["subs_profile"]["imsi"], "90156451177704")
         self.assertEquals(subs[2]["conn_profile"]["name"], "2.5G")
+        self.assertEquals(subs[2]["conn_profile"]["rat_type"], 2)
 
     def test_get(self):
         success, status, subs = dao.settings.get(1)
@@ -87,8 +89,10 @@ class ConnProfDaoTest(unittest.TestCase):
 
         self.assertEquals(conns[1]["name"], "3G")
         self.assertEquals(conns[1]["latency_up"], 100)
+        self.assertEquals(conns[1]["rat_type"], 3)
         self.assertEquals(conns[2]["name"], "2.5G")
         self.assertEquals(conns[2]["speed_up"], 59.3)
+        self.assertEquals(conns[2]["rat_type"], 2)
 
     def test_save_update(self):
         success, status, data = dao.conn_profile.get_all()
@@ -98,6 +102,7 @@ class ConnProfDaoTest(unittest.TestCase):
         conn["name"] = "test"
         conn["speed_up"] = 101
         conn["loss_down"] = 202
+        conn["rat_type"] = 7
         update_res = dao.conn_profile.save(conn)
         self.assertEquals("", update_res[1])
         self.assertTrue(update_res[0])
@@ -108,6 +113,7 @@ class ConnProfDaoTest(unittest.TestCase):
         self.assertEquals("test", conn["name"])
         self.assertEquals(101, conn["speed_up"])
         self.assertEquals(202, conn["loss_down"])
+        self.assertEquals(7, conn["rat_type"])
 
     def test_save_insert(self):
         conn = dao.conn_profile.new()
