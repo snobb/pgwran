@@ -366,10 +366,10 @@ def save_json_settings():
 if __name__ == "__main__":
     dao.initialize(config.database, config.db_schema)
     try:
-        success, status_text, data = netem_update_profiles()
-        if not success:
-            print status_text
-            exit(1)
+        # success, status_text, data = netem_update_profiles()
+        # if not success:
+        #     print status_text
+        #     exit(1)
 
         success, status_text, subscribers = dao.subscriber.get_all()
         if not success:
@@ -380,7 +380,7 @@ if __name__ == "__main__":
             if subs["enabled"]:
                 radius_session(subs, True)
 
-        netem_update_status()
+        # netem_update_status()
         app.run(host=config.listen_address, port=config.listen_port,
                 debug=config.debug,
                 reloader=config.reloader)
