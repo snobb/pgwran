@@ -26,3 +26,5 @@ clean:
 	-rm -rf MANIFEST
 	-rm -rf build dist
 	-rm -f database.db*
+
+.PHONY: check test run build install uninstall clean
