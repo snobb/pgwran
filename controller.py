@@ -12,6 +12,9 @@ import radi as radius
 import config
 
 
+__version__ = "1.3"
+
+
 # == Globals ==================================================================
 app = bottle.Bottle()
 radius_config = radius.Config()
