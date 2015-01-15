@@ -313,12 +313,14 @@ def save_json_conn_profile():
 
     # updating netem
     if success:
-        success, status_text, subscribers = dao.subscriber.get_all()
+        success, status, subscribers = dao.subscriber.get_all()
         if success:
             for subscriber in subscribers:
                 if (subscriber["enabled"] and
                         subscriber["conn_id"] == conn_profile["conn_id"]):
                     radius_session(subscriber, radius.INTERIM)
+        else:
+            status_text = status
 
         netem_full_reload()
 
