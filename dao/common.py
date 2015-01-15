@@ -7,6 +7,7 @@
 import sqlgen
 import sqlite_conn as connector
 
+
 class Transaction(object):
     """Transaction Decorator class"""
     def __init__(self):
@@ -28,6 +29,7 @@ class Transaction(object):
             return (success, status, data)
         return wrapped
 
+
 def sql_get_all(query, fields):
     """get all the values from the db. At ths point the query should contain
     all the necessary informaton about the query (eg. table, filters, etc)"""
@@ -35,6 +37,7 @@ def sql_get_all(query, fields):
     if len(obj_list):
         return [dict(zip(fields, obj)) for obj in obj_list]
     return None
+
 
 def sql_get(query, fields):
     """get one the values from the db. At ths point the query should contain
@@ -44,13 +47,15 @@ def sql_get(query, fields):
         return dict(zip(fields, obj))
     return None
 
+
 def sql_save(query, values):
-    """insert/update values in the DB. At this point the query should have everything
-    but the values in it (with =? arguments as a template).  The values
-    parameters MUST be in the same order as the list of fields or else it would
-    likely corrupt database."""
+    """insert/update values in the DB. At this point the query should have
+    everything but the values in it (with =? arguments as a template).  The
+    values parameters MUST be in the same order as the list of fields or else
+    it would likely corrupt database."""
     assert(type(values) == list)
     return connector.execute_db(query, values)
+
 
 def sql_delete(query):
     """delete object from the db. At this point the query should contain all the

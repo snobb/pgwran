@@ -37,10 +37,10 @@ def main():
         #    "without express written permission of F5 Networks, Inc.\n"
         #    ),
         version=libradi.__version__,
-        scripts=["radi.py, controller.py"],
+        scripts=["radi.py", "controller.py"],
         py_modules=["libradi.dictionary", "libradi.radius",
                     "libradi.radtypes", "libradi.config", "netem",
-                    "dao", "config", "sqlite_connector", "bottle"],
+                    "dao", "config", "sqlite_conn", "bottle"],
         data_files=[("share/pgwran/dict", glob.glob("dict/dictionary*")),
                     ("/share/pgwran/", "schema.sql"),
                     ("/share/pgwran/static", glob.glob("static/*"))]

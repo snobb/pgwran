@@ -4,6 +4,7 @@
 # Author: Alex Kozadaev (2014)
 #
 
+import sys
 import dao
 import bottle
 import netem
@@ -17,45 +18,51 @@ radius_config = radius.Config()
 
 
 # == RADI functions ===========================================================
+def ascii(str):
+    return str.encode("ascii", "ignore")
+
+
 def radius_configure(subscriber):
     """configure radi as per current settings/subscriber profile"""
     global radius_config
     subs_profile = subscriber["subs_profile"]
     success, status_text, settings = dao.settings.get_all()
     if success:
-        radius_config.radius_dest = settings["rad_ip"].encode("ascii")
+        radius_config.radius_dest = ascii(settings["rad_ip"])
         radius_config.radius_port = int(settings["rad_port"])
 
         if len(settings["rad_user"]) > 0:
-            radius_config.username = settings["rad_user"].encode("ascii")
+            radius_config.username = ascii(settings["rad_user"])
 
         if len(settings["rad_secret"]) > 0:
-            setting_ascii = settings["rad_secret"].encode("ascii")
+            setting_ascii = ascii(settings["rad_secret"])
             radius_config.radius_secret = setting_ascii
 
         if len(subs_profile["called_id"]) > 0:
-            radius_config.called_id = subs_profile["called_id"].encode("ascii")
+            radius_config.called_id = ascii(subs_profile["called_id"])
 
-        radius_config.framed_ip = subs_profile["ipaddr"].encode("ascii")
+        radius_config.framed_ip = ascii(subs_profile["ipaddr"])
 
         if len(subs_profile["calling_id"]) > 0:
-            radius_config.calling_id = subs_profile["calling_id"].encode("ascii")
+            radius_config.calling_id = ascii(subs_profile["calling_id"])
 
         if len(subs_profile["imsi"]) > 0:
-            radius_config.imsi = subs_profile["imsi"].encode("ascii")
+            radius_config.imsi = ascii(subs_profile["imsi"])
 
         if len(subs_profile["imei"]) > 0:
-            radius_config.imei = subs_profile["imei"].encode("ascii")
+            radius_config.imei = ascii(subs_profile["imei"])
 
         if len(subs_profile["loc_info"]) > 0:
-            loc_info_ascii = subs_profile["loc_info"].encode("ascii")
+            loc_info_ascii = ascii(subs_profile["loc_info"])
             radius_config.subs_loc_info = loc_info_ascii
+
+        radius_config.avps = list()
 
         if "conn_profile" in subscriber:
             conn_profile = subscriber["conn_profile"]
             if "rat_type" in conn_profile:
-                rat_type = conn_profile["rat_type"].encode("ascii")
-                radius_config.avps.append(("3GPP_RAT_Type", rat_type))
+                rat_type = conn_profile["rat_type"]
+                radius_config.avps.append(("3GPP-RAT-Type", rat_type))
     return success, status_text
 
 
@@ -66,13 +73,10 @@ def radius_send(action):
     radius.start_stop_session(radius_config)
 
 
-def radius_session(subs_profile, do_start=True):
+def radius_session(subscriber, action=radius.START):
     """send radius accounting for the given subscriber"""
-    radius_configure(subs_profile)
-    if do_start:
-        radius_send(radius.START)
-    else:
-        radius_send(radius.STOP)
+    radius_configure(subscriber)
+    radius_send(action)
 
 
 # == netem functions ==========================================================
@@ -168,13 +172,12 @@ def save_json_subscriber():
         status_text = ("ERROR: dao.subscriber.save(subs) - {}").format(
             status_text)
     else:
-        success, status_text, subs_prof_profile = dao.subs_profile.get(subs_id)
-
-        if not success:
-            status_text = ("ERROR: dao.subscriber.get_all() - "
-                           "{}".format(status_text))
-        else:
-            radius_session(subs_prof_profile, subscriber["enabled"])
+        success, status_text, subscriber = dao.subscriber.get(subs_id)
+        if success:
+            if subscriber["enabled"]:
+                radius_session(subscriber, radius.START)
+            else:
+                radius_session(subscriber, radius.STOP)
             netem_update_status()
 
     return {"success": success,
@@ -232,9 +235,10 @@ def save_json_subs_profile():
             status_text = "The subscriber profile was updated successfully"
 
         # updating radius and netem
-        success, status, subs = dao.subscriber.get(subs_profile["subs_id"])
-        if success and subs["enabled"]:
-            radius_session(subs_profile, True)
+        success, status, subscriber = dao.subscriber.get(
+            subs_profile["subs_id"])
+        if success and subscriber["enabled"]:
+            radius_session(subscriber, radius.INTERIM)
             netem_update_status()
 
     return {"success": success,
@@ -285,6 +289,7 @@ def save_json_conn_profile():
         "loss_down":        form.get("loss_down"),
         "loss_up":          form.get("loss_up"),
         "loss_jitter":      form.get("loss_jitter"),
+        "rat_type":         form.get("rat_type"),
         "conn_id":          int(form.get("conn_id")),
     }
 
@@ -308,6 +313,15 @@ def save_json_conn_profile():
 
     # updating netem
     if success:
+        success, status, subscribers = dao.subscriber.get_all()
+        if success:
+            for subscriber in subscribers:
+                if (subscriber["enabled"] and
+                        subscriber["conn_id"] == conn_profile["conn_id"]):
+                    radius_session(subscriber, radius.INTERIM)
+        else:
+            status_text = status
+
         netem_full_reload()
 
     return {"success": success,
@@ -368,17 +382,17 @@ if __name__ == "__main__":
     try:
         success, status_text, data = netem_update_profiles()
         if not success:
-            print status_text
+            print >>sys.stderr, status_text
             exit(1)
 
         success, status_text, subscribers = dao.subscriber.get_all()
         if not success:
-            print status_text
+            print >>sys.stderr, status_text
             exit(1)
 
-        for subs in subscribers:
-            if subs["enabled"]:
-                radius_session(subs, True)
+        for subscriber in subscribers:
+            if subscriber["enabled"]:
+                radius_session(subscriber)
 
         netem_update_status()
         app.run(host=config.listen_address, port=config.listen_port,

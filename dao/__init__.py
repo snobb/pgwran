@@ -9,12 +9,15 @@ import conn_profile
 import subs_profile
 import settings
 
+
 def initialize(db_name, db_schema):
     import sqlite_conn
     sqlite_conn.initialize(db_name, db_schema)
 
+
 def restart_connection():
     sqlite_conn.get_db()
+
 
 def close():
     sqlite_conn.close()

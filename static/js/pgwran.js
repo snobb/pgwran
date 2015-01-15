@@ -298,6 +298,8 @@ function newConnProfile() {
     $('#conn_screen #loss_up').val(0);
     $('#conn_screen #loss_jitter').val(0);
     $('#conn_screen #conn_id').val(-1);
+    $('#conn_screen #rat_type option').removeAttr('selected')
+    $('#conn_screen #rat_type option[value=1]').attr('selected', 'selected')
 }
 
 function populateConnProfile(obj) {
@@ -313,6 +315,8 @@ function populateConnProfile(obj) {
     $('#conn_screen #loss_up').val(obj.loss_up);
     $('#conn_screen #loss_jitter').val(obj.loss_jitter);
     $('#conn_screen #conn_id').val(obj.conn_id);
+    $('#conn_screen #rat_type option').removeAttr('selected')
+    $('#conn_screen #rat_type option[value=' + obj.rat_type + ']').attr('selected', 'selected')
 }
 
 /********* Settings code **********/
