@@ -73,13 +73,10 @@ def radius_send(action):
     radius.start_stop_session(radius_config)
 
 
-def radius_session(subscriber, do_start=True):
+def radius_session(subscriber, action=radius.START):
     """send radius accounting for the given subscriber"""
     radius_configure(subscriber)
-    if do_start:
-        radius_send(radius.START)
-    else:
-        radius_send(radius.STOP)
+    radius_send(action)
 
 
 # == netem functions ==========================================================
@@ -177,7 +174,10 @@ def save_json_subscriber():
     else:
         success, status_text, subscriber = dao.subscriber.get(subs_id)
         if success:
-            radius_session(subscriber, subscriber["enabled"])
+            if subscriber["enabled"]:
+                radius_session(subscriber, radius.START)
+            else:
+                radius_session(subscriber, radius.STOP)
             netem_update_status()
 
     return {"success": success,
@@ -237,8 +237,8 @@ def save_json_subs_profile():
         # updating radius and netem
         success, status, subscriber = dao.subscriber.get(
             subs_profile["subs_id"])
-        if success and subs["enabled"]:
-            radius_session(subscriber, True)
+        if success and subscriber["enabled"]:
+            radius_session(subscriber, radius.INTERIM)
             netem_update_status()
 
     return {"success": success,
@@ -313,6 +313,13 @@ def save_json_conn_profile():
 
     # updating netem
     if success:
+        success, status_text, subscribers = dao.subscriber.get_all()
+        if success:
+            for subscriber in subscribers:
+                if (subscriber["enabled"] and
+                        subscriber["conn_id"] == conn_profile["conn_id"]):
+                    radius_session(subscriber, radius.INTERIM)
+
         netem_full_reload()
 
     return {"success": success,
@@ -383,7 +390,7 @@ if __name__ == "__main__":
 
         for subscriber in subscribers:
             if subscriber["enabled"]:
-                radius_session(subscriber, True)
+                radius_session(subscriber)
 
         netem_update_status()
         app.run(host=config.listen_address, port=config.listen_port,

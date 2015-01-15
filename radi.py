@@ -15,7 +15,7 @@ import libradi
 __verbose__ = False     # enabling verbose logging
 
 # Constants
-RESTART, START, STOP = range(3)     # also ACCT_STATUS_TYPE start/stop
+RESTART, START, STOP, INTERIM = range(4)     # also ACCT_STATUS_TYPE start/stop
 FRAMED_PROTO_PPP = 1
 PICKLED_FILE_NAME = "{}/.{}.dat".format(os.path.curdir,
                                         os.path.basename(__file__))
@@ -201,14 +201,14 @@ def parse_args():
     config["name"] = sys.argv.pop(0)
     try:
         opt_list, arg_list = getopt.getopt(sys.argv,
-                                           "hd:p:STRi:t:f:c:C:a:D:LP:v",
+                                           "hd:p:STRIi:t:f:c:C:a:D:LP:v",
                                            [
                                                "help", "destination", "secret",
                                                "start", "stop", "restart",
-                                               "id", "id-type", "framed-ip",
-                                               "calling-id", "called_id",
-                                               "avp", "delay", "clean",
-                                               "path", "verbose"
+                                               "interim", "id", "id-type",
+                                               "framed-ip", "calling-id",
+                                               "called_id", "avp", "delay",
+                                               "clean", "path", "verbose"
                                            ])
     except getopt.GetoptError as err:
         usage()
@@ -229,6 +229,8 @@ def parse_args():
             config["action"] = STOP
         elif opt in ("-R", "--restart"):
             config["action"] = RESTART
+        elif opt in ("-I", "--interim"):
+            config["action"] = INTERIM
         elif opt in ("-i", "--imsi"):
             config["imsi"] = value
         elif opt in ("-t", "--imei"):
