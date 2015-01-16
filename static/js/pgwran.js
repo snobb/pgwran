@@ -6,7 +6,86 @@
 
 /********* Document handler code **********/
 $('document').ready(function() {
-    handleSubscribers();
+
+    /* Subscriber profile handlers */
+    $('#subs_screen #button_delete').on('click', function(data) {
+        $('#subs_screen #modal').modal('show');
+        $('#subs_screen #button_ok').on('click', function(data) {
+            $('#subs_screen #modal').modal('hide');
+            $.getJSON('/json/subs_profile/delete/' +
+                      $('#subs_screen #subs_id').val(), {}, function(data) {
+                // output success
+                showSuccess('The value has been deleted successfully');
+                updateSubscriberProfileData(0);
+            }).fail(function(e) {
+                showError('ERROR: error accessing the backend - ' + e.statusText);
+            });
+        });
+    });
+
+    $('#subs_screen #button_save').on('click', function(data) {
+        if ($('#subs_screen #ipaddr').val() == '') {
+            showError('ERROR: IP address field is required');
+            return false;
+        }
+        $.ajax({
+            type: 'POST',
+            url: '/json/subs_profile/save/',
+            data: $('#subs_screen form').serialize(),
+            success: function(response) {
+                if (response.success) {
+                    showSuccess(response.statusText);
+                    if (response.data.action == 'insert') {
+                        $('#subs_screen #subs_id').val(response.data.subs_id);
+                        updateSubscriberProfileData(response.data.subs_id);
+                    }
+                } else {
+                    showError(response.statusText);
+                }
+            }
+        }).fail(function(e) {
+            showError('ERROR: error accessing the backend - ' + e.statusText);
+        });
+    });
+
+    /* Connection profile handlers */
+    $('#conn_screen #button_delete').on('click', function(data) {
+        $('#conn_screen #modal').modal('show');
+        $('#conn_screen #button_ok').on('click', function(data) {
+            $('#conn_screen #modal').modal('hide');
+            $.getJSON('/json/conn_profile/delete/' +
+                      $('#conn_screen #conn_id').val(), {}, function(data) {
+                // output success
+                showSuccess('The value has been deleted successfully');
+                updateConnectionProfileData(0);
+            }).fail(function(data) {
+                showError('ERROR: ' + data.statusText);
+            });
+        });
+    });
+
+    $('#conn_screen #button_save').on('click', function(data) {
+        $.ajax({
+            type: 'POST',
+            url: '/json/conn_profile/save/',
+            data: $('#conn_screen form').serialize(),
+            success: function(response) {
+                if (response.success) {
+                    showSuccess(response.statusText);
+                    if (response.data.action == 'insert') {
+                        $('#conn_screen #conn_id').val(response.data.conn_id);
+                        updateConnectionProfileData(response.data.conn_id)
+                    }
+                } else {
+                    showError(response.statusText);
+                }
+            }
+        }).fail(function(e) {
+            showError('ERROR: ' + e.statusText);
+        });
+    });
+
+    /* main logic */
     $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
         e.target        // activated tab
         e.relatedTarget // previous tab
@@ -17,13 +96,16 @@ $('document').ready(function() {
         if (active_id === 'menu_subs') {
             handleSubscribers();
         } else if (active_id === 'menu_subs_profile') {
-            handleSubsProfile();
+            updateSubscriberProfileData(0);
         } else if (active_id === 'menu_conn_profile') {
-            handleConnProfile();
+            updateConnectionProfileData(0);
         } else if (active_id === 'menu_settings') {
             handleSettings();
         }
     });
+
+    /* landing page */
+    handleSubscribers();
 });
 
 /********* Subscribers code **********/
@@ -117,52 +199,6 @@ function getSubsTemplate(obj, conn_list) {
 }
 
 /********* Subscriber profile code **********/
-function handleSubsProfile() {
-    $('#subs_screen #button_delete').on('click', function(data) {
-        $('#subs_screen #modal').modal('show');
-        $('#subs_screen #button_ok').on('click', function(data) {
-            $('#subs_screen #modal').modal('hide');
-            $.getJSON('/json/subs_profile/delete/' +
-                      $('#subs_screen #subs_id').val(), {}, function(data) {
-                // output success
-                showSuccess('The value has been deleted successfully');
-                updateSubscriberProfileData(0);
-            }).fail(function(e) {
-                showError('ERROR: error accessing the backend - ' + e.statusText);
-            });
-        });
-    });
-
-
-    $('#subs_screen #button_save').on('click', function(data) {
-        if ($('#subs_screen #ipaddr').val() == '') {
-            showError('ERROR: IP address field is required');
-            return false;
-        }
-        $.ajax({
-            type: 'POST',
-            url: '/json/subs_profile/save/',
-            data: $('#subs_screen form').serialize(),
-            success: function(response) {
-                if (response.success) {
-                    showSuccess(response.statusText);
-                    if (response.data.action == 'insert') {
-                        $('#subs_screen #subs_id').val(response.data.subs_id);
-                        updateSubscriberProfileData(response.data.subs_id);
-                    }
-                } else {
-                    showError(response.statusText);
-                }
-            }
-        }).fail(function(e) {
-            showError('ERROR: error accessing the backend - ' + e.statusText);
-        });
-    });
-
-    updateSubscriberProfileData(0);
-    return true;
-}
-
 function updateSubscriberProfileData(current) {
     $.getJSON('/json/subs_profile/get/', {}, function(data) {
         if (data.success) {
@@ -215,47 +251,6 @@ function populateSubsProfile(obj) {
 }
 
 /********* Connection profile code **********/
-function handleConnProfile() {
-    $('#conn_screen #button_delete').on('click', function(data) {
-        $('#conn_screen #modal').modal('show');
-        $('#conn_screen #button_ok').on('click', function(data) {
-            $('#conn_screen #modal').modal('hide');
-            $.getJSON('/json/conn_profile/delete/' +
-                      $('#conn_screen #conn_id').val(), {}, function(data) {
-                // output success
-                showSuccess('The value has been deleted successfully');
-                updateConnectionProfileData(0);
-            }).fail(function(data) {
-                showError('ERROR: ' + data.statusText);
-            });
-        });
-    });
-
-    $('#conn_screen #button_save').on('click', function(data) {
-        $.ajax({
-            type: 'POST',
-            url: '/json/conn_profile/save/',
-            data: $('#conn_screen form').serialize(),
-            success: function(response) {
-                if (response.success) {
-                    showSuccess(response.statusText);
-                    if (response.data.action == 'insert') {
-                        $('#conn_screen #conn_id').val(response.data.conn_id);
-                        updateConnectionProfileData(response.data.conn_id)
-                    }
-                } else {
-                    showError(response.statusText);
-                }
-            }
-        }).fail(function(e) {
-            showError('ERROR: ' + e.statusText);
-        });
-    });
-
-    updateConnectionProfileData(0);
-    return true;
-}
-
 function updateConnectionProfileData(current) {
     $.getJSON('/json/conn_profile/get/', {}, function(data) {
         if (data.success) {
