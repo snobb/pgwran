@@ -160,7 +160,7 @@ function handleSubsProfile() {
     });
 
     updateSubscriberProfileData(0);
-    return false;
+    return true;
 }
 
 function updateSubscriberProfileData(current) {
@@ -253,7 +253,7 @@ function handleConnProfile() {
     });
 
     updateConnectionProfileData(0);
-    return false;
+    return true;
 }
 
 function updateConnectionProfileData(current) {
