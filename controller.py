@@ -12,7 +12,7 @@ import radi as radius
 import config
 
 
-__version__ = "1.3"
+__version__ = "1.4"
 
 
 # == Globals ==================================================================
@@ -170,18 +170,24 @@ def save_json_subscriber():
     }
 
     subs_id = subscriber["subs_id"]
-    success, status_text, data = dao.subscriber.save(subscriber)
-    if not success:
-        status_text = ("ERROR: dao.subscriber.save(subs) - {}").format(
-            status_text)
-    else:
-        success, status_text, subscriber = dao.subscriber.get(subs_id)
-        if success:
-            if subscriber["enabled"]:
-                radius_session(subscriber, radius.START)
-            else:
-                radius_session(subscriber, radius.STOP)
-            netem_update_status()
+    success, status_text, subs_orig = dao.subscriber.get(subs_id)
+    if success:
+        success, status_text, data = dao.subscriber.save(subscriber)
+        if not success:
+            status_text = ("ERROR: dao.subscriber.save(subs) - {}").format(
+                status_text)
+        else:
+            success, status_text, subscriber = dao.subscriber.get(subs_id)
+            if success:
+                if subscriber["enabled"] == subs_orig["enabled"]:
+                    action = radius.INTERIM
+                elif subscriber["enabled"]:
+                    action = radius.START
+                else:
+                    action = radius.STOP
+
+                radius_session(subscriber, action)
+                netem_update_status()
 
     return {"success": success,
             "statusText": status_text,
