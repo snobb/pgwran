@@ -161,14 +161,7 @@ def get_json_subscriber():
 @app.post("/json/subscriber/save/")
 def save_json_subscriber():
     """save the subscriber and reapply current status"""
-    form = bottle.request.forms
-
-    subscriber = {
-        "subs_id":  int(form.get("subs_id")),
-        "conn_id":  int(form.get("conn_id")),
-        "enabled":  form.get("enabled") == 'on'
-    }
-
+    subscriber = bottle.request.json
     subs_id = subscriber["subs_id"]
     success, status_text, subs_orig = dao.subscriber.get(subs_id)
     if success:
@@ -212,19 +205,8 @@ def get_json_subs_profile():
 @app.post("/json/subs_profile/save/")
 def save_json_subs_profile():
     """save subscriber profile data in one json blob"""
-    form = bottle.request.forms
-
-    subs_profile = {
-        "subs_id":      int(form.get("subs_id")),
-        "name":         form.get("name"),
-        "ipaddr":       form.get("ipaddr"),
-        "calling_id":   form.get("calling_id"),
-        "called_id":    form.get("called_id"),
-        "imsi":         form.get("imsi"),
-        "imei":         form.get("imei"),
-        "loc_info":     form.get("loc_info")
-    }
-
+    subs_profile = bottle.request.json
+    subs_profile["subs_id"] = int(subs_profile["subs_id"])
     if subs_profile["subs_id"] == -1:
         success, status_text, data = dao.subs_profile.save(subs_profile)
         subs_profile["subs_id"] = data
@@ -285,23 +267,8 @@ def get_json_conn_profile():
 @app.post("/json/conn_profile/save/")
 def save_json_conn_profile():
     """save connection profile data in one json blob"""
-    form = bottle.request.forms
-    conn_profile = {
-        "name": form.get("name"),
-        "description":      form.get("description"),
-        "speed_down":       form.get("speed_down"),
-        "speed_up":         form.get("speed_up"),
-        "speed_var":        form.get("speed_var"),
-        "latency_up":       form.get("latency_up"),
-        "latency_down":     form.get("latency_down"),
-        "latency_jitter":   form.get("latency_jitter"),
-        "loss_down":        form.get("loss_down"),
-        "loss_up":          form.get("loss_up"),
-        "loss_jitter":      form.get("loss_jitter"),
-        "rat_type":         form.get("rat_type"),
-        "conn_id":          int(form.get("conn_id")),
-    }
-
+    conn_profile = bottle.request.json
+    conn_profile["conn_id"] = int(conn_profile["conn_id"])
     if conn_profile["conn_id"] == -1:
         success, status_text, data = dao.conn_profile.save(conn_profile)
         conn_profile["conn_id"] = data
@@ -368,12 +335,7 @@ def save_json_settings():
     """save settings in the database"""
     success, status_text, settings = dao.settings.get_all()
     if success:
-        form = bottle.request.forms
-        settings["rad_ip"] = form.get("rad_ip")
-        settings["rad_port"] = form.get("rad_port")
-        settings["rad_user"] = form.get("rad_user")
-        settings["rad_pass"] = form.get("rad_pass")
-        settings["rad_secret"] = form.get("rad_secret")
+        settings = bottle.request.json
         success, status_text, data = dao.settings.save(settings)
         if not success:
             status_text = ("Could not update the settings: "

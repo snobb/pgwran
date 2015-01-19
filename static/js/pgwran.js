@@ -31,13 +31,16 @@ $('document').ready(function() {
         $.ajax({
             type: 'POST',
             url: '/json/subs_profile/save/',
-            data: $('#subs_screen form').serialize(),
+            contentType: 'application/json; charset=UTF-8',
+            data: form2JSON('#subs_screen form'),
             success: function(response) {
                 if (response.success) {
                     showSuccess(response.statusText);
                     if (response.data.action == 'insert') {
                         $('#subs_screen #subs_id').val(response.data.subs_id);
                         updateSubscriberProfileData(response.data.subs_id);
+                    } else {
+                        updateSubscriberProfileData(-1);
                     }
                 } else {
                     showError(response.statusText);
@@ -68,13 +71,16 @@ $('document').ready(function() {
         $.ajax({
             type: 'POST',
             url: '/json/conn_profile/save/',
-            data: $('#conn_screen form').serialize(),
+            contentType: 'application/json; charset=UTF-8',
+            data: form2JSON('#conn_screen form'),
             success: function(response) {
                 if (response.success) {
                     showSuccess(response.statusText);
                     if (response.data.action == 'insert') {
                         $('#conn_screen #conn_id').val(response.data.conn_id);
                         updateConnectionProfileData(response.data.conn_id)
+                    } else {
+                        updateConnectionProfileData(-1);
                     }
                 } else {
                     showError(response.statusText);
@@ -87,7 +93,7 @@ $('document').ready(function() {
 
     /* main logic */
     $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
-        e.target        // activated tab
+        e.target        // activated tab        // M
         e.relatedTarget // previous tab
         $('#title').text('PGW-RAN: ' + $('.active a').text())
 
@@ -107,6 +113,16 @@ $('document').ready(function() {
     /* landing page */
     handleSubscribers();
 });
+
+function form2JSON(jquery_form) {
+    var viewArr = $(jquery_form).serializeArray();
+    var view = {};
+
+    for (var i in viewArr) {
+        view[viewArr[i].name] = viewArr[i].value;
+    }
+    return JSON.stringify(view);
+}
 
 /********* Subscribers code **********/
 function handleSubscribers() {
@@ -143,7 +159,8 @@ function updateForm(obj, show_success) {
     $.ajax({
         type: 'POST',
         url: '/json/subscriber/save/',
-        data: $('#subscriber_screen #form' + obj.id).serialize(),
+        contentType: 'application/json; charset=UTF-8',
+        data: form2JSON('#subscriber_screen #form' + obj.id),
         success: function(response) {
             if (response.success) {
                 if (show_success) {
@@ -320,7 +337,8 @@ function handleSettings() {
         $.ajax({
             type: 'POST',
             url: '/json/settings/save/',
-            data: $('#settings_screen form').serialize(),
+            contentType: 'application/json; charset=UTF-8',
+            data: form2JSON('#settings_screen form'),
             success: function(response) {
                 if (response.success) {
                     showSuccess(response.statusText);
