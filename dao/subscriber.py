@@ -54,7 +54,7 @@ def get(obj_id):
     subscriber["subs_profile"] = subs_profile.notrans_get(
         subscriber["subs_id"])
     subscriber["conn_profile"] = conn_profile.notrans_get(
-        subscriber["subs_id"])
+        subscriber["conn_id"])
 
     return subscriber
 
