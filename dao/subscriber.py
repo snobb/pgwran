@@ -16,8 +16,16 @@ __fields__ = ["subs_id", "conn_id", "enabled"]
 
 def new():
     """get a blank object with default values"""
-    defaults = [-1, 0, 0]
+    defaults = [-1, 1, 0]
     return dict(zip(__fields__, defaults))
+
+
+def insert_new(subscriber):
+    """insert new subscriber - should only be used from the subscriber profile,
+    that is THE ONLY case when a new subcriber can be created
+    """
+    query = sqlgen.get_insert_query(subscriber.keys(), __table__)
+    return common.sql_save(query, subscriber.values())
 
 
 @common.Transaction()
@@ -46,7 +54,7 @@ def get(obj_id):
     subscriber["subs_profile"] = subs_profile.notrans_get(
         subscriber["subs_id"])
     subscriber["conn_profile"] = conn_profile.notrans_get(
-        subscriber["subs_id"])
+        subscriber["conn_id"])
 
     return subscriber
 

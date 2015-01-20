@@ -224,6 +224,12 @@ class SubscriberProfDaoTest(unittest.TestCase):
                 self.assertEquals("f5f5", sub["loc_info"])
         self.assertTrue(found)
 
+        success, status, subs = dao.subscriber.get_all()
+        self.assertTrue(success)
+        self.assertEquals(subs[4]["subs_id"], new_id)
+        self.assertEquals(subs[4]["conn_id"], 1)
+        self.assertEquals(subs[4]["enabled"], False)
+
     def test_delete(self):
         success, _, data = dao.subs_profile.get_all()
         self.assertTrue(success)

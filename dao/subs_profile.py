@@ -6,6 +6,7 @@
 
 import common
 import sqlgen
+import subscriber
 
 __table__ = "subs_profile"
 __pkey__ = "subs_id"
@@ -25,7 +26,6 @@ def new():
         "90000000000000", "012345678901234",
         "f5f5"
     ]
-
     return dict(zip(__fields__, defaults))
 
 
@@ -58,11 +58,15 @@ def save(obj_dict):
     if subs_id == -1:
         # insert
         query = sqlgen.get_insert_query(obj_dict.keys(), __table__)
+        new_id = common.sql_save(query, obj_dict.values())
+        new_subs = subscriber.new()
+        new_subs["subs_id"] = new_id
+        return subscriber.insert_new(new_subs)
     else:
         # update
         sql_filter = "{}={}".format(__pkey__, subs_id)
         query = sqlgen.get_update_query(obj_dict.keys(), __table__, sql_filter)
-    return common.sql_save(query, obj_dict.values())
+        return common.sql_save(query, obj_dict.values())
 
 
 @common.Transaction()
