@@ -12,7 +12,7 @@ import radi as radius
 import config
 
 
-__version__ = "1.4"
+__version__ = "1.5"
 
 
 # == Globals ==================================================================
@@ -273,6 +273,7 @@ def save_json_conn_profile():
     """save connection profile data in one json blob"""
     conn_profile = bottle.request.json
     conn_profile["conn_id"] = int(conn_profile["conn_id"])
+
     if conn_profile["conn_id"] == -1:
         success, status_text, data = dao.conn_profile.save(conn_profile)
         conn_profile["conn_id"] = data
@@ -297,7 +298,7 @@ def save_json_conn_profile():
         if success:
             for subscriber in subscribers:
                 if (subscriber["enabled"] and
-                        subscriber["conn_id"] == conn_profile["conn_id"]):
+                        int(subscriber["conn_id"]) == conn_profile["conn_id"]):
                     radius_session(subscriber, radius.INTERIM)
         else:
             status_text = status
