@@ -245,7 +245,7 @@ def save_json_subs_profile():
             }
 
 
-@app.get("/json/subs_profile/delete/<subs_id>")
+@app.delete("/subs_profile/<subs_id>")
 def delete_json_subs_profile(subs_id):
     success, status_text, data = dao.subs_profile.delete(subs_id)
     return {"success": success,
@@ -253,22 +253,20 @@ def delete_json_subs_profile(subs_id):
             "data": data}
 
 
-@app.get("/json/conn_profile/get/")
+@app.get("/conn_profile")
 def get_json_conn_profile():
     """get connection profile data in one json blob"""
-    success, status_text, conn_json = dao.conn_profile.get_all()
+    success, status_text, data = dao.conn_profile.get_all()
     if not success:
         status_text = "ERROR: {}".format(status_text)
 
     return {"success": success,
             "statusText": status_text,
-            "data": {
-                "conn_profiles": conn_json
-                }
+            "data": data
             }
 
 
-@app.post("/json/conn_profile/save/")
+@app.post("/conn_profile")
 def save_json_conn_profile():
     """save connection profile data in one json blob"""
     conn_profile = bottle.request.json
@@ -313,7 +311,7 @@ def save_json_conn_profile():
             }}
 
 
-@app.get("/json/conn_profile/delete/<conn_id>")
+@app.delete("/conn_profile/<conn_id>")
 def delete_json_conn_profile(conn_id):
     success, status_text, data = dao.conn_profile.delete(conn_id)
     return {"success": success,
@@ -321,7 +319,7 @@ def delete_json_conn_profile(conn_id):
             "data": data}
 
 
-@app.get("/json/settings/get/")
+@app.get("/settings")
 def get_json_settings():
     """get settings data in one json blob"""
     success, status_text, data = dao.settings.get_all()
@@ -330,12 +328,10 @@ def get_json_settings():
 
     return {"success": success,
             "statusText": status_text,
-            "data": {
-                "settings": data
-            }}
+            "data": data }
 
 
-@app.post("/json/settings/save/")
+@app.post("/settings")
 def save_json_settings():
     """save settings in the database"""
     success, status_text, settings = dao.settings.get_all()

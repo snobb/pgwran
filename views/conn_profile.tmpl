@@ -1,121 +1,124 @@
-<div id="conn_screen">
-    <form class="form" role="form">
-        <table class="table" id="conn_screen_table">
-            <tr>
-                <td>
-                    <div class="panel panel-default">
-                        <div class="panel-body">
-                            <div class="input-group">
-                                <div class="input-group-btn">
-                                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" id="dropdown">Name<span class="caret"></span></button>
-                                    <!-- Button and dropdown menu -->
-                                    <ul class="dropdown-menu" id="dropdown_mark"></ul>
-                                </div>
-                                <input type="text" class="form-control" id="name" name="name">
-                                <input type="hidden" id="conn_id" name="conn_id">
+<div id="conn_screen" ng-controller="ConnProfileCtrl as conn">
+    <table class="table" id="conn_screen_table">
+        <tr>
+            <td>
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div class="input-group">
+                            <div class="input-group-btn">
+                                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">Name<span class="caret"></span></button>
+                                <!-- Button and dropdown menu -->
+                                <ul class="dropdown-menu" ng-repeat="connp in profiles">
+                                    <li>
+                                        <a href class="action" ng-click="select(connp.conn_id)">[[connp.name]]</a>
+                                    </li>
+                                </ul>
                             </div>
+                            <input type="text" class="form-control" ng-model="profiles[selected].name">
+                            <input type="hidden" ng-model="profiles[selected].conn_id">
                         </div>
                     </div>
-                </td>
-                <td>
-                    <div class="panel panel-default">
-                        <div class="panel-body">
-                            <!-- Button and dropdown menu -->
-                            <div class="input-group">
-                                <span class="input-group-addon">RAT-Type</span>
-                                <select name="rat_type" class="form-control input-sm" id="rat_type">
-                                    <option value="1">UTRAN</option>
-                                    <option value="2">GERAN</option>
-                                    <option value="3">WLAN</option>
-                                    <option value="4">GAN</option>
-                                    <option value="5">HSPA-Evolution</option>
-                                    <option value="6">EUTRAN</option>
-                                    <option value="7">Virtual</option>
-                                    <option value="101">IEEE-802.16e</option>
-                                    <option value="102">3GPP2-eHRPD</option>
-                                    <option value="103">3GPP2-HRPD</option>
-                                    <option value="104">3GPP2-1xRTT</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                </td>
-                <td>
-                    <textarea type="area" class="form-control" id="description" name="description"></textarea>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <div class="panel panel-default">
-                        <div class="panel-heading">Speed in kbps</div>
-                        <div class="panel-body">
-                            <div class="input-group">
-                                <span class="input-group-addon input-group-sm">Downstream</span>
-                                <input class="form-control" id="speed_down" name="speed_down">
-                            </div>
-                            <div class="input-group">
-                                <span class="input-group-addon input-group-sm">Upstream</span>
-                                <input class="form-control" id="speed_up" name="speed_up">
-                            </div>
-                            <div class="input-group">
-                                <span class="input-group-addon input-group-sm">Variance</span>
-                                <input class="form-control" id="speed_var" name="speed_var">
-                            </div>
-                        </div>
-                    </div>
-                </td>
-                <td>
-                    <div class="panel panel-default">
-                        <div class="panel-heading">Latency in ms</div>
-                        <div class="panel-body">
-                            <div class="input-group">
-                                <span class="input-group-addon input-group-sm">Downstream</span>
-                                <input class="form-control" id="latency_down" name="latency_down">
-                            </div>
-                            <div class="input-group">
-                                <span class="input-group-addon input-group-sm">Upstream</span>
-                                <input class="form-control" id="latency_up" name="latency_up">
-                            </div>
-                            <div class="input-group">
-                                <span class="input-group-addon input-group-sm">Jitter</span>
-                                <input class="form-control" id="latency_jitter" name="latency_jitter">
-                            </div>
-                        </div>
-                    </div>
-                </td>
-                <td>
-                    <div class="panel panel-default">
-                        <div class="panel-heading">Loss in %</div>
-                        <div class="panel-body">
-                            <div class="input-group">
-                                <span class="input-group-addon input-group-sm">Downstream</span>
-                                <input class="form-control" id="loss_down" name="loss_down">
-                            </div>
-                            <div class="input-group">
-                                <span class="input-group-addon input-group-sm">Upstream</span>
-                                <input class="form-control" id="loss_up" name="loss_up">
-                            </div>
-                            <div class="input-group">
-                                <span class="input-group-addon input-group-sm">Jitter</span>
-                                <input class="form-control" id="loss_jitter" name="loss_jitter">
-                            </div>
-                        </div>
-                    </div>
-                </td>
-            </tr>
-        </table>
-        <button type="button" class="btn btn-primary" id="button_save">Save</button>
-        <button type="button" class="btn btn-default" id="button_delete">Delete</button>
-    </form>
-    <div class="modal fade" id="modal">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-body"><h4>Are you sure you want to delete the record?</h4></div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" id="button_ok">OK</button>
                 </div>
-            </div><!-- /.modal-content -->
-        </div><!-- /.modal-dialog -->
-    </div><!-- /.modal -->
+            </td>
+            <td>
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <!-- Button and dropdown menu -->
+                        <div class="input-group">
+                            <span class="input-group-addon">RAT-Type</span>
+                            <select ng-model="profiles[selected].rat_type" class="form-control input-sm">
+                                <option value="1">UTRAN</option>
+                                <option value="2">GERAN</option>
+                                <option value="3">WLAN</option>
+                                <option value="4">GAN</option>
+                                <option value="5">HSPA-Evolution</option>
+                                <option value="6">EUTRAN</option>
+                                <option value="7">Virtual</option>
+                                <option value="101">IEEE-802.16e</option>
+                                <option value="102">3GPP2-eHRPD</option>
+                                <option value="103">3GPP2-HRPD</option>
+                                <option value="104">3GPP2-1xRTT</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </td>
+            <td>
+                <textarea type="area" class="form-control" ng-model="profiles[selected].description"></textarea>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <div class="panel panel-default">
+                    <div class="panel-heading">Speed in kbps</div>
+                    <div class="panel-body">
+                        <div class="input-group">
+                            <span class="input-group-addon input-group-sm">Downstream</span>
+                            <input class="form-control" ng-model="profiles[selected].speed_down">
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-addon input-group-sm">Upstream</span>
+                            <input class="form-control" ng-model="profiles[selected].speed_up">
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-addon input-group-sm">Variance</span>
+                            <input class="form-control" ng-model="profiles[selected].speed_var">
+                        </div>
+                    </div>
+                </div>
+            </td>
+            <td>
+                <div class="panel panel-default">
+                    <div class="panel-heading">Latency in ms</div>
+                    <div class="panel-body">
+                        <div class="input-group">
+                            <span class="input-group-addon input-group-sm">Downstream</span>
+                            <input class="form-control" ng-model="profiles[selected].latency_down">
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-addon input-group-sm">Upstream</span>
+                            <input class="form-control" ng-model="profiles[selected].latency_up">
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-addon input-group-sm">Jitter</span>
+                            <input class="form-control" ng-model="profiles[selected].latency_jitter">
+                        </div>
+                    </div>
+                </div>
+            </td>
+            <td>
+                <div class="panel panel-default">
+                    <div class="panel-heading">Loss in %</div>
+                    <div class="panel-body">
+                        <div class="input-group">
+                            <span class="input-group-addon input-group-sm">Downstream</span>
+                            <input class="form-control" ng-model="profiles[selected].loss_down">
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-addon input-group-sm">Upstream</span>
+                            <input class="form-control" ng-model="profiles[selected].loss_up">
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-addon input-group-sm">Jitter</span>
+                            <input class="form-control" ng-model="profiles[selected].loss_jitter">
+                        </div>
+                    </div>
+                </div>
+            </td>
+        </tr>
+    </table>
+    <button type="button" class="btn btn-primary" hg-click="update(profile[selected])">Save</button>
+    <button type="button" class="btn btn-default" id="delete(profile[selected])">Delete</button>
+</form>
+<div class="modal fade" id="modal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body"><h4>Are you sure you want to delete the record?</h4></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary">OK</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
 </div>
