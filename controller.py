@@ -137,8 +137,8 @@ def home_get():
     return bottle.template("base.tmpl")
 
 
-@app.get("/json/subscriber/get/")
-def get_json_subscriber():
+@app.get("/subscriber")
+def get_json_subscribers():
     errors = []
     success, status_text, connp_data = dao.conn_profile.get_all()
     if not success:
@@ -158,7 +158,7 @@ def get_json_subscriber():
                 }
 
 
-@app.post("/json/subscriber/save/")
+@app.post("/subscriber")
 def save_json_subscriber():
     """save the subscriber and reapply current status"""
     subscriber = bottle.request.json
@@ -191,22 +191,19 @@ def save_json_subscriber():
             "data": None}
 
 
-@app.get("/json/subs_profile/get/")
-def get_json_subs_profile():
+@app.get("/subs_profile")
+def get_json_subs_profiles():
     """get subscriber profile data in one json blob"""
-    success, status_text, subs_data = dao.subs_profile.get_all()
+    success, status_text, data = dao.subs_profile.get_all()
     if not success:
         status_text = "ERROR: {}".format(status_text)
 
     return {"success": success,
             "statusText": status_text,
-            "data": {
-                "subs_profiles": subs_data
-                }
-            }
+            "data": data}
 
 
-@app.post("/json/subs_profile/save/")
+@app.post("/subs_profile")
 def save_json_subs_profile():
     """save subscriber profile data in one json blob"""
     subs_profile = bottle.request.json
@@ -254,7 +251,7 @@ def delete_json_subs_profile(subs_id):
 
 
 @app.get("/conn_profile")
-def get_json_conn_profile():
+def get_json_conn_profiles():
     """get connection profile data in one json blob"""
     success, status_text, data = dao.conn_profile.get_all()
     if not success:
@@ -328,7 +325,7 @@ def get_json_settings():
 
     return {"success": success,
             "statusText": status_text,
-            "data": data }
+            "data": data}
 
 
 @app.post("/settings")

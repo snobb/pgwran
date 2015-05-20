@@ -6,6 +6,30 @@
  Author: Alex Kozadaev (2015)
  */
 
+// subscriber services
+angular.module('subsServices', ['ngResource'])
+    .factory('SubsService', ['$resource', function($resource) {
+        'use strict';
+
+        return $resource('/subscriber', {}, {
+            get: { method: 'GET', params:{}, isArray:false },
+            update: { method: 'POST', params: {}},
+            delete: { method: 'GET', params: {}}
+        });
+    }]);
+
+// subscriber profile services
+angular.module('subsProfileServices', ['ngResource'])
+    .factory('SubsProfileService', ['$resource', function($resource) {
+        'use strict';
+
+        return $resource('/subs_profile', {}, {
+            get: { method: 'GET', params:{}, isArray:false },
+            update: { method: 'POST', params: {}},
+            delete: { method: 'GET', params: {}}
+        });
+    }]);
+
 // connection profile services
 angular.module('connProfileServices', ['ngResource'])
     .factory('ConnProfileService', ['$resource', function($resource) {

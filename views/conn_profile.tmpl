@@ -1,115 +1,116 @@
-<div id="conn_screen" ng-controller="ConnProfileCtrl as conn">
-    <table class="table" id="conn_screen_table">
-        <tr>
-            <td>
-                <div class="panel panel-default">
-                    <div class="panel-body">
-                        <div class="input-group">
-                            <div class="input-group-btn">
-                                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">Name<span class="caret"></span></button>
-                                <!-- Button and dropdown menu -->
-                                <ul class="dropdown-menu">
-                                    <li ng-repeat="profile in profiles track by profile.conn_id">
-                                        <a href class="action" ng-click="select($index)">[[profile.name]]</a>
-                                    </li>
-                                </ul>
-                            </div>
-                            <input type="text" class="form-control" ng-model="profiles[selected].name">
-                            <input type="hidden" ng-model="profiles[selected].conn_id">
+<table class="table" ng-controller="ConnProfileCtrl as connCtrl">
+    <tr>
+        <td>
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="input-group">
+                        <div class="input-group-btn">
+                            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">Name <span class="caret"></span></button>
+                            <!-- Button and dropdown menu -->
+                            <ul class="dropdown-menu">
+                                <li ng-repeat="profile in profiles track by profile.conn_id">
+                                    <a href class="action" ng-click="select($index)">[[profile.name]]</a>
+                                </li>
+                            </ul>
                         </div>
+                        <input type="text" class="form-control" ng-model="profiles[selected].name">
+                        <input type="hidden" ng-model="profiles[selected].conn_id">
                     </div>
                 </div>
-            </td>
-            <td>
-                <div class="panel panel-default">
-                    <div class="panel-body">
-                        <!-- Button and dropdown menu -->
-                        <div class="input-group">
-                            <span class="input-group-addon">RAT-Type</span>
-                            <select ng-model="profiles[selected].rat_type" class="form-control input-sm">
-                                <option value="1">UTRAN</option>
-                                <option value="2">GERAN</option>
-                                <option value="3">WLAN</option>
-                                <option value="4">GAN</option>
-                                <option value="5">HSPA-Evolution</option>
-                                <option value="6">EUTRAN</option>
-                                <option value="7">Virtual</option>
-                                <option value="101">IEEE-802.16e</option>
-                                <option value="102">3GPP2-eHRPD</option>
-                                <option value="103">3GPP2-HRPD</option>
-                                <option value="104">3GPP2-1xRTT</option>
-                            </select>
-                        </div>
+            </div>
+        </td>
+        <td>
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <!-- Button and dropdown menu -->
+                    <div class="input-group">
+                        <span class="input-group-addon">RAT-Type</span>
+                        <select ng-model="profiles[selected].rat_type" class="form-control input-sm">
+                            <option value="1">UTRAN</option>
+                            <option value="2">GERAN</option>
+                            <option value="3">WLAN</option>
+                            <option value="4">GAN</option>
+                            <option value="5">HSPA-Evolution</option>
+                            <option value="6">EUTRAN</option>
+                            <option value="7">Virtual</option>
+                            <option value="101">IEEE-802.16e</option>
+                            <option value="102">3GPP2-eHRPD</option>
+                            <option value="103">3GPP2-HRPD</option>
+                            <option value="104">3GPP2-1xRTT</option>
+                        </select>
                     </div>
                 </div>
-            </td>
-            <td>
-                <textarea type="area" class="form-control" ng-model="profiles[selected].description"></textarea>
-            </td>
-        </tr>
-        <tr>
-            <td>
-                <div class="panel panel-default">
-                    <div class="panel-heading">Speed in kbps</div>
-                    <div class="panel-body">
-                        <div class="input-group">
-                            <span class="input-group-addon input-group-sm">Downstream</span>
-                            <input class="form-control" ng-model="profiles[selected].speed_down">
-                        </div>
-                        <div class="input-group">
-                            <span class="input-group-addon input-group-sm">Upstream</span>
-                            <input class="form-control" ng-model="profiles[selected].speed_up">
-                        </div>
-                        <div class="input-group">
-                            <span class="input-group-addon input-group-sm">Variance</span>
-                            <input class="form-control" ng-model="profiles[selected].speed_var">
-                        </div>
+            </div>
+        </td>
+        <td>
+            <textarea type="area" class="form-control" ng-model="profiles[selected].description"></textarea>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div class="panel panel-default">
+                <div class="panel-heading">Speed in kbps</div>
+                <div class="panel-body">
+                    <div class="input-group">
+                        <span class="input-group-addon input-group-sm">Downstream</span>
+                        <input class="form-control" ng-model="profiles[selected].speed_down">
+                    </div>
+                    <div class="input-group">
+                        <span class="input-group-addon input-group-sm">Upstream</span>
+                        <input class="form-control" ng-model="profiles[selected].speed_up">
+                    </div>
+                    <div class="input-group">
+                        <span class="input-group-addon input-group-sm">Variance</span>
+                        <input class="form-control" ng-model="profiles[selected].speed_var">
                     </div>
                 </div>
-            </td>
-            <td>
-                <div class="panel panel-default">
-                    <div class="panel-heading">Latency in ms</div>
-                    <div class="panel-body">
-                        <div class="input-group">
-                            <span class="input-group-addon input-group-sm">Downstream</span>
-                            <input class="form-control" ng-model="profiles[selected].latency_down">
-                        </div>
-                        <div class="input-group">
-                            <span class="input-group-addon input-group-sm">Upstream</span>
-                            <input class="form-control" ng-model="profiles[selected].latency_up">
-                        </div>
-                        <div class="input-group">
-                            <span class="input-group-addon input-group-sm">Jitter</span>
-                            <input class="form-control" ng-model="profiles[selected].latency_jitter">
-                        </div>
+            </div>
+        </td>
+        <td>
+            <div class="panel panel-default">
+                <div class="panel-heading">Latency in ms</div>
+                <div class="panel-body">
+                    <div class="input-group">
+                        <span class="input-group-addon input-group-sm">Downstream</span>
+                        <input class="form-control" ng-model="profiles[selected].latency_down">
+                    </div>
+                    <div class="input-group">
+                        <span class="input-group-addon input-group-sm">Upstream</span>
+                        <input class="form-control" ng-model="profiles[selected].latency_up">
+                    </div>
+                    <div class="input-group">
+                        <span class="input-group-addon input-group-sm">Jitter</span>
+                        <input class="form-control" ng-model="profiles[selected].latency_jitter">
                     </div>
                 </div>
-            </td>
-            <td>
-                <div class="panel panel-default">
-                    <div class="panel-heading">Loss in %</div>
-                    <div class="panel-body">
-                        <div class="input-group">
-                            <span class="input-group-addon input-group-sm">Downstream</span>
-                            <input class="form-control" ng-model="profiles[selected].loss_down">
-                        </div>
-                        <div class="input-group">
-                            <span class="input-group-addon input-group-sm">Upstream</span>
-                            <input class="form-control" ng-model="profiles[selected].loss_up">
-                        </div>
-                        <div class="input-group">
-                            <span class="input-group-addon input-group-sm">Jitter</span>
-                            <input class="form-control" ng-model="profiles[selected].loss_jitter">
-                        </div>
+            </div>
+        </td>
+        <td>
+            <div class="panel panel-default">
+                <div class="panel-heading">Loss in %</div>
+                <div class="panel-body">
+                    <div class="input-group">
+                        <span class="input-group-addon input-group-sm">Downstream</span>
+                        <input class="form-control" ng-model="profiles[selected].loss_down">
+                    </div>
+                    <div class="input-group">
+                        <span class="input-group-addon input-group-sm">Upstream</span>
+                        <input class="form-control" ng-model="profiles[selected].loss_up">
+                    </div>
+                    <div class="input-group">
+                        <span class="input-group-addon input-group-sm">Jitter</span>
+                        <input class="form-control" ng-model="profiles[selected].loss_jitter">
                     </div>
                 </div>
-            </td>
-        </tr>
-    </table>
-    <button type="button" class="btn btn-primary" hg-click="update(profiles[selected])">Save</button>
-    <button type="button" class="btn btn-default" hg-click="delete(profiles[selected].conn_id)">Delete</button>
+            </div>
+        </td>
+    </tr>
+</table>
+
 </form>
+<button type="button" class="btn btn-primary" hg-click="update(profiles[selected])">Save</button>
+<button type="button" class="btn btn-default" hg-click="delete(profiles[selected].conn_id)">Delete</button>
+
 <div class="modal fade" id="modal">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -121,4 +122,3 @@
         </div><!-- /.modal-content -->
     </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
-</div>

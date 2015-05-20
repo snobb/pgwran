@@ -7,7 +7,10 @@
  */
 
 
-var app = angular.module('pgwran', ['settingsServices', 'connProfileServices']);
+var app = angular.module('pgwran', ['subsServices',
+                                    'subsProfileServices',
+                                    'connProfileServices',
+                                    'settingsServices']);
 
 // modifying the template tokens so that they do not conflict with server-side
 // code
@@ -54,9 +57,32 @@ app.controller('SubsCtrl', function() {
 });
 
 // Subscriber profile controller
-app.controller('SubsProfileCtrl', function() {
+app.controller('SubsProfileCtrl', ['$scope', 'SubsProfileService', function($scope, SubsProfileService) {
     'use strict';
-});
+
+    SubsProfileService.get(function(data) {
+        $scope.profiles = data.data;
+        $scope.success = data.success;
+        $scope.status = data.statusText;
+
+        if ($scope.profiles.length > 0) {
+            $scope.selected = 0;
+        }
+
+        $scope.select = function(index) {
+            $scope.selected = index;
+        };
+    });
+
+    $scope.update = function(subs_profile) {
+        SubsProfileService.update(subs_profile);
+    };
+
+    $scope.delete = function(subs_profile) {
+        SubsProfileService.delete(subs_profile);
+    };
+
+}]);
 
 // Connection profile controller
 app.controller('ConnProfileCtrl', ['$scope', 'ConnProfileService', function($scope, ConnProfileService) {
