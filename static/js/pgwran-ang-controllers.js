@@ -1,22 +1,31 @@
-/*jshint node:true*/
+/*jshint browser:true, jquery:true */
+/*global angular*/
 
 /*
  pgwran-ang.js
  Author: Alex Kozadaev (2015)
  */
 
-'use strict';
 
 var app = angular.module('pgwran', ['settingsServices', 'connProfileServices']);
 
+// modifying the template tokens so that they do not conflict with server-side
+// code
 app.config(function($interpolateProvider) {
+    'use strict';
+
     $interpolateProvider.startSymbol('[[');
     $interpolateProvider.endSymbol(']]');
 });
 
 // controller handling the tab navigation
 app.controller('TabCtrl', function() {
+    'use strict';
+
     this.tab = 1;
+    this.message = '';
+    this.isMessage = false;
+    this.isError = false;
 
     this.selectTab = function(tab) {
         this.tab = tab;
@@ -24,43 +33,62 @@ app.controller('TabCtrl', function() {
 
     this.isSelected = function(tab) {
         return this.tab === tab;
-    }
+    };
+
+//    this.showMessage= function(msg, status) {
+//        if (status) {
+//            this.msgClass = 'msg-board, alert alert-success';
+//        } else {
+//            this.msgClass = 'alert alert-error';
+//        }
+//
+//        $('.msg-board').fadeIn(500).delay(2000).fadeOut(500,function() {
+//            this.message = '';
+//        });
+//    };
 });
 
+// Subscribers controller
 app.controller('SubsCtrl', function() {
+    'use strict';
 });
 
+// Subscriber profile controller
 app.controller('SubsProfileCtrl', function() {
+    'use strict';
 });
 
+// Connection profile controller
 app.controller('ConnProfileCtrl', ['$scope', 'ConnProfileService', function($scope, ConnProfileService) {
+    'use strict';
+
     ConnProfileService.get(function(data) {
         $scope.profiles = data.data;
         $scope.success = data.success;
         $scope.status = data.statusText;
+
         if ($scope.profiles.length > 0) {
             $scope.selected = 0;
         }
 
-        $scope.select = function(conn_id) {
-            console.log($scope.profiles);
-            for (var i = 0; i < $scope.profiles; i++) {
-                if ($scope.profiles[i].conn_id === conn_id) {
-                    $scope.selected = i;
-                    break;
-                }
-            }
-            $scope.selected = -1;
+        $scope.select = function(index) {
+            $scope.selected = index;
         };
     });
 
     $scope.update = function(conn_profile) {
         ConnProfileService.update(conn_profile);
     };
+
+    $scope.delete = function(conn_profile) {
+        ConnProfileService.delete(conn_profile);
+    };
 }]);
 
-// settings controller (and all related code)
+// Settings controller
 app.controller('SettingsCtrl', ['$scope', 'SettingsService', function($scope, SettingsService) {
+    'use strict';
+
     SettingsService.get(function(data) {
         $scope.settings = data.data;
         $scope.success = data.success;
@@ -69,10 +97,8 @@ app.controller('SettingsCtrl', ['$scope', 'SettingsService', function($scope, Se
 
     $scope.update = function(settings) {
         SettingsService.update(settings);
-    }
+    };
 }]);
-
-
 
 /* vim: ts=4 sts=8 sw=4 smarttab si tw=80 ci cino+=t0:0l1 fo=ctrocl list */
 

@@ -27,7 +27,7 @@
                     </li>
                 </ul>
             </div>
-            <div class="msg-board" style="display: none"></div>
+            <div ng-hide="panel.isMessage" class="msg-board, ng-hide" style="display: none">[[panel.message]]</div>
             <div class="body">
                 <div class="panel" ng-show="panel.isSelected(1)">
                     %include subscribers.tmpl

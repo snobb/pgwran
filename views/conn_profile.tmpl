@@ -8,9 +8,9 @@
                             <div class="input-group-btn">
                                 <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">Name<span class="caret"></span></button>
                                 <!-- Button and dropdown menu -->
-                                <ul class="dropdown-menu" ng-repeat="connp in profiles">
-                                    <li>
-                                        <a href class="action" ng-click="select(connp.conn_id)">[[connp.name]]</a>
+                                <ul class="dropdown-menu">
+                                    <li ng-repeat="profile in profiles track by profile.conn_id">
+                                        <a href class="action" ng-click="select($index)">[[profile.name]]</a>
                                     </li>
                                 </ul>
                             </div>
@@ -107,8 +107,8 @@
             </td>
         </tr>
     </table>
-    <button type="button" class="btn btn-primary" hg-click="update(profile[selected])">Save</button>
-    <button type="button" class="btn btn-default" id="delete(profile[selected])">Delete</button>
+    <button type="button" class="btn btn-primary" hg-click="update(profiles[selected])">Save</button>
+    <button type="button" class="btn btn-default" hg-click="delete(profiles[selected].conn_id)">Delete</button>
 </form>
 <div class="modal fade" id="modal">
     <div class="modal-dialog">
