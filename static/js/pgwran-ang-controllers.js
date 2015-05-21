@@ -66,11 +66,15 @@ app.controller('SubsProfileCtrl', ['$scope', 'SubsProfileService', function($sco
         $scope.status = data.statusText;
 
         if ($scope.profiles.length > 0) {
-            $scope.selected = 0;
+            $scope.selected = $scope.profiles[0];
+        } else {
+            $scope.selected = {};
         }
 
         $scope.select = function(index) {
-            $scope.selected = index;
+            if (index < $scope.profiles.length) {
+                $scope.selected = $scope.profiles[index];
+            }
         };
     });
 
@@ -94,11 +98,16 @@ app.controller('ConnProfileCtrl', ['$scope', 'ConnProfileService', function($sco
         $scope.status = data.statusText;
 
         if ($scope.profiles.length > 0) {
-            $scope.selected = 0;
+            $scope.selected = $scope.profiles[0];
+        } else {
+            $scope.selected = {};
         }
 
+
         $scope.select = function(index) {
-            $scope.selected = index;
+            if (index < $scope.profiles.length) {
+                $scope.selected = $scope.profiles[index];
+            }
         };
     });
 

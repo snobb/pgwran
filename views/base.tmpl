@@ -28,17 +28,17 @@
                 </ul>
             </div>
             <div ng-hide="panel.isMessage" class="msg-board, ng-hide" style="display: none">[[panel.message]]</div>
-            <div class="body">
-                <div class="panel" ng-show="panel.isSelected(1)">
+            <div>
+                <div ng-show="panel.isSelected(1)">
                     %include subscribers.tmpl
                 </div>
-                <div class="panel" ng-show="panel.isSelected(2)">
+                <div ng-show="panel.isSelected(2)">
                     %include subs_profile.tmpl
                 </div>
-                <div class="panel" ng-show="panel.isSelected(3)">
+                <div ng-show="panel.isSelected(3)">
                     %include conn_profile.tmpl
                 </div>
-                <div class="panel" ng-show="panel.isSelected(4)">
+                <div ng-show="panel.isSelected(4)">
                     %include settings.tmpl
                 </div>
             </div>

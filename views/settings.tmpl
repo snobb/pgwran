@@ -1,33 +1,31 @@
-<div ng-controller="SettingsCtrl as settings">
-    <table class="table" id="settings_screen_table">
-        <tr>
-            <td>
-                <div class="form-group">
-                    <label for="rad_ip">Radius IP</label>
-                    <input type="text" class="form-control" placeholder="Radius IP" ng-model="settings.rad_ip">
-                </div>
-                <div class="form-group">
-                    <label for="rad_port">Radius Port</label>
-                    <input type="number" class="form-control" min="1" max="65536" placeholder="Radius Port" ng-model="settings.rad_port">
-                </div>
-            </td><td>
-                <div class="form-group">
-                    <label for="rad_user">Radius User</label>
-                    <input type="text" class="form-control" placeholder="Radius User" ng-model="settings.rad_user">
-                </div>
+<table class="table" id="settings_screen_table" ng-controller="SettingsCtrl as settings">
+    <tr>
+        <td>
+            <div class="form-group">
+                <label for="rad_ip">Radius IP</label>
+                <input type="text" class="form-control" placeholder="Radius IP" ng-model="settings.rad_ip">
+            </div>
+            <div class="form-group">
+                <label for="rad_port">Radius Port</label>
+                <input type="number" class="form-control" min="1" max="65536" placeholder="Radius Port" ng-model="settings.rad_port">
+            </div>
+        </td><td>
+            <div class="form-group">
+                <label for="rad_user">Radius User</label>
+                <input type="text" class="form-control" placeholder="Radius User" ng-model="settings.rad_user">
+            </div>
 
-                <div class="form-group">
-                    <label for="rad_pass">Radius Password</label>
-                    <input type="password" class="form-control" placeholder="Radius Password" ng-model="settings.rad_pass">
+            <div class="form-group">
+                <label for="rad_pass">Radius Password</label>
+                <input type="password" class="form-control" placeholder="Radius Password" ng-model="settings.rad_pass">
 
-                </div>
-                <div class="form-group">
-                    <label for="rad_secret">Radius Secret</label>
-                    <input type="text" class="form-control" placeholder="Radius Secret" ng-model="settings.rad_secret">
-                </div>
-            </td>
-        </tr>
-    </table>
+            </div>
+            <div class="form-group">
+                <label for="rad_secret">Radius Secret</label>
+                <input type="text" class="form-control" placeholder="Radius Secret" ng-model="settings.rad_secret">
+            </div>
+        </td>
+    </tr>
+</table>
 
-    <button type="button" class="btn btn-default" ng-click="update(settings)">Save</button>
-</div>
+<button type="button" class="btn btn-default" ng-click="update(settings)">Save</button>

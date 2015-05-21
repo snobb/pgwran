@@ -13,8 +13,8 @@
                                 </li>
                             </ul>
                         </div>
-                        <input type="text" class="form-control" ng-model="profiles[selected].name">
-                        <input type="hidden" ng-model="profiles[selected].conn_id">
+                        <input type="text" class="form-control" ng-model="selected.name">
+                        <input type="hidden" ng-model="selected.conn_id">
                     </div>
                 </div>
             </div>
@@ -23,7 +23,7 @@
                 <div class="panel-body">
                     <div class="input-group">
                         <span class="input-group-addon input-group-sm">IP address</span>
-                        <input type="text" class="form-control" ng-model="profiles[selected].ipaddr">
+                        <input type="text" class="form-control" ng-model="selected.ipaddr">
                     </div>
                 </div>
             </div>
@@ -34,23 +34,23 @@
                 <div class="panel-body">
                     <div class="input-group">
                         <span class="input-group-addon input-group-sm">IMSI</span>
-                        <input class="form-control" ng-model="profiles[selected].imsi">
+                        <input class="form-control" ng-model="selected.imsi">
                     </div>
                     <div class="input-group">
                         <span class="input-group-addon input-group-sm">IMEI</span>
-                        <input class="form-control" ng-model="profiles[selected].imei">
+                        <input class="form-control" ng-model="selected.imei">
                     </div>
                     <div class="input-group">
                         <span class="input-group-addon input-group-sm">Calling Station ID</span>
-                        <input class="form-control" ng-model="profiles[selected].calling_id">
+                        <input class="form-control" ng-model="selected.calling_id">
                     </div>
                     <div class="input-group">
                         <span class="input-group-addon input-group-sm">Called Station ID</span>
-                        <input type="text" class="form-control" ng-model="profiles[selected].called_id">
+                        <input type="text" class="form-control" ng-model="selected.called_id">
                     </div>
                     <div class="input-group">
                         <span class="input-group-addon input-group-sm">Location info</span>
-                        <input type="text" class="form-control" ng-model="profiles[selected].loc_info">
+                        <input type="text" class="form-control" ng-model="selected.loc_info">
                     </div>
                 </div>
             </div>
@@ -58,8 +58,8 @@
     </tr>
 </table>
 
-<button type="button" class="btn btn-primary" hg-click="update(profiles[selected])">Save</button>
-<button type="button" class="btn btn-default" hg-click="delete(profiles[selected].subs_id)">Delete</button>
+<button type="button" class="btn btn-primary" hg-click="update(selected)">Save</button>
+<button type="button" class="btn btn-default" hg-click="delete(selected.subs_id)">Delete</button>
 
 <div class="modal fade" id="modal">
     <div class="modal-dialog">

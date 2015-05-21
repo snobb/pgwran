@@ -20,24 +20,3 @@ img.png {
     padding: 5px;
     background-color: transparent;
 }
-
-.table#address_table {
-    margin: 10px;
-    width: 50%;
-}
-
-.table#connection_screen td {
-    border: none
-}
-
-.table#subscriber_screen td {
-    border: none
-}
-
-.table#client_screen td {
-    border: none
-}
-
-.table#settings_screen td {
-    border: none
-}

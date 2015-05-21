@@ -13,8 +13,8 @@
                                 </li>
                             </ul>
                         </div>
-                        <input type="text" class="form-control" ng-model="profiles[selected].name">
-                        <input type="hidden" ng-model="profiles[selected].conn_id">
+                        <input type="text" class="form-control" ng-model="selected.name">
+                        <input type="hidden" ng-model="selected.conn_id">
                     </div>
                 </div>
             </div>
@@ -25,7 +25,7 @@
                     <!-- Button and dropdown menu -->
                     <div class="input-group">
                         <span class="input-group-addon">RAT-Type</span>
-                        <select ng-model="profiles[selected].rat_type" class="form-control input-sm">
+                        <select ng-model="selected.rat_type" class="form-control input-sm">
                             <option value="1">UTRAN</option>
                             <option value="2">GERAN</option>
                             <option value="3">WLAN</option>
@@ -43,7 +43,7 @@
             </div>
         </td>
         <td>
-            <textarea type="area" class="form-control" ng-model="profiles[selected].description"></textarea>
+            <textarea type="area" class="form-control" ng-model="selected.description"></textarea>
         </td>
     </tr>
     <tr>
@@ -53,15 +53,15 @@
                 <div class="panel-body">
                     <div class="input-group">
                         <span class="input-group-addon input-group-sm">Downstream</span>
-                        <input class="form-control" ng-model="profiles[selected].speed_down">
+                        <input class="form-control" ng-model="selected.speed_down">
                     </div>
                     <div class="input-group">
                         <span class="input-group-addon input-group-sm">Upstream</span>
-                        <input class="form-control" ng-model="profiles[selected].speed_up">
+                        <input class="form-control" ng-model="selected.speed_up">
                     </div>
                     <div class="input-group">
                         <span class="input-group-addon input-group-sm">Variance</span>
-                        <input class="form-control" ng-model="profiles[selected].speed_var">
+                        <input class="form-control" ng-model="selected.speed_var">
                     </div>
                 </div>
             </div>
@@ -72,15 +72,15 @@
                 <div class="panel-body">
                     <div class="input-group">
                         <span class="input-group-addon input-group-sm">Downstream</span>
-                        <input class="form-control" ng-model="profiles[selected].latency_down">
+                        <input class="form-control" ng-model="selected.latency_down">
                     </div>
                     <div class="input-group">
                         <span class="input-group-addon input-group-sm">Upstream</span>
-                        <input class="form-control" ng-model="profiles[selected].latency_up">
+                        <input class="form-control" ng-model="selected.latency_up">
                     </div>
                     <div class="input-group">
                         <span class="input-group-addon input-group-sm">Jitter</span>
-                        <input class="form-control" ng-model="profiles[selected].latency_jitter">
+                        <input class="form-control" ng-model="selected.latency_jitter">
                     </div>
                 </div>
             </div>
@@ -91,15 +91,15 @@
                 <div class="panel-body">
                     <div class="input-group">
                         <span class="input-group-addon input-group-sm">Downstream</span>
-                        <input class="form-control" ng-model="profiles[selected].loss_down">
+                        <input class="form-control" ng-model="selected.loss_down">
                     </div>
                     <div class="input-group">
                         <span class="input-group-addon input-group-sm">Upstream</span>
-                        <input class="form-control" ng-model="profiles[selected].loss_up">
+                        <input class="form-control" ng-model="selected.loss_up">
                     </div>
                     <div class="input-group">
                         <span class="input-group-addon input-group-sm">Jitter</span>
-                        <input class="form-control" ng-model="profiles[selected].loss_jitter">
+                        <input class="form-control" ng-model="selected.loss_jitter">
                     </div>
                 </div>
             </div>
@@ -107,9 +107,8 @@
     </tr>
 </table>
 
-</form>
-<button type="button" class="btn btn-primary" hg-click="update(profiles[selected])">Save</button>
-<button type="button" class="btn btn-default" hg-click="delete(profiles[selected].conn_id)">Delete</button>
+<button type="button" class="btn btn-primary" hg-click="update(selected)">Save</button>
+<button type="button" class="btn btn-default" hg-click="delete(selected.conn_id)">Delete</button>
 
 <div class="modal fade" id="modal">
     <div class="modal-dialog">
