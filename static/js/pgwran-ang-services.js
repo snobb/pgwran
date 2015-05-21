@@ -53,6 +53,5 @@ angular.module('settingsServices', ['ngResource'])
         });
     }]);
 
-
 /* vim: ts=4 sts=8 sw=4 smarttab si tw=80 ci cino+=t0:0l1 fo=ctrocl list */
 

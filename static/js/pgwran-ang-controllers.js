@@ -89,7 +89,9 @@ app.controller('SubsProfileCtrl', ['$scope', 'SubsProfileService', function($sco
 }]);
 
 // Connection profile controller
-app.controller('ConnProfileCtrl', ['$scope', 'ConnProfileService', function($scope, ConnProfileService) {
+app.controller('ConnProfileCtrl',
+               ['$scope', '$rootScope', 'ConnProfileService',
+                   function($scope, $rootScope, ConnProfileService) {
     'use strict';
 
     ConnProfileService.get(function(data) {
@@ -121,8 +123,12 @@ app.controller('ConnProfileCtrl', ['$scope', 'ConnProfileService', function($sco
 }]);
 
 // Settings controller
-app.controller('SettingsCtrl', ['$scope', 'SettingsService', function($scope, SettingsService) {
+app.controller('SettingsCtrl',
+               ['$scope', '$timeout', '$rootScope', 'SettingsService',
+                   function($scope, $timeout, $rootScope, SettingsService) {
     'use strict';
+    $rootScope.msg_show = false;
+
 
     SettingsService.get(function(data) {
         $scope.settings = data.data;
@@ -131,7 +137,17 @@ app.controller('SettingsCtrl', ['$scope', 'SettingsService', function($scope, Se
     });
 
     $scope.update = function(settings) {
-        SettingsService.update(settings);
+        SettingsService.update(settings, function(data) {
+            $rootScope.msg_show = true;
+            $rootScope.msg_text = data.statusText;
+            $rootScope.msg_class = data.success ? 'alert alert-success' :
+                                                 'alert alert-danger';
+
+            $timeout(function() {
+                $rootScope.msg_show = false;
+                $rootScope.msg_text = "";
+            }, 5000);
+        });
     };
 }]);
 
