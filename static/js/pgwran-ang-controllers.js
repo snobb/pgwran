@@ -6,6 +6,7 @@
  Author: Alex Kozadaev (2015)
  */
 var app = angular.module('pgwran', ['ui.bootstrap',
+                                    'ui.bootstrap.modal',
                                     'subsServices',
                                     'subsProfileServices',
                                     'connProfileServices',
@@ -124,8 +125,8 @@ app.controller('SubsProfileController',
 
 // Connection profile controller
 app.controller('ConnProfileController',
-               ['$scope', '$rootScope', 'ConnProfileService',
-                   function($scope, $rootScope, ConnProfileService) {
+               ['$scope', '$rootScope', '$modal', 'ConnProfileService',
+                   function($scope, $rootScope, $modal, ConnProfileService) {
     'use strict';
 
     // load the data
@@ -179,7 +180,39 @@ app.controller('ConnProfileController',
             $rootScope.$emit('message', data);
         });
     };
+
+    $scope.open = function () {
+        console.log("here");
+        var modalInstance = $modal.open({
+            animation: true,
+            size: 'sm',
+            templateUrl: 'deleteModalContent.html',
+            controller: 'ModalInstanceCtrl',
+            resolve: {},
+        });
+
+        modalInstance.result.then(function (selectedItem) {
+            //$scope.selected = selectedItem;
+        }, function() {
+        });
+    };
 }]);
+
+app.controller('ModalInstanceCtrl', function ($scope, $modalInstance) {
+    'use strict';
+
+  $scope.selected = {
+    //item: $scope.items[0]
+  };
+
+  $scope.ok = function () {
+    //$modalInstance.close($scope.selected.item);
+  };
+
+  $scope.cancel = function () {
+    $modalInstance.dismiss('cancel');
+  };
+});
 
 // Settings controller
 app.controller('SettingsController',
