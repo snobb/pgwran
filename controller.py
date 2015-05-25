@@ -227,11 +227,12 @@ def save_json_subs_profile():
             status_text = "The subscriber profile was updated successfully"
 
         # updating radius and netem
-        success, status, subscriber = dao.subscriber.get(
-            subs_profile["subs_id"])
-        if success and subscriber["enabled"]:
-            radius_session(subscriber, radius.INTERIM)
-            netem_update_status()
+        if success:
+            success, status, subscriber = dao.subscriber.get(
+                subs_profile["subs_id"])
+            if success and subscriber["enabled"]:
+                radius_session(subscriber, radius.INTERIM)
+                netem_update_status()
 
     return {"success": success,
             "statusText": status_text,
@@ -369,6 +370,5 @@ if __name__ == "__main__":
                 reloader=config.reloader)
     finally:
         netem.commit(netem.clear_all())
-
 
 # vim: ts=4 sts=4 sw=4 tw=80 ai smarttab et fo=rtcq list
