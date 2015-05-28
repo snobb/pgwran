@@ -72,7 +72,7 @@ INSERT INTO subs_profile(name, ipaddr, calling_id, called_id, imsi, imei, loc_in
 INSERT INTO subs_profile(name, ipaddr, calling_id, called_id, imsi, imei, loc_info) VALUES ("Linus", "10.0.0.30",
     "004916636129410", "internet.apn", "90156451177704", "66657422830175", "stockholm");
 INSERT INTO subs_profile(name, ipaddr, calling_id, called_id, imsi, imei, loc_info) VALUES ("Alex", "10.0.0.40",
-    "004412345678901", "telepathy.apn", "90156451177999", "66657422830999", "bishkek");
+    "004412345678901", "telepathy.apn", "90156451177999", "66657422830999", "chertsey");
 
 INSERT INTO subscriber(subs_id, conn_id, enabled) VALUES(1, 1, 1);
 INSERT INTO subscriber(subs_id, conn_id, enabled) VALUES(2, 2, 1);

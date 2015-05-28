@@ -154,8 +154,8 @@ def get_json_subscribers():
                     "conn_profiles": connp_data,
                     "subscribers": sorted(subs_data,
                                           key=lambda x: x["subs_id"])
-                    }
                 }
+               }
 
 
 @app.post("/subscriber")
@@ -239,13 +239,16 @@ def save_json_subs_profile():
             "data": {
                 "subs_id": subs_profile["subs_id"],
                 "action": action
-                }
             }
+           }
 
 
 @app.delete("/subs_profile/<subs_id>")
 def delete_json_subs_profile(subs_id):
     success, status_text, data = dao.subs_profile.delete(subs_id)
+    if success:
+        status_text = "The profile was successfully deleted"
+
     return {"success": success,
             "statusText": status_text,
             "data": data}
@@ -312,6 +315,9 @@ def save_json_conn_profile():
 @app.delete("/conn_profile/<conn_id>")
 def delete_json_conn_profile(conn_id):
     success, status_text, data = dao.conn_profile.delete(conn_id)
+    if success:
+        status_text = "The profile was successfully deleted"
+
     return {"success": success,
             "statusText": status_text,
             "data": data}

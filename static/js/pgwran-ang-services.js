@@ -26,7 +26,11 @@ angular.module('subsProfileServices', ['ngResource'])
         return $resource('/subs_profile', {}, {
             get: { method: 'GET', params:{}, isArray:false },
             update: { method: 'POST', params: {}},
-            delete: { method: 'GET', params: {}}
+            delete: {
+                method: 'DELETE',
+                url: '/subs_profile/:subs_id',
+                params: {subs_id: '@subs_id'}
+            },
         });
     }]);
 
@@ -38,7 +42,11 @@ angular.module('connProfileServices', ['ngResource'])
         return $resource('/conn_profile', {}, {
             get: { method: 'GET', params:{}, isArray:false },
             update: { method: 'POST', params: {}},
-            delete: { method: 'GET', params: {}}
+            delete: {
+                method: 'DELETE',
+                url: '/conn_profile/:conn_id',
+                params: {conn_id: '@conn_id'}
+            },
         });
     }]);
 

@@ -71,28 +71,39 @@ app.controller('SubsController', function() {
 
 // Subscriber profile controller
 app.controller('SubsProfileController',
-               ['$scope', '$rootScope', 'SubsProfileService',
-                   function($scope, $rootScope, SubsProfileService) {
+               ['$scope', '$rootScope', '$modal', 'SubsProfileService',
+                   function($scope, $rootScope, $modal, SubsProfileService) {
     'use strict';
 
+    var firstLoad = true;
+
     // load the data
-    SubsProfileService.get(function(data) {
-        $scope.profiles = data.data;
-        $scope.success = data.success;
-        $scope.status = data.statusText;
+    $scope.loadData = function() {
+        SubsProfileService.get(function(data) {
+            $scope.profiles = data.data;
+            $scope.success = data.success;
+            $scope.status = data.statusText;
 
-        if ($scope.profiles.length > 0) {
-            $scope.selected = $scope.profiles[0];
-        } else {
-            $scope.selected = {};
-        }
-
-        $scope.select = function(index) {
-            if (index < $scope.profiles.length) {
-                $scope.selected = $scope.profiles[index];
+            if (firstLoad) {
+                if ($scope.profiles.length > 0) {
+                    $scope.selected = $scope.profiles[0];
+                } else {
+                    $scope.selected = {};
+                }
+                firstLoad = false;
             }
-        };
-    });
+        });
+    };
+
+    // initial load
+    $scope.loadData();
+
+    // select profile in the drop down
+    $scope.select = function(index) {
+        if (index < $scope.profiles.length) {
+            $scope.selected = $scope.profiles[index];
+        }
+    };
 
     // create a new profile (just populate the form but not save)
     $scope.createNew = function() {
@@ -112,6 +123,7 @@ app.controller('SubsProfileController',
     $scope.update = function(subs_profile) {
         SubsProfileService.update(subs_profile, function(data) {
             $rootScope.$emit('message', data);
+            $scope.loadData();
         });
     };
 
@@ -119,6 +131,25 @@ app.controller('SubsProfileController',
     $scope.delete = function(subs_profile) {
         SubsProfileService.delete(subs_profile, function(data) {
             $rootScope.$emit('message', data);
+            $scope.loadData();
+            $scope.select(0);
+        });
+    };
+
+    // open a modal dialog (delete)
+    $scope.open = function () {
+        var modalInstance = $modal.open({
+            animation: true,
+            size: 'sm',
+            templateUrl: 'deleteSubsModalContent.html',
+            controller: 'ModalDialogController',
+            resolve: {},
+        });
+
+        modalInstance.result.then(function () {
+            $scope.delete({subs_id: $scope.selected.subs_id});
+        }, function () {
+            // dialog dismissed - doing nothing
         });
     };
 }]);
@@ -129,24 +160,35 @@ app.controller('ConnProfileController',
                    function($scope, $rootScope, $modal, ConnProfileService) {
     'use strict';
 
+    var firstLoad = true;
+
     // load the data
-    ConnProfileService.get(function(data) {
-        $scope.profiles = data.data;
-        $scope.success = data.success;
-        $scope.status = data.statusText;
+    $scope.loadData = function() {
+        ConnProfileService.get(function(data) {
+            $scope.profiles = data.data;
+            $scope.success = data.success;
+            $scope.status = data.statusText;
 
-        if ($scope.profiles.length > 0) {
-            $scope.selected = $scope.profiles[0];
-        } else {
-            $scope.selected = {};
-        }
-
-        $scope.select = function(index) {
-            if (index < $scope.profiles.length) {
-                $scope.selected = $scope.profiles[index];
+            if (firstLoad) {
+                if ($scope.profiles.length > 0) {
+                    $scope.selected = $scope.profiles[0];
+                } else {
+                    $scope.selected = {};
+                }
+                firstLoad = false;
             }
-        };
-    });
+        });
+    };
+
+    // initial load
+    $scope.loadData();
+
+    // select profile in the drop down
+    $scope.select = function(index) {
+        if (index < $scope.profiles.length) {
+            $scope.selected = $scope.profiles[index];
+        }
+    };
 
     // create a new profile (just populate the form but not save)
     $scope.createNew = function() {
@@ -171,6 +213,7 @@ app.controller('ConnProfileController',
     $scope.update = function(conn_profile) {
         ConnProfileService.update(conn_profile, function(data) {
             $rootScope.$emit('message', data);
+            $scope.loadData();
         });
     };
 
@@ -178,40 +221,39 @@ app.controller('ConnProfileController',
     $scope.delete = function(conn_profile) {
         ConnProfileService.delete(conn_profile, function(data) {
             $rootScope.$emit('message', data);
+            $scope.loadData();
+            $scope.select(0);
         });
     };
 
+    // open a modal dialog (delete)
     $scope.open = function () {
-        console.log("here");
         var modalInstance = $modal.open({
             animation: true,
             size: 'sm',
-            templateUrl: 'deleteModalContent.html',
-            controller: 'ModalInstanceCtrl',
+            templateUrl: 'deleteConnModalContent.html',
+            controller: 'ModalDialogController',
             resolve: {},
         });
 
-        modalInstance.result.then(function (selectedItem) {
-            //$scope.selected = selectedItem;
-        }, function() {
+        modalInstance.result.then(function () {
+            $scope.delete({conn_id: $scope.selected.conn_id});
+        }, function () {
+            // dialog dismissed - doing nothing
         });
     };
 }]);
 
-app.controller('ModalInstanceCtrl', function ($scope, $modalInstance) {
+app.controller('ModalDialogController', function ($scope, $modalInstance) {
     'use strict';
 
-  $scope.selected = {
-    //item: $scope.items[0]
-  };
+    $scope.cancel = function () {
+        $modalInstance.dismiss('cancel');
+    };
 
-  $scope.ok = function () {
-    //$modalInstance.close($scope.selected.item);
-  };
-
-  $scope.cancel = function () {
-    $modalInstance.dismiss('cancel');
-  };
+    $scope.ok = function () {
+        $modalInstance.close();
+    };
 });
 
 // Settings controller
