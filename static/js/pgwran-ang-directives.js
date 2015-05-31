@@ -41,6 +41,53 @@ app.directive('ipv4', function() {
     };
 });
 
+app.directive('imsi', function() {
+    'use strict';
+    return {
+        require: 'ngModel',
+        link: function(scope, elm, attrs, ctrl) {
+            ctrl.$validators.imsi = function(modelValue, viewValue) {
+                if (!isNaN(viewValue) && viewValue.length <= 15) {
+                    return true;
+                }
+                return false;
+            };
+        }
+    };
+});
+
+app.directive('imei', function() {
+    'use strict';
+    return {
+        require: 'ngModel',
+        link: function(scope, elm, attrs, ctrl) {
+            ctrl.$validators.imei = function(modelValue, viewValue) {
+                if (!isNaN(viewValue) && (viewValue.length === 15 ||
+                                          viewValue.length === 16)) {
+                    return true;
+                }
+                return false;
+            };
+        }
+    };
+});
+
+app.directive('callingId', function() {
+    'use strict';
+    return {
+        require: 'ngModel',
+        link: function(scope, elm, attrs, ctrl) {
+            ctrl.$validators.callingId = function(modelValue, viewValue) {
+                if (!isNaN(viewValue) && viewValue.length >= 3) {
+                    return true;
+                }
+                return false;
+            };
+        }
+    };
+});
+
+
 var isValidOctet = function(num) {
     'use strict';
     return (num >= 0 && num <= 255);

@@ -163,9 +163,6 @@ def save_json_subscriber():
     """save the subscriber and reapply current status"""
     subscriber = bottle.request.json
 
-    subscriber["enabled"] = ("enabled" in subscriber and
-                             subscriber["enabled"] == "on")
-
     subs_id = subscriber["subs_id"]
     success, status_text, subs_orig = dao.subscriber.get(subs_id)
     if success:
@@ -185,6 +182,7 @@ def save_json_subscriber():
 
                 radius_session(subscriber, action)
                 netem_update_status()
+                status_text = "The subscriber was updated successfully"
 
     return {"success": success,
             "statusText": status_text,

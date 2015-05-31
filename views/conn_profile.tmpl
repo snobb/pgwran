@@ -1,5 +1,5 @@
 <form name="conn_profile_form" ng-controller="ConnProfileController as connCtrl"
-                               ng-submit="update(selected)">
+                               ng-submit="conn_profile_form.$valid && update(selected)" novalidate>
     <table class="table">
         <tr>
             <td>
@@ -17,8 +17,8 @@
                                     <li><a href class="action" ng-click="createNew()">Add New</a></li>
                                 </ul>
                             </div>
-                            <input type="text" class="form-control" ng-model="selected.name">
-                            <input type="hidden" ng-model="selected.conn_id">
+                            <input type="text" class="form-control" ng-model="selected.name" required>
+                            <input type="hidden" ng-model="selected.conn_id" required>
                         </div>
                     </div>
                 </div>
@@ -57,15 +57,15 @@
                     <div class="panel-body">
                         <div class="input-group">
                             <span class="input-group-addon input-group-sm">Downstream</span>
-                            <input class="form-control" ng-model="selected.speed_down">
+                            <input type="number" class="form-control" ng-model="selected.speed_down" required>
                         </div>
                         <div class="input-group">
                             <span class="input-group-addon input-group-sm">Upstream</span>
-                            <input class="form-control" ng-model="selected.speed_up">
+                            <input type="number" class="form-control" ng-model="selected.speed_up" required>
                         </div>
                         <div class="input-group">
                             <span class="input-group-addon input-group-sm">Variance</span>
-                            <input class="form-control" ng-model="selected.speed_var">
+                            <input type="number" class="form-control" ng-model="selected.speed_var" required>
                         </div>
                     </div>
                 </div>
@@ -76,15 +76,15 @@
                     <div class="panel-body">
                         <div class="input-group">
                             <span class="input-group-addon input-group-sm">Downstream</span>
-                            <input class="form-control" ng-model="selected.latency_down">
+                            <input type="number" class="form-control" ng-model="selected.latency_down" required>
                         </div>
                         <div class="input-group">
                             <span class="input-group-addon input-group-sm">Upstream</span>
-                            <input class="form-control" ng-model="selected.latency_up">
+                            <input type="number" class="form-control" ng-model="selected.latency_up" required>
                         </div>
                         <div class="input-group">
                             <span class="input-group-addon input-group-sm">Jitter</span>
-                            <input class="form-control" ng-model="selected.latency_jitter">
+                            <input type="number" class="form-control" ng-model="selected.latency_jitter" required>
                         </div>
                     </div>
                 </div>
@@ -95,15 +95,15 @@
                     <div class="panel-body">
                         <div class="input-group">
                             <span class="input-group-addon input-group-sm">Downstream</span>
-                            <input class="form-control" ng-model="selected.loss_down">
+                            <input type="number" class="form-control" ng-model="selected.loss_down" required>
                         </div>
                         <div class="input-group">
                             <span class="input-group-addon input-group-sm">Upstream</span>
-                            <input class="form-control" ng-model="selected.loss_up">
+                            <input type="number" class="form-control" ng-model="selected.loss_up" required>
                         </div>
                         <div class="input-group">
                             <span class="input-group-addon input-group-sm">Jitter</span>
-                            <input class="form-control" ng-model="selected.loss_jitter">
+                            <input type="number" class="form-control" ng-model="selected.loss_jitter" required>
                         </div>
                     </div>
                 </div>

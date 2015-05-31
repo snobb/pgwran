@@ -1,28 +1,33 @@
-<!--
-<form class="form" action="/subscriber" ng-controller="SubscriberController">
-    <div class="panel panel-default">
-        <div class="panel-body">
-            <input type="hidden">
-            <div class="row">
-                <div class="col-md-5">
-                    <div class="input-group">
-                        <span class="input-group-addon">Subscriber</span>
-                        <input type="text" class="form-control input-sm" readonly="true">
+<div ng-controller="SubscriberController">
+    <form class="form" ng-repeat="subscriber in subscribers">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <input type="hidden" ng-model="subscriber.subs_id">
+                <div class="row">
+                    <div class="col-md-5">
+                        <div class="input-group">
+                            <span class="input-group-addon">Subscriber</span>
+                            <input type="text" class="form-control input-sm" readonly="true" ng-model="subscriber.subs_profile.name"/>
+                        </div>
                     </div>
-                </div>
-                <div class="col-md-5">
-                    <div class="input-group">
-                        <span class="input-group-addon">Connection</span>
-                        <select ng-model="conn_id" class="form-control input-sm">
-                        </select>
+                    <div class="col-md-5">
+                        <div class="input-group">
+                            <span class="input-group-addon">Connection</span>
+                            <select ng-model="subscriber.conn_profile" class="form-control input-sm"
+                                    ng-options="conn.name for conn in conn_profiles track by conn.conn_id"
+                                    ng-change="update(subscriber)">
+                            </select>
+                        </div>
                     </div>
-                </div>
-                <div class="col-md-1">
-                    <input type="checkbox" class="cbox" name="enabled" checked>
-                    ON
+                    <div class="col-md-1">
+                        <input type="checkbox" ng-model="subscriber.enabled"
+                                               ng-true-value="1" ng-false-value="0"
+                                               ng-change="update(subscriber)"/>
+                        ON
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-</form>
--->
+    </form>
+</div>
+

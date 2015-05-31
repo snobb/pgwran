@@ -7,14 +7,13 @@
  */
 
 // subscriber services
-angular.module('subsServices', ['ngResource'])
-    .factory('SubsService', ['$resource', function($resource) {
+angular.module('subscriberServices', ['ngResource'])
+    .factory('SubscriberService', ['$resource', function($resource) {
         'use strict';
 
         return $resource('/subscriber', {}, {
             get: { method: 'GET', params:{}, isArray:false },
             update: { method: 'POST', params: {}},
-            delete: { method: 'GET', params: {}}
         });
     }]);
 

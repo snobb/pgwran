@@ -1,5 +1,5 @@
 <form name="subs_profile_form" ng-controller="SubsProfileController as subsCtrl"
-                               ng-submit="update(selected)">
+                               ng-submit="subs_profile_form.$valid && update(selected)" novalidate>
 
     <table class="table">
         <tr>
@@ -28,7 +28,7 @@
                     <div class="panel-body">
                         <div class="input-group">
                             <span class="input-group-addon input-group-sm">IP address</span>
-                            <input type="text" class="form-control" ng-model="selected.ipaddr">
+                            <input type="text" class="form-control" ng-model="selected.ipaddr" required ipv4>
                         </div>
                     </div>
                 </div>
@@ -39,23 +39,23 @@
                     <div class="panel-body">
                         <div class="input-group">
                             <span class="input-group-addon input-group-sm">IMSI</span>
-                            <input class="form-control" ng-model="selected.imsi">
+                            <input type="text" class="form-control" ng-model="selected.imsi" required imsi>
                         </div>
                         <div class="input-group">
                             <span class="input-group-addon input-group-sm">IMEI</span>
-                            <input class="form-control" ng-model="selected.imei">
+                            <input type="text" class="form-control" ng-model="selected.imei" required imei>
                         </div>
                         <div class="input-group">
                             <span class="input-group-addon input-group-sm">Calling Station ID</span>
-                            <input class="form-control" ng-model="selected.calling_id">
+                            <input class="form-control" ng-model="selected.calling_id" required calling_id>
                         </div>
                         <div class="input-group">
                             <span class="input-group-addon input-group-sm">Called Station ID</span>
-                            <input type="text" class="form-control" ng-model="selected.called_id">
+                            <input type="text" class="form-control" ng-model="selected.called_id" required>
                         </div>
                         <div class="input-group">
                             <span class="input-group-addon input-group-sm">Location info</span>
-                            <input type="text" class="form-control" ng-model="selected.loc_info">
+                            <input type="text" class="form-control" ng-model="selected.loc_info" required>
                         </div>
                     </div>
                 </div>

@@ -28,3 +28,7 @@ img.png {
 .ng-valid.ng-dirty {
     border-color: green;
 }
+
+.table tbody tr td {
+    border: none;
+}

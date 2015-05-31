@@ -7,10 +7,11 @@
  */
 var app = angular.module('pgwran', ['ui.bootstrap',
                                     'ui.bootstrap.modal',
-                                    'subsServices',
+                                    'subscriberServices',
                                     'subsProfileServices',
                                     'connProfileServices',
-                                    'settingsServices']);
+                                    'settingsServices',
+                                    'Directives']);
 
 // modifying the template tokens so that they do not conflict with server-side
 // code
@@ -22,7 +23,7 @@ app.config(function($interpolateProvider) {
 });
 
 // controller handling the tab navigation
-app.controller('TabController', function() {
+app.controller('TabController', ['$rootScope', function($rootScope) {
     'use strict';
 
     this.tab = 1;
@@ -30,13 +31,19 @@ app.controller('TabController', function() {
 
     this.selectTab = function(tab) {
         this.tab = tab;
+
+        // reload subscriber page every time it gets focus
+        if (this.tab === 1) {
+            $rootScope.$emit('subscriberReload');
+        }
     };
 
     this.isSelected = function(tab) {
         return this.tab === tab;
     };
-});
+}]);
 
+// message controller
 app.controller('MessageController',
                ['$scope', '$rootScope', '$timeout',
                    function($scope, $rootScope, $timeout) {
@@ -65,9 +72,38 @@ app.controller('MessageController',
 }]);
 
 // Subscribers controller
-app.controller('SubsController', function() {
+app.controller('SubscriberController',
+               ['$scope', '$rootScope', '$modal', 'SubscriberService',
+                   function($scope, $rootScope, $modal, SubscriberService) {
     'use strict';
-});
+
+    // load the data
+    $scope.loadData = function() {
+        SubscriberService.get(function(data) {
+            $scope.subscribers = data.data.subscribers;
+            $scope.conn_profiles = data.data.conn_profiles;
+            $scope.success = data.success;
+            $scope.status = data.statusText;
+        });
+    };
+
+    // initial load
+    $scope.loadData();
+
+    $rootScope.$on('subscriberReload', function() {
+        $scope.loadData();
+    });
+
+    $scope.update = function(subscriber) {
+        if (subscriber.conn_profile.conn_id !== subscriber.conn_id) {
+            subscriber.conn_id = subscriber.conn_profile.conn_id;
+        }
+        SubscriberService.update(subscriber, function(data) {
+            $rootScope.$emit('message', data);
+            $scope.loadData();
+        });
+    };
+}]);
 
 // Subscriber profile controller
 app.controller('SubsProfileController',
@@ -113,7 +149,7 @@ app.controller('SubsProfileController',
             'name': 'new_subscriber',
             'ipaddr': '10.0.0.1',
             'imsi': '00000000000001',
-            'imei': '00000000000001',
+            'imei': '000000000000001',
             'calling_id': '000000000000001',
             'loc_info': 'chertsey',
         };
