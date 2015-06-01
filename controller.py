@@ -137,8 +137,8 @@ def home_get():
     return bottle.template("base.tmpl")
 
 
-@app.get("/json/subscriber/get/")
-def get_json_subscriber():
+@app.get("/subscriber")
+def get_json_subscribers():
     errors = []
     success, status_text, connp_data = dao.conn_profile.get_all()
     if not success:
@@ -154,17 +154,14 @@ def get_json_subscriber():
                     "conn_profiles": connp_data,
                     "subscribers": sorted(subs_data,
                                           key=lambda x: x["subs_id"])
-                    }
                 }
+               }
 
 
-@app.post("/json/subscriber/save/")
+@app.post("/subscriber")
 def save_json_subscriber():
     """save the subscriber and reapply current status"""
     subscriber = bottle.request.json
-
-    subscriber["enabled"] = ("enabled" in subscriber and
-                             subscriber["enabled"] == "on")
 
     subs_id = subscriber["subs_id"]
     success, status_text, subs_orig = dao.subscriber.get(subs_id)
@@ -185,28 +182,26 @@ def save_json_subscriber():
 
                 radius_session(subscriber, action)
                 netem_update_status()
+                status_text = "The subscriber was updated successfully"
 
     return {"success": success,
             "statusText": status_text,
             "data": None}
 
 
-@app.get("/json/subs_profile/get/")
-def get_json_subs_profile():
+@app.get("/subs_profile")
+def get_json_subs_profiles():
     """get subscriber profile data in one json blob"""
-    success, status_text, subs_data = dao.subs_profile.get_all()
+    success, status_text, data = dao.subs_profile.get_all()
     if not success:
         status_text = "ERROR: {}".format(status_text)
 
     return {"success": success,
             "statusText": status_text,
-            "data": {
-                "subs_profiles": subs_data
-                }
-            }
+            "data": data}
 
 
-@app.post("/json/subs_profile/save/")
+@app.post("/subs_profile")
 def save_json_subs_profile():
     """save subscriber profile data in one json blob"""
     subs_profile = bottle.request.json
@@ -230,45 +225,47 @@ def save_json_subs_profile():
             status_text = "The subscriber profile was updated successfully"
 
         # updating radius and netem
-        success, status, subscriber = dao.subscriber.get(
-            subs_profile["subs_id"])
-        if success and subscriber["enabled"]:
-            radius_session(subscriber, radius.INTERIM)
-            netem_update_status()
+        if success:
+            success, status, subscriber = dao.subscriber.get(
+                subs_profile["subs_id"])
+            if success and subscriber["enabled"]:
+                radius_session(subscriber, radius.INTERIM)
+                netem_update_status()
 
     return {"success": success,
             "statusText": status_text,
             "data": {
                 "subs_id": subs_profile["subs_id"],
                 "action": action
-                }
             }
+           }
 
 
-@app.get("/json/subs_profile/delete/<subs_id>")
+@app.delete("/subs_profile/<subs_id>")
 def delete_json_subs_profile(subs_id):
     success, status_text, data = dao.subs_profile.delete(subs_id)
+    if success:
+        status_text = "The profile was successfully deleted"
+
     return {"success": success,
             "statusText": status_text,
             "data": data}
 
 
-@app.get("/json/conn_profile/get/")
-def get_json_conn_profile():
+@app.get("/conn_profile")
+def get_json_conn_profiles():
     """get connection profile data in one json blob"""
-    success, status_text, conn_json = dao.conn_profile.get_all()
+    success, status_text, data = dao.conn_profile.get_all()
     if not success:
         status_text = "ERROR: {}".format(status_text)
 
     return {"success": success,
             "statusText": status_text,
-            "data": {
-                "conn_profiles": conn_json
-                }
+            "data": data
             }
 
 
-@app.post("/json/conn_profile/save/")
+@app.post("/conn_profile")
 def save_json_conn_profile():
     """save connection profile data in one json blob"""
     conn_profile = bottle.request.json
@@ -313,15 +310,18 @@ def save_json_conn_profile():
             }}
 
 
-@app.get("/json/conn_profile/delete/<conn_id>")
+@app.delete("/conn_profile/<conn_id>")
 def delete_json_conn_profile(conn_id):
     success, status_text, data = dao.conn_profile.delete(conn_id)
+    if success:
+        status_text = "The profile was successfully deleted"
+
     return {"success": success,
             "statusText": status_text,
             "data": data}
 
 
-@app.get("/json/settings/get/")
+@app.get("/settings")
 def get_json_settings():
     """get settings data in one json blob"""
     success, status_text, data = dao.settings.get_all()
@@ -330,12 +330,10 @@ def get_json_settings():
 
     return {"success": success,
             "statusText": status_text,
-            "data": {
-                "settings": data
-            }}
+            "data": data}
 
 
-@app.post("/json/settings/save/")
+@app.post("/settings")
 def save_json_settings():
     """save settings in the database"""
     success, status_text, settings = dao.settings.get_all()
@@ -376,6 +374,5 @@ if __name__ == "__main__":
                 reloader=config.reloader)
     finally:
         netem.commit(netem.clear_all())
-
 
 # vim: ts=4 sts=4 sw=4 tw=80 ai smarttab et fo=rtcq list

@@ -1,47 +1,57 @@
 <!DOCTYPE html>
-<html>
+<html ng-app="pgwran">
     <head>
         <title id="title">P-GW and RAN Simulator</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <!-- Bootstrap -->
         <link href="/static/bootstrap.min.css" rel="stylesheet" media="screen">
-        <link rel="stylesheet" type="text/css" href="/static/style.css">
+        <link href="/static/style.css" rel="stylesheet" type="text/css">
     </head>
     <body>
-        <div class="container">
+        <div class="container" ng-controller="TabController as panel">
             <div class="masthead">
                 <img src="/static/f5logo.png" class="png" width="74" height="68" alt="F5 Networks"/>
                 <h1>P-GW and RAN Simulator</h1>
                 <ul id="menuTab" class="nav nav-tabs">
-                    <li class="active" id="menu_subs"><a href="#nav_subscribers" data-toggle="tab">Subscribers</a></li>
-                    <li class="" id="menu_subs_profile"><a href="#nav_subscriber-profile" data-toggle="tab">Subscriber Profiles</a></li>
-                    <li class="" id="menu_conn_profile"><a href="#nav_connection-profile" data-toggle="tab">Connection Profiles</a></li>
-                    <li class="" id="menu_settings"><a href="#nav_settings" data-toggle="tab">Settings</a></li>
-
+                    <li ng-class="{active: panel.isSelected(1)}">
+                        <a href ng-click="panel.selectTab(1)">Subscribers</a>
+                    </li>
+                    <li ng-class="{active: panel.isSelected(2)}">
+                        <a href ng-click="panel.selectTab(2)">Subscriber Profiles</a>
+                    </li>
+                    <li ng-class="{active: panel.isSelected(3)}">
+                        <a href ng-click="panel.selectTab(3)">Connection Profiles</a>
+                    </li>
+                    <li ng-class="{active: panel.isSelected(4)}">
+                        <a href ng-click="panel.selectTab(4)">Settings</a>
+                    </li>
                 </ul>
             </div>
-            <div class="msg-board" style="display: none"></div>
-            <div class="body">
-                <div id="myTabContent" class="tab-content">
-                    <div class="tab-pane fade active in" id="nav_subscribers">
-                        %include subscribers.tmpl
-                    </div>
-                    <div class="tab-pane fade" id="nav_subscriber-profile">
-                        %include subs_profile.tmpl
-                    </div>
-                    <div class="tab-pane fade" id="nav_connection-profile">
-                        %include conn_profile.tmpl
-                    </div>
-                    <div class="tab-pane fade" id="nav_settings">
-                        %include settings.tmpl
-                    </div>
+            <div ng-class="message.msg_class" ng-show="message.msg_show"
+                    ng-controller="MessageController">[[message.msg_text]]</div>
+            <div>
+                <div ng-show="panel.isSelected(1)">
+                    %include subscribers.tmpl
+                </div>
+                <div ng-show="panel.isSelected(2)">
+                    %include subs_profile.tmpl
+                </div>
+                <div ng-show="panel.isSelected(3)">
+                    %include conn_profile.tmpl
+                </div>
+                <div ng-show="panel.isSelected(4)">
+                    %include settings.tmpl
                 </div>
             </div>
             <div class=footer>&copy; F5 Networks 2014-2015 (<a href="mailto:dTeam@f5.com">dteam @ f5.com</a>)</div>
         <div>
 
         <script src="/static/js/jquery.min.js"></script>
-        <script src="/static/js/bootstrap.min.js"></script>
-        <script src="/static/js/pgwran.js"></script>
+        <script src="/static/js/angular.min.js"></script>
+        <script src="/static/js/angular-resource.min.js"></script>
+        <script src="/static/js/ui-bootstrap-tpls.min.js"></script>
+        <script src="/static/js/pgwran-ang-controllers.js"></script>
+        <script src="/static/js/pgwran-ang-services.js"></script>
+        <script src="/static/js/pgwran-ang-directives.js"></script>
     </body>
 </html>
