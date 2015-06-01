@@ -25,14 +25,15 @@ app.directive('integer', function() {
     };
 });
 
-app.directive('ipv4', function() {
+app.directive('ip', function() {
     'use strict';
-    var INTEGER_REGEXP = /^(\d+)\.(\d+)\.(\d+)\.(\d+)$/;
+    var IPV4_REGEXP = /^(\d+)\.(\d+)\.(\d+)\.(\d+)$/;
+    var IPV6_REGEXP = /^(\d+)\:[:\d]+(\d+)$/;
     return {
         require: 'ngModel',
         link: function(scope, elm, attrs, ctrl) {
             ctrl.$validators.integer = function(modelValue, viewValue) {
-                if (INTEGER_REGEXP.test(viewValue)) {
+                if (IPV4_REGEXP.test(viewValue) || IPV6_REGEXP.test(viewValue)) {
                     return true;
                 }
                 return false;
@@ -86,13 +87,6 @@ app.directive('callingId', function() {
         }
     };
 });
-
-
-var isValidOctet = function(num) {
-    'use strict';
-    return (num >= 0 && num <= 255);
-};
-
 
 /* vim: ts=4 sts=8 sw=4 smarttab si tw=80 ci cino+=t0:0l1 fo=ctrocl list */
 
