@@ -8,6 +8,7 @@ import sys
 import os
 import glob
 import distutils.sysconfig
+import controller
 from distutils.core import setup
 import libradi
 
@@ -36,7 +37,7 @@ def main():
         #    "form or by any means, electronic or mechanical, for any purpose,\n"
         #    "without express written permission of F5 Networks, Inc.\n"
         #    ),
-        version=libradi.__version__,
+        version=controller.__version__,
         scripts=["radi.py", "controller.py"],
         py_modules=["libradi.dictionary", "libradi.radius",
                     "libradi.radtypes", "libradi.config", "netem",
