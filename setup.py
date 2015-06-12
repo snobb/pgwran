@@ -30,13 +30,12 @@ def main():
         description=libradi.__doc__,
         author=libradi.__author__,
         author_email=libradi.__author_email__,
-        license=libradi.__license__,
-        # license=("Alex Kozadaev <a.kozadaev at f5.com>\n\n"
-        #    "Copyright (c) 2013-2014, F5 Networks, Inc. All rights reserved.\n\n"
-        #    "No part of this software may be reproduced or transmitted in any\n"
-        #    "form or by any means, electronic or mechanical, for any purpose,\n"
-        #    "without express written permission of F5 Networks, Inc.\n"
-        #    ),
+        license=("Alex Kozadaev <a.kozadaev at f5.com>\n\n"
+                 "Copyright (c) 2013-2014, F5 Networks, Inc. All rights "
+                 "reserved.\n\nNo part of this software may be reproduced or "
+                 "transmitted in any\nform or by any means, electronic or "
+                 "mechanical, for any purpose,\nwithout express written "
+                 "permission of F5 Networks, Inc.\n"),
         version=controller.__version__,
         scripts=["radi.py", "controller.py"],
         py_modules=["libradi.dictionary", "libradi.radius",
