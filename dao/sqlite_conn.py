@@ -39,8 +39,10 @@ def get_db():
     current application context."""
     global __db__
     if not __db__:
+        db_exists = os.path.isfile(config["db_fname"])
         __db__ = __connect_db()
-        __init_db()
+        if not db_exists:
+            __init_db()
         __db__.execute("PRAGMA foreign_keys=ON")
     return __db__
 
