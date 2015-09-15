@@ -15,11 +15,7 @@ app.directive('integer', function() {
         require: 'ngModel',
         link: function(scope, elm, attrs, ctrl) {
             ctrl.$validators.integer = function(modelValue, viewValue) {
-                if (INTEGER_REGEXP.test(viewValue)) {
-                    return true; //valid
-                }
-
-                return false; // invalid
+                return (INTEGER_REGEXP.test(viewValue));
             };
         }
     };
@@ -27,16 +23,19 @@ app.directive('integer', function() {
 
 app.directive('ip', function() {
     'use strict';
-    var IPV4_REGEXP = /^(\d+)\.(\d+)\.(\d+)\.(\d+)$/;
+    var IPV4_REGEXP = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/;
     var IPV6_REGEXP = /^(\d+)\:[:\d]+(\d+)$/;
     return {
         require: 'ngModel',
         link: function(scope, elm, attrs, ctrl) {
-            ctrl.$validators.integer = function(modelValue, viewValue) {
-                if (IPV4_REGEXP.test(viewValue) || IPV6_REGEXP.test(viewValue)) {
-                    return true;
-                }
-                return false;
+            ctrl.$validators.ip = function(modelValue, viewValue) {
+                var res = IPV4_REGEXP.exec(viewValue);
+                return (res && res.length == 5 &&
+                            res[1] >  0 && res[1] < 256 &&
+                            res[2] >= 0 && res[2] < 256 &&
+                            res[3] >= 0 && res[3] < 256 &&
+                            res[4] >  0 && res[4] < 255) ||
+                        IPV6_REGEXP.test(viewValue);
             };
         }
     };
@@ -48,10 +47,7 @@ app.directive('imsi', function() {
         require: 'ngModel',
         link: function(scope, elm, attrs, ctrl) {
             ctrl.$validators.imsi = function(modelValue, viewValue) {
-                if (!isNaN(viewValue) && viewValue.length <= 15) {
-                    return true;
-                }
-                return false;
+                return (!isNaN(viewValue) && viewValue.length <= 15);
             };
         }
     };
@@ -63,11 +59,22 @@ app.directive('imei', function() {
         require: 'ngModel',
         link: function(scope, elm, attrs, ctrl) {
             ctrl.$validators.imei = function(modelValue, viewValue) {
-                if (!isNaN(viewValue) && (viewValue.length === 15 ||
-                                          viewValue.length === 16)) {
-                    return true;
-                }
-                return false;
+                return (!isNaN(viewValue) &&
+                        (viewValue.length === 15 ||
+                         viewValue.length === 16));
+            };
+        }
+    };
+});
+
+app.directive('locationInfo', function() {
+    'use strict';
+    var HEX_LOC_INFO = /^[0-9a-fA-F]{16}$/;
+    return {
+        require: 'ngModel',
+        link: function(scope, elm, attrs, ctrl) {
+            ctrl.$validators.location_info = function(modelValue, viewValue) {
+                return (HEX_LOC_INFO.test(viewValue));
             };
         }
     };
@@ -78,11 +85,8 @@ app.directive('callingId', function() {
     return {
         require: 'ngModel',
         link: function(scope, elm, attrs, ctrl) {
-            ctrl.$validators.callingId = function(modelValue, viewValue) {
-                if (!isNaN(viewValue) && viewValue.length >= 3) {
-                    return true;
-                }
-                return false;
+            ctrl.$validators.calling_id = function(modelValue, viewValue) {
+                return (!isNaN(viewValue) && viewValue.length >= 3);
             };
         }
     };

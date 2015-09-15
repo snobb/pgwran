@@ -66,13 +66,13 @@ INSERT INTO conn_profile(name, description, speed_down, speed_up, speed_var, lat
     "GPRS Connections are slow and lossy", 9.6, 9.6, 2, 200, 200, 20, 1, 1, 0.5, 1);
 
 INSERT INTO subs_profile(name, ipaddr, calling_id, called_id, imsi, imei, loc_info) VALUES ("Marie", "10.0.0.10",
-    "004917489639813", "web.apn", "90125827556293", "666193487240051", "seattle");
+    "004917489639813", "web.apn", "90125827556293", "666193487240051", "01620210ffffffff");
 INSERT INTO subs_profile(name, ipaddr, calling_id, called_id, imsi, imei, loc_info) VALUES ("John", "10.0.0.20",
-    "004916705353340", "iphone.apn", "90108576436201", "666694986263952", "london");
+    "004916705353340", "iphone.apn", "90108576436201", "666694986263952", "0106f22076faa4e3");
 INSERT INTO subs_profile(name, ipaddr, calling_id, called_id, imsi, imei, loc_info) VALUES ("Linus", "10.0.0.30",
-    "004916636129410", "internet.apn", "90156451177704", "666574228301753", "stockholm");
+    "004916636129410", "internet.apn", "90156451177704", "666574228301753", "01620210ffffffff");
 INSERT INTO subs_profile(name, ipaddr, calling_id, called_id, imsi, imei, loc_info) VALUES ("Alex", "10.0.0.40",
-    "004412345678901", "telepathy.apn", "90156451177999", "666574228309993", "chertsey");
+    "004412345678901", "telepathy.apn", "90156451177999", "666574228309993", "0106f22076faa4e3");
 
 INSERT INTO subscriber(subs_id, conn_id, enabled) VALUES(1, 1, 1);
 INSERT INTO subscriber(subs_id, conn_id, enabled) VALUES(2, 2, 1);

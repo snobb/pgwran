@@ -56,8 +56,8 @@ def radius_configure(subscriber):
             radius_config.imei = ascii(subs_profile["imei"])
 
         if len(subs_profile["loc_info"]) > 0:
-            loc_info_ascii = ascii(subs_profile["loc_info"])
-            radius_config.subs_loc_info = loc_info_ascii
+            loc_info_hex = (subs_profile["loc_info"]).decode("hex")
+            radius_config.subs_loc_info = loc_info_hex
 
         radius_config.avps = list()
 

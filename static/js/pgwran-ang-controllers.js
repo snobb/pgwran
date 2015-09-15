@@ -151,7 +151,7 @@ app.controller('SubsProfileController',
             'imsi': '00000000000001',
             'imei': '000000000000001',
             'calling_id': '000000000000001',
-            'loc_info': 'chertsey',
+            'loc_info': '01620210ffffffff',
         };
     };
 
